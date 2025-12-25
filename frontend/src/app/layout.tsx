@@ -9,7 +9,7 @@ const font = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Modelis - Multi-Model AI Market Forecasts",
+  title: "Modelis - AI-powered Market Forecasts",
   description:
     "Modelis provides AI-powered price forecasts with confidence bands, multi-model ensemble predictions, and transparent performance metrics including MAE, calibration scores, and walk-forward backtesting.",
 };
