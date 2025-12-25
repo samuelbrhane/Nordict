@@ -1,0 +1,37 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Node / Next
+node_modules/
+.next/
+out/
+dist/
+.vercel/
+.env
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.envrc
+
+# Terraform (later)
+.terraform/
+*.tfstate
+*.tfstate.*
+.crash.log
+
+# Misc
+coverage/
+
+
+chainforcast_overview.docx
