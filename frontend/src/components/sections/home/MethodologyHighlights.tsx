@@ -3,25 +3,26 @@
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 
-const STEPS = [
+const HIGHLIGHTS = [
   {
-    step: "01",
-    title: "Ingest & normalize data",
-    desc: "Fetch market data, validate inputs, and store clean time-series for training and evaluation.",
+    title: "Walk-forward validation",
+    desc: "Models are evaluated sequentially to better reflect live deployment conditions.",
   },
   {
-    step: "02",
-    title: "Train & version models",
-    desc: "Run walk-forward training and evaluation, store model artifacts, and record metadata for auditability.",
+    title: "Leakage prevention",
+    desc: "Strict separation of training, validation, and test windows.",
   },
   {
-    step: "03",
-    title: "Serve forecasts & track performance",
-    desc: "Generate multi-horizon predictions with confidence scoring and continuously monitor live results.",
+    title: "Confidence calibration",
+    desc: "Probabilities are evaluated so confidence bands remain meaningful.",
+  },
+  {
+    title: "Regime-aware evaluation",
+    desc: "Performance is inspected across different market conditions.",
   },
 ];
 
-const HowItWorks = () => {
+const MethodologyHighlights = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
@@ -47,7 +48,7 @@ const HowItWorks = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden bg-white py-20 dark:bg-black"
+      className="relative overflow-hidden bg-neutral-50 py-20 dark:bg-neutral-950"
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
@@ -66,7 +67,7 @@ const HowItWorks = () => {
               style={{ backgroundColor: "var(--brand)" }}
             />
             <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-              How it works
+              Methodology highlights
             </p>
           </div>
 
@@ -78,7 +79,7 @@ const HowItWorks = () => {
             }`}
             style={{ transitionDelay: "100ms" }}
           >
-            A simple workflow, designed for{" "}
+            Designed for{" "}
             <span
               className="inline-block"
               style={{
@@ -89,9 +90,9 @@ const HowItWorks = () => {
                 backgroundClip: "text",
               }}
             >
-              real-world evaluation
-            </span>
-            .
+              statistical rigor
+            </span>{" "}
+            and transparency.
           </h2>
 
           <p
@@ -102,78 +103,43 @@ const HowItWorks = () => {
             }`}
             style={{ transitionDelay: "200ms" }}
           >
-            Modelis separates{" "}
-            <span className="font-medium text-neutral-800 dark:text-neutral-100">
-              ingestion
-            </span>
-            ,{" "}
-            <span className="font-medium text-neutral-800 dark:text-neutral-100">
-              training
-            </span>
-            , and{" "}
-            <span className="font-medium text-neutral-800 dark:text-neutral-100">
-              serving
-            </span>{" "}
-            so the web app stays fast while model workloads scale independently.
+            Forecasts are only as useful as the evaluation behind them. Each
+            model is trained, validated, and monitored with explicit safeguards.
           </p>
         </div>
 
-        {/* steps */}
-        <div className="mt-12 grid gap-4 lg:grid-cols-3">
-          {STEPS.map((s, i) => (
+        {/* highlights */}
+        <div className="mt-12 grid gap-4 sm:grid-cols-2">
+          {HIGHLIGHTS.map((h, i) => (
             <div
-              key={s.step}
+              key={h.title}
               className={`group relative overflow-hidden rounded-3xl border border-neutral-200 bg-white/60 p-6 shadow-sm transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md hover:bg-white dark:border-neutral-800 dark:bg-black/40 dark:hover:bg-black/60 cursor-default ${
                 isVisible
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-6"
               }`}
-              style={{ transitionDelay: `${300 + i * 100}ms` }}
+              style={{ transitionDelay: `${300 + i * 80}ms` }}
               onMouseEnter={() => setHoveredCard(i)}
               onMouseLeave={() => setHoveredCard(null)}
             >
-              <div className="flex items-center justify-between">
+              <div className="flex items-start gap-3">
                 <span
-                  className={`text-xs font-semibold tracking-widest transition-colors duration-200 ${
-                    hoveredCard === i
-                      ? "text-neutral-900 dark:text-neutral-100"
-                      : "text-neutral-500 dark:text-neutral-400"
-                  }`}
-                >
-                  {s.step}
-                </span>
-                <span
-                  className={`h-2 w-2 rounded-full transition-transform duration-200 ${
+                  className={`mt-1.5 h-2 w-2 shrink-0 rounded-full transition-transform duration-200 ${
                     hoveredCard === i ? "scale-125" : "scale-100"
                   }`}
                   style={{ backgroundColor: "var(--brand)" }}
                 />
+                <div>
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                    {h.title}
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-relaxed text-neutral-600 dark:text-neutral-300">
+                    {h.desc}
+                  </p>
+                </div>
               </div>
 
-              <h3 className="mt-4 text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-                {s.title}
-              </h3>
-
-              <p className="mt-2 text-sm leading-relaxed text-neutral-600 dark:text-neutral-300">
-                {s.desc}
-              </p>
-
-              {/* Connecting line between steps (visible on lg screens) */}
-              {i < STEPS.length - 1 && (
-                <div
-                  className={`hidden lg:block absolute -right-2 top-1/2 w-4 h-px bg-neutral-200 dark:bg-neutral-700 transition-all duration-500 ${
-                    isVisible
-                      ? "opacity-100 scale-x-100"
-                      : "opacity-0 scale-x-0"
-                  }`}
-                  style={{
-                    transitionDelay: `${600 + i * 100}ms`,
-                    transformOrigin: "left center",
-                  }}
-                />
-              )}
-
-              {/* hover accent */}
               <div
                 className={`pointer-events-none absolute inset-x-0 bottom-0 h-1 transition-all duration-500 ${
                   hoveredCard === i ? "w-full" : "w-0"
@@ -183,9 +149,44 @@ const HowItWorks = () => {
             </div>
           ))}
         </div>
+
+        {/* CTA */}
+        <div
+          className={`mt-10 flex flex-wrap items-center gap-3 transition-all duration-700 ease-out ${
+            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
+          }`}
+          style={{ transitionDelay: "600ms" }}
+        >
+          <Link
+            href="/resources/methodology"
+            className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl px-4 py-2 text-sm font-medium text-black shadow-sm transition-all duration-200 hover:shadow-md hover:shadow-[var(--brand)]/20 active:scale-[0.98]"
+            style={{ backgroundColor: "var(--brand)" }}
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              Read full methodology
+              <svg
+                className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
+              </svg>
+            </span>
+          </Link>
+
+          <p className="text-xs text-neutral-500 dark:text-neutral-400">
+            Detailed assumptions and limitations are disclosed.
+          </p>
+        </div>
       </div>
     </section>
   );
 };
 
-export default HowItWorks;
+export default MethodologyHighlights;

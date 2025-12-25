@@ -9,9 +9,9 @@ const font = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "ChainForecast — Probabilistic Market Forecasts",
+  title: "Modelis - Multi-Model AI Market Forecasts",
   description:
-    "ChainForecast provides multi-horizon market forecasts with confidence scoring, walk-forward backtesting, and transparent performance metrics to support data-driven trading and investment decisions.",
+    "Modelis provides AI-powered price forecasts with confidence bands, multi-model ensemble predictions, and transparent performance metrics including MAE, calibration scores, and walk-forward backtesting.",
 };
 
 export default function RootLayout({

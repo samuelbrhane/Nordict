@@ -1,7 +1,31 @@
-import React from "react";
+import {
+  Hero,
+  TrustStrip,
+  ProblemSolution,
+  CoreFeatures,
+  ProductPreview,
+  HowItWorks,
+  MethodologyHighlights,
+  UseCases,
+  FAQ,
+  FinalCTA,
+} from "@/components/sections/home";
 
 const Home = () => {
-  return <div>This is the Home Page</div>;
+  return (
+    <main>
+      <Hero />
+      <TrustStrip />
+      <ProblemSolution />
+      <CoreFeatures />
+      <ProductPreview />
+      <HowItWorks />
+      <MethodologyHighlights />
+      <UseCases />
+      <FAQ />
+      <FinalCTA />
+    </main>
+  );
 };
 
 export default Home;
