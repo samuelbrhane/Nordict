@@ -205,128 +205,211 @@ const LiveVsBacktest = () => {
             }`}
             style={{ transitionDelay: "300ms" }}
           >
-            <div className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-black">
-              <div className="mb-6 flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
+            <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-6 dark:border-neutral-800 dark:bg-black">
+              <div className="mb-4 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
+                <h3 className="text-sm font-semibold text-neutral-900 sm:text-lg dark:text-white">
                   Performance Comparison
                 </h3>
-                <div className="flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 dark:border-neutral-700 dark:bg-neutral-800">
+                <div className="flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-50 px-2 py-0.5 sm:gap-2 sm:px-3 sm:py-1 dark:border-neutral-700 dark:bg-neutral-800">
                   <span
-                    className="h-2 w-2 rounded-full"
+                    className="h-1.5 w-1.5 rounded-full sm:h-2 sm:w-2"
                     style={{ backgroundColor: "var(--brand)" }}
                   />
-                  <span className="text-xs font-medium text-neutral-600 dark:text-neutral-300">
+                  <span className="text-[10px] font-medium text-neutral-600 sm:text-xs dark:text-neutral-300">
                     Model v2.4.1
                   </span>
                 </div>
               </div>
 
-              {/* Comparison header */}
-              <div className="grid grid-cols-4 gap-4 pb-3 border-b border-neutral-200 dark:border-neutral-700">
-                <div className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-                  Metric
-                </div>
-                <div className="text-center">
-                  <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-500">
-                    <svg
-                      className="h-3 w-3"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    Backtest
-                  </span>
-                </div>
-                <div className="text-center">
-                  <span
-                    className="inline-flex items-center gap-1 text-xs font-medium"
-                    style={{ color: "var(--brand)" }}
-                  >
+              {/* Desktop: Table layout */}
+              <div className="hidden sm:block">
+                {/* Comparison header */}
+                <div className="grid grid-cols-4 gap-4 pb-3 border-b border-neutral-200 dark:border-neutral-700">
+                  <div className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
+                    Metric
+                  </div>
+                  <div className="text-center">
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-500">
+                      <svg
+                        className="h-3 w-3"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      Backtest
+                    </span>
+                  </div>
+                  <div className="text-center">
                     <span
-                      className="h-2 w-2 rounded-full animate-pulse"
-                      style={{ backgroundColor: "var(--brand)" }}
-                    />
-                    Live
-                  </span>
-                </div>
-                <div className="text-center text-xs font-medium text-neutral-500 dark:text-neutral-400">
-                  Delta
-                </div>
-              </div>
-
-              {/* Comparison rows */}
-              <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
-                {COMPARISON_DATA.map((row, i) => (
-                  <div
-                    key={row.metric}
-                    className={`grid grid-cols-4 gap-4 py-4 transition-colors duration-200 ${
-                      hoveredRow === i
-                        ? "bg-neutral-50 dark:bg-neutral-900/50"
-                        : ""
-                    }`}
-                    onMouseEnter={() => setHoveredRow(i)}
-                    onMouseLeave={() => setHoveredRow(null)}
-                  >
-                    <div className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                      {row.metric}
-                    </div>
-                    <div className="text-center text-sm text-neutral-600 dark:text-neutral-400">
-                      {typeof row.backtest === "number" && row.backtest < 1
-                        ? row.backtest.toFixed(2)
-                        : row.backtest}
-                      {row.metric.includes("Accuracy") ||
-                      row.metric.includes("Coverage")
-                        ? "%"
-                        : ""}
-                    </div>
-                    <div
-                      className="text-center text-sm font-semibold"
+                      className="inline-flex items-center gap-1 text-xs font-medium"
                       style={{ color: "var(--brand)" }}
                     >
-                      {typeof row.live === "number" && row.live < 1
-                        ? row.live.toFixed(2)
-                        : row.live}
-                      {row.metric.includes("Accuracy") ||
-                      row.metric.includes("Coverage")
-                        ? "%"
-                        : ""}
-                    </div>
-                    <div className="text-center">
                       <span
-                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-                          Math.abs(row.delta) <= 2
-                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                            : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-                        }`}
-                      >
-                        {row.delta > 0 ? "+" : ""}
-                        {typeof row.delta === "number" &&
-                        Math.abs(row.delta) < 1
-                          ? row.delta.toFixed(2)
-                          : row.delta}
+                        className="h-2 w-2 rounded-full animate-pulse"
+                        style={{ backgroundColor: "var(--brand)" }}
+                      />
+                      Live
+                    </span>
+                  </div>
+                  <div className="text-center text-xs font-medium text-neutral-500 dark:text-neutral-400">
+                    Delta
+                  </div>
+                </div>
+
+                {/* Comparison rows */}
+                <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
+                  {COMPARISON_DATA.map((row, i) => (
+                    <div
+                      key={row.metric}
+                      className={`grid grid-cols-4 gap-4 py-4 transition-colors duration-200 ${
+                        hoveredRow === i
+                          ? "bg-neutral-50 dark:bg-neutral-900/50"
+                          : ""
+                      }`}
+                      onMouseEnter={() => setHoveredRow(i)}
+                      onMouseLeave={() => setHoveredRow(null)}
+                    >
+                      <div className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                        {row.metric}
+                      </div>
+                      <div className="text-center text-sm text-neutral-600 dark:text-neutral-400">
+                        {typeof row.backtest === "number" && row.backtest < 1
+                          ? row.backtest.toFixed(2)
+                          : row.backtest}
                         {row.metric.includes("Accuracy") ||
                         row.metric.includes("Coverage")
                           ? "%"
                           : ""}
-                      </span>
+                      </div>
+                      <div
+                        className="text-center text-sm font-semibold"
+                        style={{ color: "var(--brand)" }}
+                      >
+                        {typeof row.live === "number" && row.live < 1
+                          ? row.live.toFixed(2)
+                          : row.live}
+                        {row.metric.includes("Accuracy") ||
+                        row.metric.includes("Coverage")
+                          ? "%"
+                          : ""}
+                      </div>
+                      <div className="text-center">
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                            Math.abs(row.delta) <= 2
+                              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                              : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                          }`}
+                        >
+                          {row.delta > 0 ? "+" : ""}
+                          {typeof row.delta === "number" &&
+                          Math.abs(row.delta) < 1
+                            ? row.delta.toFixed(2)
+                            : row.delta}
+                          {row.metric.includes("Accuracy") ||
+                          row.metric.includes("Coverage")
+                            ? "%"
+                            : ""}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Mobile: Card layout */}
+              <div className="space-y-2 sm:hidden">
+                {COMPARISON_DATA.map((row) => (
+                  <div
+                    key={row.metric}
+                    className="rounded-lg border border-neutral-100 bg-neutral-50 p-2.5 dark:border-neutral-800 dark:bg-neutral-900"
+                  >
+                    {/* Metric name */}
+                    <p className="mb-2 text-[11px] font-semibold text-neutral-900 dark:text-white">
+                      {row.metric}
+                    </p>
+
+                    {/* Values row */}
+                    <div className="grid grid-cols-3 gap-2">
+                      {/* Backtest */}
+                      <div>
+                        <p className="text-[9px] text-amber-600 dark:text-amber-500">
+                          Backtest
+                        </p>
+                        <p className="text-xs font-medium text-neutral-600 dark:text-neutral-400">
+                          {typeof row.backtest === "number" && row.backtest < 1
+                            ? row.backtest.toFixed(2)
+                            : row.backtest}
+                          {row.metric.includes("Accuracy") ||
+                          row.metric.includes("Coverage")
+                            ? "%"
+                            : ""}
+                        </p>
+                      </div>
+
+                      {/* Live */}
+                      <div>
+                        <p
+                          className="text-[9px]"
+                          style={{ color: "var(--brand)" }}
+                        >
+                          Live
+                        </p>
+                        <p
+                          className="text-xs font-semibold"
+                          style={{ color: "var(--brand)" }}
+                        >
+                          {typeof row.live === "number" && row.live < 1
+                            ? row.live.toFixed(2)
+                            : row.live}
+                          {row.metric.includes("Accuracy") ||
+                          row.metric.includes("Coverage")
+                            ? "%"
+                            : ""}
+                        </p>
+                      </div>
+
+                      {/* Delta */}
+                      <div className="flex flex-col items-end">
+                        <p className="text-[9px] text-neutral-500 dark:text-neutral-400">
+                          Delta
+                        </p>
+                        <span
+                          className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
+                            Math.abs(row.delta) <= 2
+                              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                              : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                          }`}
+                        >
+                          {row.delta > 0 ? "+" : ""}
+                          {typeof row.delta === "number" &&
+                          Math.abs(row.delta) < 1
+                            ? row.delta.toFixed(2)
+                            : row.delta}
+                          {row.metric.includes("Accuracy") ||
+                          row.metric.includes("Coverage")
+                            ? "%"
+                            : ""}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
 
               {/* Status indicator */}
-              <div className="mt-4 rounded-xl bg-green-50 p-4 dark:bg-green-900/20">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/40">
+              <div className="mt-3 rounded-lg bg-green-50 p-3 sm:mt-4 sm:rounded-xl sm:p-4 dark:bg-green-900/20">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-100 sm:h-10 sm:w-10 dark:bg-green-900/40">
                     <svg
-                      className="h-5 w-5 text-green-600 dark:text-green-400"
+                      className="h-4 w-4 text-green-600 sm:h-5 sm:w-5 dark:text-green-400"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -340,10 +423,10 @@ const LiveVsBacktest = () => {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-green-800 dark:text-green-300">
+                    <p className="text-xs font-semibold text-green-800 sm:text-sm dark:text-green-300">
                       Live performance aligned with backtest
                     </p>
-                    <p className="text-xs text-green-600 dark:text-green-400">
+                    <p className="text-[10px] text-green-600 sm:text-xs dark:text-green-400">
                       All metrics within expected variance
                     </p>
                   </div>

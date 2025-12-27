@@ -277,7 +277,8 @@ const ModelVersionComparison = () => {
           }`}
           style={{ transitionDelay: "400ms" }}
         >
-          <div className="rounded-3xl border border-neutral-200 bg-white shadow-lg overflow-hidden dark:border-neutral-800 dark:bg-black">
+          {/* Desktop: Table layout */}
+          <div className="hidden rounded-3xl border border-neutral-200 bg-white shadow-lg overflow-hidden sm:block dark:border-neutral-800 dark:bg-black">
             {/* Table header */}
             <div
               className="grid border-b border-neutral-200 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900"
@@ -417,6 +418,119 @@ const ModelVersionComparison = () => {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Mobile: Card layout - one card per version */}
+          <div className="space-y-4 sm:hidden">
+            {compareVersions.map((model) => {
+              const metrics = Object.keys(METRIC_LABELS) as Array<
+                keyof typeof METRIC_LABELS
+              >;
+
+              return (
+                <div
+                  key={model.version}
+                  className="overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
+                >
+                  {/* Card header */}
+                  <div className="flex items-center justify-between border-b border-neutral-100 bg-neutral-50 px-3 py-2 dark:border-neutral-800 dark:bg-neutral-950">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="h-2 w-2 rounded-full"
+                        style={{ backgroundColor: "var(--brand)" }}
+                      />
+                      <span className="text-xs font-semibold text-neutral-900 dark:text-white">
+                        {model.version}
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-neutral-500 dark:text-neutral-400">
+                      {model.date}
+                    </span>
+                  </div>
+
+                  {/* Metrics */}
+                  <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
+                    {metrics.map((metric) => {
+                      const values = compareVersions.map(
+                        (v) => v.metrics[metric]
+                      );
+                      const bestValue = getBetterValue(metric, values);
+                      const value = model.metrics[metric];
+                      const isBest =
+                        value === bestValue && compareVersions.length > 1;
+
+                      return (
+                        <div
+                          key={metric}
+                          className="flex items-center justify-between px-3 py-2"
+                        >
+                          <div>
+                            <p className="text-[11px] font-medium text-neutral-700 dark:text-neutral-300">
+                              {METRIC_LABELS[metric].label}
+                            </p>
+                            <p className="text-[9px] text-neutral-400">
+                              {METRIC_LABELS[metric].better} is better
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <p
+                              className={`text-sm font-semibold ${
+                                isBest
+                                  ? ""
+                                  : "text-neutral-600 dark:text-neutral-400"
+                              }`}
+                              style={{
+                                color: isBest ? "var(--brand)" : undefined,
+                              }}
+                            >
+                              {value}
+                              {METRIC_LABELS[metric].unit}
+                            </p>
+                            {isBest && (
+                              <svg
+                                className="h-3 w-3"
+                                style={{ color: "var(--brand)" }}
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Key changes */}
+                  <div className="border-t border-neutral-100 bg-neutral-50 px-3 py-2 dark:border-neutral-800 dark:bg-neutral-950">
+                    <p className="mb-1.5 text-[10px] font-medium text-neutral-500 dark:text-neutral-400">
+                      Key Changes
+                    </p>
+                    <ul className="space-y-1">
+                      {model.changes.map((change) => (
+                        <li
+                          key={change}
+                          className="flex items-start gap-1.5 text-[10px] leading-snug text-neutral-600 dark:text-neutral-400"
+                        >
+                          <span
+                            className="mt-1 h-1 w-1 shrink-0 rounded-full"
+                            style={{ backgroundColor: "var(--brand)" }}
+                          />
+                          {change}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
