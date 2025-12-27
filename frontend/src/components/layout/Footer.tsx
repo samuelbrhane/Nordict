@@ -8,7 +8,7 @@ const FOOTER_LINKS = [
       { label: "Forecasting Engine", href: "/product/engine" },
       { label: "Performance", href: "/product/performance" },
       { label: "Alerts", href: "/product/alerts" },
-      { label: "API", href: "/product/api" },
+      { label: "API & Integrations", href: "/product/api" },
     ],
   },
   {
