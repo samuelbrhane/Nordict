@@ -93,7 +93,7 @@ const FinalCTA = () => {
               backgroundClip: "text",
             }}
           >
-            Modelis
+            Nordict
           </span>
         </h2>
 

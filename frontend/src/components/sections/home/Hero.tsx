@@ -94,7 +94,7 @@ const Hero = () => {
             }`}
             style={{ transitionDelay: "200ms" }}
           >
-            Modelis uses{" "}
+            Nordict uses{" "}
             <span className="relative inline-block group cursor-default">
               <span className="relative z-10 font-medium text-neutral-800 dark:text-neutral-100">
                 multiple AI models{" "}
