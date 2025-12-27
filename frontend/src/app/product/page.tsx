@@ -3,6 +3,7 @@ import {
   ForecastingCapabilities,
   ConfidenceUncertainty,
   BacktestingPerformance,
+  AlertsSignals,
 } from "@/components/sections/product";
 
 const Product = () => {
@@ -12,6 +13,7 @@ const Product = () => {
       <ForecastingCapabilities />
       <ConfidenceUncertainty />
       <BacktestingPerformance />
+      <AlertsSignals />
     </div>
   );
 };
