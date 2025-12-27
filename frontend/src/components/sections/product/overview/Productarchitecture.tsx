@@ -350,9 +350,12 @@ const ProductArchitecture = () => {
               </svg>
 
               {/* Nodes grid */}
-              <div className="grid grid-cols-3 gap-6 sm:gap-8">
-                {/* Left column */}
-                <div className="flex flex-col gap-6 sm:gap-8">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-8">
+                {/* Mobile: 2 columns, reorder nodes top-to-bottom */}
+                {/* Desktop: 3 columns as before */}
+
+                {/* Left column (desktop) / First items (mobile) */}
+                <div className="flex flex-col gap-4 sm:gap-8 items-stretch">
                   {ARCHITECTURE_NODES.filter((n) => n.position === "left").map(
                     (node, i) => (
                       <NodeCard
@@ -372,8 +375,8 @@ const ProductArchitecture = () => {
                   )}
                 </div>
 
-                {/* Center column */}
-                <div className="flex flex-col items-center justify-center gap-6 sm:gap-8">
+                {/* Center column (desktop) / Second items (mobile) */}
+                <div className="flex flex-col gap-4 sm:items-center sm:justify-center sm:gap-8 items-stretch">
                   {ARCHITECTURE_NODES.filter(
                     (n) => n.position === "center"
                   ).map((node, i) => (
@@ -393,8 +396,8 @@ const ProductArchitecture = () => {
                   ))}
                 </div>
 
-                {/* Right column */}
-                <div className="flex flex-col items-end gap-6 sm:gap-8">
+                {/* Right column (desktop) / Full width row (mobile) */}
+                <div className="col-span-2 flex flex-row justify-center gap-4 sm:col-span-1 sm:flex-col sm:items-end sm:gap-8">
                   {ARCHITECTURE_NODES.filter((n) => n.position === "right").map(
                     (node, i) => (
                       <NodeCard
@@ -416,7 +419,7 @@ const ProductArchitecture = () => {
               </div>
 
               {/* Flow arrows (simplified visual) */}
-              <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute inset-0 pointer-events-none hidden sm:block">
                 {/* Horizontal flow indicators */}
                 <div
                   className={`absolute left-[20%] top-[30%] w-[15%] h-0.5 transition-all duration-500 ${
@@ -503,7 +506,7 @@ const NodeCard = ({
 }) => {
   return (
     <div
-      className={`group relative w-full max-w-[180px] overflow-hidden rounded-2xl border p-4 transition-all duration-300 cursor-pointer ${
+      className={`group relative w-full max-w-[150px] overflow-hidden rounded-xl border p-3 transition-all duration-300 cursor-pointer sm:max-w-[180px] sm:rounded-2xl sm:p-4 ${
         isActive
           ? "border-[var(--brand)] bg-[var(--brand)]/5 shadow-lg shadow-[var(--brand)]/10"
           : isConnected

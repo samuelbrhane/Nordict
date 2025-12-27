@@ -165,12 +165,12 @@ const ForecastingCapabilities = () => {
           }`}
           style={{ transitionDelay: "300ms" }}
         >
-          <div className="inline-flex rounded-2xl border border-neutral-200 bg-neutral-50 p-1.5 dark:border-neutral-800 dark:bg-neutral-900">
+          <div className="inline-flex rounded-2xl border border-neutral-200 bg-neutral-50 p-1 sm:p-1.5 dark:border-neutral-800 dark:bg-neutral-900">
             {FORECAST_TYPES.map((type) => (
               <button
                 key={type.id}
                 onClick={() => setActiveTab(type.id)}
-                className={`relative rounded-xl px-5 py-2.5 text-sm font-medium transition-all duration-300 ${
+                className={`relative rounded-xl px-3 py-2 text-xs font-medium transition-all duration-300 sm:px-5 sm:py-2.5 sm:text-sm ${
                   activeTab === type.id
                     ? "text-black shadow-sm"
                     : "text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
@@ -182,10 +182,11 @@ const ForecastingCapabilities = () => {
                     style={{ backgroundColor: "var(--brand)" }}
                   />
                 )}
-                <span className="relative z-10 flex items-center gap-2">
+                <span className="relative z-10 flex items-center gap-1 sm:gap-2">
                   {type.label}
+                  {/* Hide horizon text on mobile, show on sm and up */}
                   <span
-                    className={`text-xs ${
+                    className={`hidden text-xs sm:inline ${
                       activeTab === type.id
                         ? "text-black/70"
                         : "text-neutral-400 dark:text-neutral-500"

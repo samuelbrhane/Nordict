@@ -304,10 +304,10 @@ const APIIntegrations = () => {
         </div>
 
         {/* Main content */}
-        <div className="mt-12 grid gap-8 lg:grid-cols-5">
-          {/* Left: Code preview (3 cols) */}
+        <div className="mt-6 grid gap-5 sm:mt-12 sm:gap-8 lg:grid-cols-5">
+          {/* Left: Code preview (3 cols on lg) */}
           <div
-            className={`lg:col-span-3 transition-all duration-700 ease-out ${
+            className={`hidden lg:block lg:col-span-3 transition-all duration-700 ease-out ${
               isVisible
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-6"
@@ -424,13 +424,13 @@ const APIIntegrations = () => {
             </div>
           </div>
 
-          {/* Right: Features (2 cols) */}
+          {/* Right: Features (2 cols on lg) - stacked vertically */}
           <div className="lg:col-span-2 flex flex-col justify-center">
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 gap-2 sm:gap-3">
               {API_FEATURES.map((feature, i) => (
                 <div
                   key={feature.title}
-                  className={`group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900 cursor-default ${
+                  className={`group relative overflow-hidden rounded-xl border border-neutral-200 bg-white p-3 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:rounded-2xl sm:p-4 dark:border-neutral-800 dark:bg-neutral-900 cursor-default ${
                     isVisible
                       ? "opacity-100 translate-y-0"
                       : "opacity-0 translate-y-4"
@@ -439,21 +439,23 @@ const APIIntegrations = () => {
                   onMouseEnter={() => setHoveredFeature(i)}
                   onMouseLeave={() => setHoveredFeature(null)}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-2 sm:gap-3">
                     <div
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors duration-200 ${
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors duration-200 sm:h-10 sm:w-10 sm:rounded-xl ${
                         hoveredFeature === i
                           ? "bg-[var(--brand)]/15 text-[var(--brand)]"
                           : "bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400"
                       }`}
                     >
-                      {feature.icon}
+                      <div className="[&>svg]:h-4 [&>svg]:w-4 sm:[&>svg]:h-5 sm:[&>svg]:w-5">
+                        {feature.icon}
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-xs font-semibold text-neutral-900 sm:text-sm dark:text-white">
                         {feature.title}
                       </h3>
-                      <p className="mt-1 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
+                      <p className="mt-0.5 text-[10px] leading-snug text-neutral-600 sm:mt-1 sm:text-xs sm:leading-relaxed dark:text-neutral-400">
                         {feature.desc}
                       </p>
                     </div>
