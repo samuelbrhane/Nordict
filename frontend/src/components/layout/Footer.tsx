@@ -16,7 +16,7 @@ const FOOTER_LINKS = [
     links: [
       { label: "Methodology", href: "/resources/methodology" },
       { label: "Blog", href: "/blog" },
-      { label: "Changelog", href: "/changelog" },
+      // { label: "Changelog", href: "/changelog" },
     ],
   },
   {
