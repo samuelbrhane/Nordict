@@ -34,6 +34,13 @@ const ProductPreview = () => {
       ref={sectionRef}
       className="relative overflow-hidden bg-neutral-50 py-20 dark:bg-neutral-950"
     >
+      {/* Brand glow */}
+      <div className="pointer-events-none absolute inset-0">
+        <div
+          className="absolute left-1/2 top-0 h-40 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl opacity-15"
+          style={{ backgroundColor: "var(--brand)" }}
+        />
+      </div>
       {/* background divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 

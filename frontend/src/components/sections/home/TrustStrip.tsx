@@ -142,7 +142,7 @@ const TrustStrip = () => {
             }`}
             style={{ transitionDelay: "300ms" }}
           >
-            Modelis emphasizes{" "}
+            Nordict emphasizes{" "}
             <span className="font-medium text-neutral-800 dark:text-neutral-100">
               validation
             </span>
