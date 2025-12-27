@@ -11,3 +11,4 @@ export { default as MethodologyHighlights } from "./MethodologyHighlights";
 export { default as UseCases } from "./UseCases";
 export { default as FAQ } from "./FAQ";
 export { default as FinalCTA } from "./FinalCTA";
+export { default as MarketLogos } from "./MarketLogos";
