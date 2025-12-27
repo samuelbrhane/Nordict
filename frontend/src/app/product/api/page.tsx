@@ -6,7 +6,7 @@ import {
   SDKs,
   Webhooks,
 } from "@/components/sections/product/api";
-import SubPageCTA from "@/components/sections/product/Subpagecta";
+import SubPageCTA from "@/components/sections/shared/Subpagecta";
 
 const Api = () => {
   return (

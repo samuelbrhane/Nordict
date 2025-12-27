@@ -7,7 +7,7 @@ import {
   TransparencyGuarantees,
   Walkforwardvalidation,
 } from "@/components/sections/product/performance";
-import SubPageCTA from "@/components/sections/product/Subpagecta";
+import SubPageCTA from "@/components/sections/shared/Subpagecta";
 
 const Performance = () => {
   return (

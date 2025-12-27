@@ -6,7 +6,7 @@ import {
   DeliveryChannels,
   TriggerLogic,
 } from "@/components/sections/product/alerts";
-import SubPageCTA from "@/components/sections/product/Subpagecta";
+import SubPageCTA from "@/components/sections/shared/Subpagecta";
 
 const Alerts = () => {
   return (

@@ -6,7 +6,7 @@ import {
   SupportedHorizons,
   UpdateFrequency,
 } from "@/components/sections/product/engine";
-import SubPageCTA from "@/components/sections/product/Subpagecta";
+import SubPageCTA from "@/components/sections/shared/Subpagecta";
 
 const ForecastEngine = () => {
   return (
