@@ -1,5 +1,17 @@
+import {
+  AboutCTA,
+  AboutHero,
+  AboutStory,
+  AboutValues,
+} from "@/components/sections/company/about";
+
 export default function About() {
   return (
-   <div className="">ChainForcast</div>
+    <div>
+      <AboutHero />
+      <AboutStory />
+      <AboutValues />
+      <AboutCTA />
+    </div>
   );
 }

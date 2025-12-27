@@ -19,7 +19,9 @@ const Product = () => {
       <BacktestingPerformance />
       <AlertsSignals />
       <APIIntegrations />
-      <ProductArchitecture />
+      <div className="hidden lg:block">
+        <ProductArchitecture />
+      </div>
       <WhyDifferent />
       <ProductCTA />
     </div>
