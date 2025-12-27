@@ -44,6 +44,13 @@ const ProblemSolution = () => {
       ref={sectionRef}
       className="relative overflow-hidden bg-neutral-50 py-20 dark:bg-neutral-950"
     >
+      {/* Brand glow */}
+      <div className="pointer-events-none absolute inset-0">
+        <div
+          className="absolute left-1/2 top-0 h-40 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl opacity-15"
+          style={{ backgroundColor: "var(--brand)" }}
+        />
+      </div>
       <div className="mx-auto max-w-7xl px-6">
         {/* Section label */}
         <div
@@ -139,7 +146,7 @@ const ProblemSolution = () => {
             </h3>
 
             <p className="mt-4 text-sm leading-relaxed text-neutral-600 dark:text-neutral-300">
-              Modelis produces{" "}
+              Nordict produces{" "}
               <span className="font-medium text-neutral-800 dark:text-neutral-100">
                 probabilistic forecasts
               </span>{" "}
