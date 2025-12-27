@@ -219,7 +219,7 @@ const Webhooks = () => {
             }`}
             style={{ transitionDelay: "300ms" }}
           >
-            <h3 className="mb-4 text-sm font-semibold text-neutral-900 dark:text-white">
+            <h3 className="mb-3 text-xs font-semibold text-neutral-900 sm:mb-4 sm:text-sm dark:text-white">
               Available Events
             </h3>
 
@@ -227,7 +227,7 @@ const Webhooks = () => {
               {WEBHOOK_EVENTS.map((item, i) => (
                 <div
                   key={item.event}
-                  className={`group relative overflow-hidden rounded-xl border p-4 transition-all duration-300 cursor-default ${
+                  className={`group relative overflow-hidden rounded-lg border p-3 transition-all duration-300 cursor-default sm:rounded-xl sm:p-4 ${
                     hoveredEvent === i
                       ? "border-[var(--brand)]/50 bg-white shadow-md dark:bg-black"
                       : "border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
@@ -235,7 +235,8 @@ const Webhooks = () => {
                   onMouseEnter={() => setHoveredEvent(i)}
                   onMouseLeave={() => setHoveredEvent(null)}
                 >
-                  <div className="flex items-start justify-between gap-4">
+                  {/* Desktop: side by side */}
+                  <div className="hidden sm:flex sm:items-start sm:justify-between sm:gap-4">
                     <div>
                       <code
                         className={`text-sm font-semibold transition-colors duration-200 ${
@@ -255,6 +256,25 @@ const Webhooks = () => {
                     </span>
                   </div>
 
+                  {/* Mobile: stacked */}
+                  <div className="sm:hidden">
+                    <code
+                      className={`text-[11px] font-semibold transition-colors duration-200 ${
+                        hoveredEvent === i
+                          ? "text-[var(--brand)]"
+                          : "text-neutral-900 dark:text-white"
+                      }`}
+                    >
+                      {item.event}
+                    </code>
+                    <p className="mt-1 text-[10px] leading-snug text-neutral-600 dark:text-neutral-400">
+                      {item.description}
+                    </p>
+                    <span className="mt-2 inline-block rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400">
+                      {item.frequency}
+                    </span>
+                  </div>
+
                   {/* Hover accent */}
                   <div
                     className={`pointer-events-none absolute inset-x-0 bottom-0 h-0.5 transition-all duration-500 ${
@@ -267,17 +287,17 @@ const Webhooks = () => {
             </div>
 
             {/* Payload example */}
-            <div className="mt-6 rounded-2xl border border-neutral-200 bg-neutral-900 overflow-hidden dark:border-neutral-700">
-              <div className="flex items-center justify-between border-b border-neutral-700 bg-neutral-800 px-4 py-2">
-                <span className="text-xs font-medium text-neutral-400">
+            <div className="mt-4 rounded-xl border border-neutral-200 bg-neutral-900 overflow-hidden sm:mt-6 sm:rounded-2xl dark:border-neutral-700">
+              <div className="flex items-center justify-between border-b border-neutral-700 bg-neutral-800 px-3 py-1.5 sm:px-4 sm:py-2">
+                <span className="text-[10px] font-medium text-neutral-400 sm:text-xs">
                   Example Payload
                 </span>
-                <span className="rounded bg-green-500 px-1.5 py-0.5 text-xs font-bold text-white">
+                <span className="rounded bg-green-500 px-1.5 py-0.5 text-[10px] font-bold text-white sm:text-xs">
                   POST
                 </span>
               </div>
-              <div className="p-4 overflow-x-auto">
-                <pre className="text-xs text-neutral-300">
+              <div className="max-h-48 overflow-auto p-3 sm:max-h-none sm:p-4">
+                <pre className="text-[9px] leading-relaxed text-neutral-300 sm:text-xs">
                   {`{
   "event": "forecast.updated",
   "timestamp": "2024-12-15T10:00:03Z",

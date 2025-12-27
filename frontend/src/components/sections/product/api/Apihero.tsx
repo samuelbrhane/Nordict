@@ -48,11 +48,11 @@ console.log(\`Confidence: \${forecast.confidence}%\`);`,
   };
 
   return (
-    <section className="relative overflow-hidden bg-white pt-8 pb-20 dark:bg-black">
+    <section className="relative overflow-hidden bg-white pt-6 pb-12 sm:pt-8 sm:pb-20 dark:bg-black">
       {/* Brand glow */}
       <div className="pointer-events-none absolute inset-0">
         <div
-          className={`absolute left-1/2 top-0 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl transition-opacity duration-1000 ${
+          className={`absolute left-1/2 top-0 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl transition-opacity duration-1000 sm:h-[500px] sm:w-[500px] ${
             isVisible ? "opacity-10 dark:opacity-20" : "opacity-0"
           }`}
           style={{ backgroundColor: "var(--brand)" }}
@@ -69,54 +69,54 @@ console.log(\`Confidence: \${forecast.confidence}%\`);`,
         }}
       />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
         {/* Breadcrumb */}
         <div
-          className={`mb-6 flex items-center gap-3 transition-all duration-700 ease-out ${
+          className={`mb-4 flex items-center gap-2 overflow-x-auto sm:mb-6 sm:gap-3 transition-all duration-700 ease-out ${
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3"
           }`}
         >
           <Link
             href="/"
-            className="text-sm text-neutral-500 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
+            className="shrink-0 text-xs text-neutral-500 transition-colors hover:text-neutral-900 sm:text-sm dark:text-neutral-400 dark:hover:text-white"
           >
             Home
           </Link>
           <span className="text-neutral-300 dark:text-neutral-600">/</span>
           <Link
             href="/product"
-            className="text-sm text-neutral-500 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
+            className="shrink-0 text-xs text-neutral-500 transition-colors hover:text-neutral-900 sm:text-sm dark:text-neutral-400 dark:hover:text-white"
           >
             Product
           </Link>
           <span className="text-neutral-300 dark:text-neutral-600">/</span>
-          <span className="text-sm text-neutral-700 dark:text-neutral-300">
+          <span className="shrink-0 text-xs text-neutral-700 sm:text-sm dark:text-neutral-300">
             API & Integrations
           </span>
         </div>
 
         {/* Badge */}
         <div
-          className={`mb-6 inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white/80 px-4 py-1.5 backdrop-blur dark:border-neutral-800 dark:bg-neutral-900/60 transition-all duration-700 ease-out ${
+          className={`mb-4 inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white/80 px-3 py-1 backdrop-blur sm:mb-6 sm:gap-2 sm:px-4 sm:py-1.5 dark:border-neutral-800 dark:bg-neutral-900/60 transition-all duration-700 ease-out ${
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3"
           }`}
           style={{ transitionDelay: "100ms" }}
         >
           <span
-            className="h-2 w-2 rounded-full animate-pulse"
+            className="h-1.5 w-1.5 rounded-full animate-pulse sm:h-2 sm:w-2"
             style={{ backgroundColor: "var(--brand)" }}
           />
-          <span className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+          <span className="text-[10px] font-medium text-neutral-700 sm:text-xs dark:text-neutral-300">
             Deep Dive
           </span>
         </div>
 
-        <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+        <div className="grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-12">
           {/* Left: Content */}
           <div>
             {/* Headline */}
             <h1
-              className={`text-4xl font-semibold tracking-tight text-neutral-900 dark:text-white sm:text-5xl transition-all duration-700 ease-out ${
+              className={`text-2xl font-semibold tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl dark:text-white transition-all duration-700 ease-out ${
                 isVisible
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-4"
@@ -140,7 +140,7 @@ console.log(\`Confidence: \${forecast.confidence}%\`);`,
 
             {/* Subtitle */}
             <p
-              className={`mt-6 text-base leading-relaxed text-neutral-600 dark:text-neutral-300 sm:text-lg transition-all duration-700 ease-out ${
+              className={`mt-4 text-sm leading-relaxed text-neutral-600 sm:mt-6 sm:text-base lg:text-lg dark:text-neutral-300 transition-all duration-700 ease-out ${
                 isVisible
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-4"
@@ -154,7 +154,7 @@ console.log(\`Confidence: \${forecast.confidence}%\`);`,
 
             {/* Key points */}
             <div
-              className={`mt-8 grid gap-4 sm:grid-cols-2 transition-all duration-700 ease-out ${
+              className={`mt-5 grid grid-cols-2 gap-2 sm:mt-8 sm:gap-4 transition-all duration-700 ease-out ${
                 isVisible
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-4"
@@ -169,14 +169,14 @@ console.log(\`Confidence: \${forecast.confidence}%\`);`,
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="flex items-start gap-3 rounded-xl border border-neutral-200 bg-neutral-50 p-3 dark:border-neutral-800 dark:bg-neutral-900"
+                  className="flex items-start gap-2 rounded-lg border border-neutral-200 bg-neutral-50 p-2 sm:gap-3 sm:rounded-xl sm:p-3 dark:border-neutral-800 dark:bg-neutral-900"
                 >
                   <span
-                    className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md"
+                    className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded sm:h-5 sm:w-5 sm:rounded-md"
                     style={{ backgroundColor: "rgba(4,236,58,0.15)" }}
                   >
                     <svg
-                      className="h-3 w-3"
+                      className="h-2.5 w-2.5 sm:h-3 sm:w-3"
                       style={{ color: "var(--brand)" }}
                       fill="none"
                       viewBox="0 0 24 24"
@@ -190,11 +190,11 @@ console.log(\`Confidence: \${forecast.confidence}%\`);`,
                       />
                     </svg>
                   </span>
-                  <div>
-                    <p className="text-sm font-medium text-neutral-900 dark:text-white">
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-medium text-neutral-900 sm:text-sm dark:text-white">
                       {item.label}
                     </p>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    <p className="hidden text-xs text-neutral-500 sm:block dark:text-neutral-400">
                       {item.desc}
                     </p>
                   </div>
@@ -204,7 +204,7 @@ console.log(\`Confidence: \${forecast.confidence}%\`);`,
 
             {/* CTAs */}
             <div
-              className={`mt-8 flex flex-wrap items-center gap-4 transition-all duration-700 ease-out ${
+              className={`mt-5 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 transition-all duration-700 ease-out ${
                 isVisible
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-4"
@@ -213,13 +213,13 @@ console.log(\`Confidence: \${forecast.confidence}%\`);`,
             >
               <Link
                 href="/contact"
-                className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl px-6 py-3 text-sm font-medium text-black shadow-lg shadow-[var(--brand)]/25 transition-all duration-300 hover:shadow-xl hover:shadow-[var(--brand)]/30 hover:scale-[1.02] active:scale-[0.98]"
+                className="group relative inline-flex items-center justify-center overflow-hidden rounded-lg px-4 py-2.5 text-xs font-medium text-black shadow-lg shadow-[var(--brand)]/25 transition-all duration-300 hover:shadow-xl hover:shadow-[var(--brand)]/30 hover:scale-[1.02] active:scale-[0.98] sm:rounded-xl sm:px-6 sm:py-3 sm:text-sm"
                 style={{ backgroundColor: "var(--brand)" }}
               >
                 <span className="relative z-10 flex items-center gap-2">
                   Request API access
                   <svg
-                    className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
+                    className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5 sm:w-4 sm:h-4"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -237,12 +237,12 @@ console.log(\`Confidence: \${forecast.confidence}%\`);`,
 
               <Link
                 href="#endpoints"
-                className="group inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-6 py-3 text-sm font-medium text-neutral-900 shadow-sm transition-all duration-300 hover:bg-neutral-50 hover:border-neutral-300 active:scale-[0.98] dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800 dark:hover:border-neutral-700"
+                className="group inline-flex items-center justify-center rounded-lg border border-neutral-200 bg-white px-4 py-2.5 text-xs font-medium text-neutral-900 shadow-sm transition-all duration-300 hover:bg-neutral-50 hover:border-neutral-300 active:scale-[0.98] sm:rounded-xl sm:px-6 sm:py-3 sm:text-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800 dark:hover:border-neutral-700"
               >
                 <span className="flex items-center gap-2">
                   View endpoints
                   <svg
-                    className="w-4 h-4 transition-transform duration-200 group-hover:translate-y-0.5"
+                    className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-y-0.5 sm:w-4 sm:h-4"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -268,43 +268,45 @@ console.log(\`Confidence: \${forecast.confidence}%\`);`,
             }`}
             style={{ transitionDelay: "400ms" }}
           >
-            <div className="rounded-2xl border border-neutral-200 bg-neutral-900 shadow-2xl overflow-hidden dark:border-neutral-700">
+            <div className="rounded-xl border border-neutral-200 bg-neutral-900 shadow-2xl overflow-hidden sm:rounded-2xl dark:border-neutral-700">
               {/* Tab bar */}
-              <div className="flex items-center gap-1 border-b border-neutral-700 bg-neutral-800 px-4 py-2">
-                {(["python", "javascript", "curl"] as const).map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
-                      activeTab === tab
-                        ? "bg-neutral-700 text-white"
-                        : "text-neutral-400 hover:text-white"
-                    }`}
-                  >
-                    {tab === "python" && "Python"}
-                    {tab === "javascript" && "JavaScript"}
-                    {tab === "curl" && "cURL"}
-                  </button>
-                ))}
+              <div className="flex items-center justify-between border-b border-neutral-700 bg-neutral-800 px-2 py-1.5 sm:px-4 sm:py-2">
+                <div className="flex items-center gap-0.5 sm:gap-1">
+                  {(["python", "javascript", "curl"] as const).map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`rounded px-2 py-1 text-[10px] font-medium transition-all duration-200 sm:rounded-lg sm:px-3 sm:py-1.5 sm:text-xs ${
+                        activeTab === tab
+                          ? "bg-neutral-700 text-white"
+                          : "text-neutral-400 hover:text-white"
+                      }`}
+                    >
+                      {tab === "python" && "Python"}
+                      {tab === "javascript" && "JS"}
+                      {tab === "curl" && "cURL"}
+                    </button>
+                  ))}
+                </div>
 
                 {/* Window controls */}
-                <div className="ml-auto flex items-center gap-1.5">
-                  <div className="h-3 w-3 rounded-full bg-red-500" />
-                  <div className="h-3 w-3 rounded-full bg-yellow-500" />
-                  <div className="h-3 w-3 rounded-full bg-green-500" />
+                <div className="flex items-center gap-1 sm:gap-1.5">
+                  <div className="h-2 w-2 rounded-full bg-red-500 sm:h-3 sm:w-3" />
+                  <div className="h-2 w-2 rounded-full bg-yellow-500 sm:h-3 sm:w-3" />
+                  <div className="h-2 w-2 rounded-full bg-green-500 sm:h-3 sm:w-3" />
                 </div>
               </div>
 
               {/* Code content */}
-              <div className="p-4 overflow-x-auto">
-                <pre className="text-sm leading-relaxed">
+              <div className="max-h-48 overflow-auto p-2 sm:max-h-none sm:p-4">
+                <pre className="text-[10px] leading-relaxed sm:text-sm">
                   <code className="text-neutral-300">
                     {codeExamples[activeTab].split("\n").map((line, i) => (
                       <div key={i} className="flex">
-                        <span className="w-8 shrink-0 text-neutral-600 select-none">
+                        <span className="w-5 shrink-0 text-neutral-600 select-none sm:w-8">
                           {i + 1}
                         </span>
-                        <span>
+                        <span className="break-all sm:break-normal">
                           {line.includes("import") || line.includes("from") ? (
                             <span className="text-purple-400">{line}</span>
                           ) : line.includes("=") && !line.includes("==") ? (
@@ -335,17 +337,17 @@ console.log(\`Confidence: \${forecast.confidence}%\`);`,
               </div>
 
               {/* Response preview */}
-              <div className="border-t border-neutral-700 bg-neutral-800 px-4 py-3">
-                <div className="flex items-center gap-2 mb-2">
+              <div className="border-t border-neutral-700 bg-neutral-800 px-2 py-2 sm:px-4 sm:py-3">
+                <div className="flex items-center gap-1.5 mb-1.5 sm:gap-2 sm:mb-2">
                   <span
-                    className="h-2 w-2 rounded-full"
+                    className="h-1.5 w-1.5 rounded-full sm:h-2 sm:w-2"
                     style={{ backgroundColor: "var(--brand)" }}
                   />
-                  <span className="text-xs font-medium text-neutral-400">
+                  <span className="text-[9px] font-medium text-neutral-400 sm:text-xs">
                     Response
                   </span>
                 </div>
-                <pre className="text-xs text-neutral-400">
+                <pre className="text-[9px] text-neutral-400 sm:text-xs">
                   {`{
   "direction": "bullish",
   "confidence": 72,
@@ -357,7 +359,7 @@ console.log(\`Confidence: \${forecast.confidence}%\`);`,
 
             {/* Decorative glow */}
             <div
-              className="absolute -bottom-8 left-1/2 h-32 w-64 -translate-x-1/2 rounded-full blur-3xl opacity-30"
+              className="absolute -bottom-8 left-1/2 h-24 w-48 -translate-x-1/2 rounded-full blur-3xl opacity-30 sm:h-32 sm:w-64"
               style={{ backgroundColor: "var(--brand)" }}
             />
           </div>
