@@ -44,7 +44,7 @@ const Footer = () => {
                 className="h-2.5 w-2.5 rounded-full"
                 style={{ backgroundColor: "var(--brand)" }}
               />
-              Modelis
+              Nordict
             </Link>
 
             <p className="mt-3 max-w-sm text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
@@ -124,10 +124,10 @@ const Footer = () => {
 
         {/* Bottom bar */}
         <div className="mt-10 flex flex-col gap-4 border-t border-neutral-200 pt-6 text-sm text-neutral-600 dark:border-neutral-800 dark:text-neutral-400 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Modelis. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Nordict. All rights reserved.</p>
 
           <p className="text-xs leading-relaxed">
-            Modelis is provided for informational purposes only and does not
+            Nordict is provided for informational purposes only and does not
             constitute financial advice.
           </p>
         </div>

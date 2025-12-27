@@ -66,14 +66,14 @@ const Header = () => {
         >
           <Image
             src="/main_logo.png"
-            alt="Modelis"
+            alt="Nordict"
             width={46}
             height={46}
             priority
             className="transition-transform duration-200 group-hover:scale-105"
           />
-          <span className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
-            <span style={{ color: "var(--brand)" }}>Modelis</span>
+          <span className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100 uppercase">
+            <span style={{ color: "var(--brand)" }}>Nordict</span>
           </span>
         </Link>
 

@@ -60,6 +60,13 @@ const CoreFeatures = () => {
       ref={sectionRef}
       className="relative overflow-hidden bg-white py-20 dark:bg-black"
     >
+      {/* Brand glow */}
+      <div className="pointer-events-none absolute inset-0">
+        <div
+          className="absolute left-1/2 top-0 h-40 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl opacity-15"
+          style={{ backgroundColor: "var(--brand)" }}
+        />
+      </div>
       {/* subtle top line */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
