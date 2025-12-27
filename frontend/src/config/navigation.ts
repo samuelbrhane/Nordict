@@ -32,7 +32,7 @@ export const NAV_ITEMS: NavItem[] = [
     children: [
       { label: "Methodology", href: "/resources/methodology" },
       { label: "Blog", href: "/blog" },
-      { label: "Changelog", href: "/changelog" },
+      // { label: "Changelog", href: "/changelog" },
     ],
   },
   {
