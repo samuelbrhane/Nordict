@@ -10,6 +10,51 @@ const TIME_PERIODS = [
   { id: "all", label: "All" },
 ];
 
+const CHART_DATA_BY_PERIOD: Record<
+  string,
+  { label: string; accuracy: number }[]
+> = {
+  "7d": [
+    { label: "Mon", accuracy: 71 },
+    { label: "Tue", accuracy: 68 },
+    { label: "Wed", accuracy: 74 },
+    { label: "Thu", accuracy: 66 },
+    { label: "Fri", accuracy: 72 },
+    { label: "Sat", accuracy: 69 },
+    { label: "Sun", accuracy: 70 },
+  ],
+  "30d": [
+    { label: "W1", accuracy: 67 },
+    { label: "W2", accuracy: 71 },
+    { label: "W3", accuracy: 65 },
+    { label: "W4", accuracy: 73 },
+  ],
+  "90d": [
+    { label: "Oct", accuracy: 68 },
+    { label: "Nov", accuracy: 71 },
+    { label: "Dec", accuracy: 69 },
+  ],
+  "1y": [
+    { label: "Jan", accuracy: 65 },
+    { label: "Feb", accuracy: 68 },
+    { label: "Mar", accuracy: 64 },
+    { label: "Apr", accuracy: 71 },
+    { label: "May", accuracy: 69 },
+    { label: "Jun", accuracy: 72 },
+    { label: "Jul", accuracy: 67 },
+    { label: "Aug", accuracy: 70 },
+    { label: "Sep", accuracy: 73 },
+    { label: "Oct", accuracy: 68 },
+    { label: "Nov", accuracy: 71 },
+    { label: "Dec", accuracy: 69 },
+  ],
+  all: [
+    { label: "2022", accuracy: 62 },
+    { label: "2023", accuracy: 66 },
+    { label: "2024", accuracy: 69 },
+  ],
+};
+
 const REGIME_DATA = [
   {
     regime: "Trending Up",
@@ -37,27 +82,21 @@ const REGIME_DATA = [
   },
 ];
 
-const MOCK_CHART_DATA = [
-  { month: "Jan", accuracy: 65, baseline: 50 },
-  { month: "Feb", accuracy: 68, baseline: 50 },
-  { month: "Mar", accuracy: 64, baseline: 50 },
-  { month: "Apr", accuracy: 71, baseline: 50 },
-  { month: "May", accuracy: 69, baseline: 50 },
-  { month: "Jun", accuracy: 72, baseline: 50 },
-  { month: "Jul", accuracy: 67, baseline: 50 },
-  { month: "Aug", accuracy: 70, baseline: 50 },
-  { month: "Sep", accuracy: 73, baseline: 50 },
-  { month: "Oct", accuracy: 68, baseline: 50 },
-  { month: "Nov", accuracy: 71, baseline: 50 },
-  { month: "Dec", accuracy: 69, baseline: 50 },
-];
-
 const HistoricalPerformance = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState("1y");
   const [hoveredBar, setHoveredBar] = useState<number | null>(null);
   const [hoveredRegime, setHoveredRegime] = useState<number | null>(null);
+  const [animationKey, setAnimationKey] = useState(0);
   const sectionRef = useRef<HTMLElement>(null);
+
+  const handlePeriodChange = (periodId: string) => {
+    setSelectedPeriod(periodId);
+    setAnimationKey((prev) => prev + 1);
+  };
+
+  const currentChartData =
+    CHART_DATA_BY_PERIOD[selectedPeriod] || CHART_DATA_BY_PERIOD["1y"];
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -82,6 +121,19 @@ const HistoricalPerformance = () => {
       ref={sectionRef}
       className="relative overflow-hidden bg-neutral-50 py-20 dark:bg-neutral-950"
     >
+      {/* CSS Animation for bars */}
+      <style jsx>{`
+        @keyframes growUp {
+          from {
+            transform: scaleY(0);
+            transform-origin: bottom;
+          }
+          to {
+            transform: scaleY(1);
+            transform-origin: bottom;
+          }
+        }
+      `}</style>
       {/* Brand glow */}
       <div className="pointer-events-none absolute inset-0">
         <div
@@ -176,7 +228,7 @@ const HistoricalPerformance = () => {
                   {TIME_PERIODS.map((period) => (
                     <button
                       key={period.id}
-                      onClick={() => setSelectedPeriod(period.id)}
+                      onClick={() => handlePeriodChange(period.id)}
                       className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
                         selectedPeriod === period.id
                           ? "bg-white text-neutral-900 shadow-sm dark:bg-neutral-700 dark:text-white"
@@ -222,14 +274,16 @@ const HistoricalPerformance = () => {
                   </div>
 
                   {/* Bars */}
-                  <div className="relative h-full pb-8 flex items-end justify-between gap-1">
-                    {MOCK_CHART_DATA.map((data, i) => {
+                  <div
+                    key={animationKey}
+                    className="relative h-full pb-8 flex items-end justify-between gap-1"
+                  >
+                    {currentChartData.map((data, i) => {
                       const height = ((data.accuracy - 40) / 40) * 100;
-                      const baselineHeight = ((50 - 40) / 40) * 100;
 
                       return (
                         <div
-                          key={data.month}
+                          key={`${selectedPeriod}-${data.label}`}
                           className="flex-1 flex flex-col items-center"
                           onMouseEnter={() => setHoveredBar(i)}
                           onMouseLeave={() => setHoveredBar(null)}
@@ -252,18 +306,19 @@ const HistoricalPerformance = () => {
                               hoveredBar === i ? "opacity-100" : "opacity-80"
                             }`}
                             style={{
-                              height: isVisible ? `${height}%` : "0%",
+                              height: `${height}%`,
                               backgroundColor:
                                 data.accuracy >= 65
                                   ? "var(--brand)"
                                   : "#f59e0b",
-                              transitionDelay: `${i * 50}ms`,
+                              animation: "growUp 0.5s ease-out forwards",
+                              animationDelay: `${i * 50}ms`,
                             }}
                           />
 
                           {/* X-axis label */}
                           <span className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
-                            {data.month}
+                            {data.label}
                           </span>
                         </div>
                       );
