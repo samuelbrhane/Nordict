@@ -3,3 +3,4 @@ export { default as SupportedHorizons } from "./Supportedhorizons";
 export { default as ForecastOutputs } from "./Forecastoutputs";
 export { default as ConfidenceBands } from "./Confidencebands";
 export { default as ModelLifecycle } from "./Modellifecycle";
+export { default as UpdateFrequency } from "./Updatefrequency";
