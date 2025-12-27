@@ -77,12 +77,9 @@ const InvestorsHero = () => {
             Home
           </Link>
           <span className="text-neutral-300 dark:text-neutral-600">/</span>
-          <Link
-            href="/solutions"
-            className="text-sm text-neutral-500 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
-          >
+          <span className="text-sm text-neutral-500 transition-colors  dark:text-neutral-400 dark:hover:text-white">
             Solutions
-          </Link>
+          </span>
           <span className="text-neutral-300 dark:text-neutral-600">/</span>
           <span className="text-sm text-neutral-700 dark:text-neutral-300">
             For Investors
