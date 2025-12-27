@@ -297,12 +297,13 @@ const WhyDifferent = () => {
 
         {/* Comparison table */}
         <div
-          className={`mt-12 transition-all duration-700 ease-out ${
+          className={`mt-8 transition-all duration-700 ease-out sm:mt-12 ${
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
           }`}
           style={{ transitionDelay: "400ms" }}
         >
-          <div className="overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-lg dark:border-neutral-800 dark:bg-neutral-900">
+          {/* Desktop: Table layout */}
+          <div className="hidden overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-lg sm:block dark:border-neutral-800 dark:bg-neutral-900">
             {/* Table header */}
             <div className="grid grid-cols-12 gap-4 border-b border-neutral-200 bg-neutral-50 px-6 py-4 dark:border-neutral-800 dark:bg-neutral-950">
               <div className="col-span-4 text-sm font-semibold text-neutral-900 dark:text-white">
@@ -401,6 +402,78 @@ const WhyDifferent = () => {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Mobile: Card layout */}
+          <div className="space-y-3 sm:hidden">
+            {COMPARISON_POINTS.map((point, i) => (
+              <div
+                key={point.aspect}
+                className={`overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900 ${
+                  isVisible
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-4"
+                }`}
+                style={{ transitionDelay: `${500 + i * 80}ms` }}
+              >
+                {/* Card header */}
+                <div className="flex items-center gap-2 border-b border-neutral-100 bg-neutral-50 px-3 py-2 dark:border-neutral-800 dark:bg-neutral-950">
+                  <div
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--brand)]/15"
+                    style={{ color: "var(--brand)" }}
+                  >
+                    <div className="[&>svg]:h-4 [&>svg]:w-4">{point.icon}</div>
+                  </div>
+                  <span className="text-xs font-semibold text-neutral-900 dark:text-white">
+                    {point.aspect}
+                  </span>
+                </div>
+
+                {/* Card content */}
+                <div className="space-y-2 p-3">
+                  {/* Typical */}
+                  <div className="flex items-start gap-2">
+                    <svg
+                      className="mt-0.5 h-3.5 w-3.5 shrink-0 text-neutral-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                    <span className="text-[11px] leading-snug text-neutral-500 dark:text-neutral-400">
+                      {point.typical}
+                    </span>
+                  </div>
+
+                  {/* Nordict */}
+                  <div className="flex items-start gap-2">
+                    <svg
+                      className="mt-0.5 h-3.5 w-3.5 shrink-0"
+                      style={{ color: "var(--brand)" }}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    <span className="text-[11px] font-medium leading-snug text-neutral-900 dark:text-white">
+                      {point.nordict}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 

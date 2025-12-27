@@ -286,12 +286,12 @@ const ProductHero = () => {
             }`}
             style={{ transitionDelay: "700ms" }}
           >
-            {/* Aspect ratio container */}
-            <div className="relative h-137.5">
+            {/* Aspect ratio container - using aspect-video (16:9) for responsive height */}
+            <div className="relative aspect-video">
               {/* Video element */}
               <video
                 ref={videoRef}
-                className="h-full w-full object-cover"
+                className="absolute inset-0 h-full w-full object-cover"
                 onEnded={handleVideoEnd}
                 poster="/mock/mock3.jpeg"
                 muted
@@ -309,7 +309,7 @@ const ProductHero = () => {
                 >
                   {/* Play button */}
                   <button
-                    className="group relative flex h-20 w-20 items-center justify-center rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:border-[var(--brand)]/50 hover:bg-[var(--brand)]/20 sm:h-24 sm:w-24"
+                    className="group relative flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:border-[var(--brand)]/50 hover:bg-[var(--brand)]/20 sm:h-20 sm:w-20 md:h-24 md:w-24"
                     aria-label="Play video"
                   >
                     {/* Pulsing ring */}
@@ -320,18 +320,13 @@ const ProductHero = () => {
 
                     {/* Play icon */}
                     <svg
-                      className="relative z-10 ml-1 h-8 w-8 text-white transition-transform duration-300 group-hover:scale-110 sm:h-10 sm:w-10"
+                      className="relative z-10 ml-1 h-6 w-6 text-white transition-transform duration-300 group-hover:scale-110 sm:h-8 sm:w-8 md:h-10 md:w-10"
                       fill="currentColor"
                       viewBox="0 0 24 24"
                     >
                       <path d="M8 5v14l11-7z" />
                     </svg>
                   </button>
-
-                  {/* Duration badge */}
-                  {/* <div className="absolute bottom-4 right-4 rounded-lg bg-black/60 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
-                    2:30
-                  </div> */}
                 </div>
               )}
 
@@ -354,17 +349,17 @@ const ProductHero = () => {
             </div>
 
             {/* Bottom bar */}
-            <div className="flex items-center justify-between border-t border-neutral-800 bg-neutral-900 px-4 py-3 sm:px-6">
-              <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between border-t border-neutral-800 bg-neutral-900 px-3 py-2 sm:px-4 sm:py-3 md:px-6">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <span
-                  className="h-2 w-2 rounded-full animate-pulse"
+                  className="h-1.5 w-1.5 rounded-full animate-pulse sm:h-2 sm:w-2"
                   style={{ backgroundColor: "var(--brand)" }}
                 />
-                <span className="text-sm text-neutral-300">
+                <span className="text-xs text-neutral-300 sm:text-sm">
                   Product walkthrough
                 </span>
               </div>
-              <span className="text-xs text-neutral-500">
+              <span className="text-[10px] text-neutral-500 sm:text-xs">
                 Recorded Dec 2024
               </span>
             </div>

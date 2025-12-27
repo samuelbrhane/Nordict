@@ -201,7 +201,7 @@ const HistoricalPerformance = () => {
           </p>
         </div>
 
-        <div className="mt-12 grid gap-8 lg:grid-cols-3">
+        <div className="mt-8 grid gap-6 sm:mt-12 sm:gap-8 lg:grid-cols-3">
           {/* Left: Time-series chart (2 cols) */}
           <div
             className={`lg:col-span-2 transition-all duration-700 ease-out ${
@@ -211,25 +211,25 @@ const HistoricalPerformance = () => {
             }`}
             style={{ transitionDelay: "300ms" }}
           >
-            <div className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-black">
+            <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-6 dark:border-neutral-800 dark:bg-black">
               {/* Chart header */}
-              <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+              <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
+                  <h3 className="text-sm font-semibold text-neutral-900 sm:text-lg dark:text-white">
                     Directional Accuracy Over Time
                   </h3>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                  <p className="text-[10px] text-neutral-500 sm:text-xs dark:text-neutral-400">
                     Rolling 30-day accuracy vs 50% baseline
                   </p>
                 </div>
 
                 {/* Period selector */}
-                <div className="flex items-center gap-1 rounded-xl border border-neutral-200 bg-neutral-50 p-1 dark:border-neutral-700 dark:bg-neutral-800">
+                <div className="flex items-center gap-0.5 rounded-lg border border-neutral-200 bg-neutral-50 p-0.5 sm:gap-1 sm:rounded-xl sm:p-1 dark:border-neutral-700 dark:bg-neutral-800">
                   {TIME_PERIODS.map((period) => (
                     <button
                       key={period.id}
                       onClick={() => handlePeriodChange(period.id)}
-                      className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
+                      className={`rounded-md px-2 py-1 text-[10px] font-medium transition-all duration-200 sm:rounded-lg sm:px-3 sm:py-1.5 sm:text-xs ${
                         selectedPeriod === period.id
                           ? "bg-white text-neutral-900 shadow-sm dark:bg-neutral-700 dark:text-white"
                           : "text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
@@ -242,9 +242,9 @@ const HistoricalPerformance = () => {
               </div>
 
               {/* Chart */}
-              <div className="relative h-64">
+              <div className="relative h-48 sm:h-64">
                 {/* Y-axis labels */}
-                <div className="absolute left-0 top-0 bottom-8 flex flex-col justify-between text-xs text-neutral-400 dark:text-neutral-500">
+                <div className="absolute left-0 top-0 bottom-8 flex flex-col justify-between text-[9px] text-neutral-400 sm:text-xs dark:text-neutral-500">
                   <span>80%</span>
                   <span>70%</span>
                   <span>60%</span>
@@ -253,9 +253,9 @@ const HistoricalPerformance = () => {
                 </div>
 
                 {/* Chart area */}
-                <div className="ml-10 h-full">
+                <div className="ml-7 h-full sm:ml-10">
                   {/* Grid lines */}
-                  <div className="absolute inset-0 ml-10 flex flex-col justify-between pb-8">
+                  <div className="absolute inset-0 ml-7 flex flex-col justify-between pb-8 sm:ml-10">
                     {[...Array(5)].map((_, i) => (
                       <div
                         key={i}
@@ -268,15 +268,15 @@ const HistoricalPerformance = () => {
                     ))}
                   </div>
 
-                  {/* Baseline label */}
-                  <div className="absolute right-0 top-[60%] -translate-y-1/2 text-xs text-neutral-400 dark:text-neutral-500">
+                  {/* Baseline label - hidden on mobile */}
+                  <div className="absolute right-0 top-[60%] hidden -translate-y-1/2 text-xs text-neutral-400 sm:block dark:text-neutral-500">
                     Baseline (50%)
                   </div>
 
                   {/* Bars */}
                   <div
                     key={animationKey}
-                    className="relative h-full pb-8 flex items-end justify-between gap-1"
+                    className="relative h-full pb-8 flex items-end justify-between gap-0.5 sm:gap-1"
                   >
                     {currentChartData.map((data, i) => {
                       const height = ((data.accuracy - 40) / 40) * 100;
@@ -292,7 +292,7 @@ const HistoricalPerformance = () => {
                           {hoveredBar === i && (
                             <div className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-lg border border-neutral-200 bg-white px-2 py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-800 z-10">
                               <p
-                                className="text-xs font-semibold"
+                                className="text-[10px] font-semibold sm:text-xs"
                                 style={{ color: "var(--brand)" }}
                               >
                                 {data.accuracy}%
@@ -317,7 +317,7 @@ const HistoricalPerformance = () => {
                           />
 
                           {/* X-axis label */}
-                          <span className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
+                          <span className="mt-1 text-[8px] text-neutral-500 sm:mt-2 sm:text-xs dark:text-neutral-400">
                             {data.label}
                           </span>
                         </div>
@@ -328,22 +328,22 @@ const HistoricalPerformance = () => {
               </div>
 
               {/* Chart legend */}
-              <div className="mt-4 flex items-center justify-center gap-6 border-t border-neutral-100 pt-4 dark:border-neutral-800">
-                <div className="flex items-center gap-2">
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-3 border-t border-neutral-100 pt-3 sm:mt-4 sm:gap-6 sm:pt-4 dark:border-neutral-800">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   <div
-                    className="h-3 w-6 rounded"
+                    className="h-2 w-4 rounded sm:h-3 sm:w-6"
                     style={{ backgroundColor: "var(--brand)" }}
                   />
-                  <span className="text-xs text-neutral-600 dark:text-neutral-400">
+                  <span className="text-[9px] text-neutral-600 sm:text-xs dark:text-neutral-400">
                     Above target (≥65%)
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   <div
-                    className="h-3 w-6 rounded"
+                    className="h-2 w-4 rounded sm:h-3 sm:w-6"
                     style={{ backgroundColor: "#f59e0b" }}
                   />
-                  <span className="text-xs text-neutral-600 dark:text-neutral-400">
+                  <span className="text-[9px] text-neutral-600 sm:text-xs dark:text-neutral-400">
                     Below target (&lt;65%)
                   </span>
                 </div>
@@ -360,19 +360,19 @@ const HistoricalPerformance = () => {
             }`}
             style={{ transitionDelay: "400ms" }}
           >
-            <div className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-black h-full">
-              <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
+            <div className="h-full rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-6 dark:border-neutral-800 dark:bg-black">
+              <h3 className="text-sm font-semibold text-neutral-900 sm:text-lg dark:text-white">
                 By Market Regime
               </h3>
-              <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+              <p className="mt-0.5 text-[10px] text-neutral-500 sm:mt-1 sm:text-xs dark:text-neutral-400">
                 Performance varies by conditions
               </p>
 
-              <div className="mt-6 space-y-4">
+              <div className="mt-4 space-y-3 sm:mt-6 sm:space-y-4">
                 {REGIME_DATA.map((regime, i) => (
                   <div
                     key={regime.regime}
-                    className={`group relative overflow-hidden rounded-xl border p-4 transition-all duration-300 cursor-default ${
+                    className={`group relative overflow-hidden rounded-lg border p-3 transition-all duration-300 cursor-default sm:rounded-xl sm:p-4 ${
                       hoveredRegime === i
                         ? "border-neutral-300 bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800"
                         : "border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900"
@@ -382,15 +382,15 @@ const HistoricalPerformance = () => {
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-neutral-900 dark:text-white">
+                        <p className="text-xs font-medium text-neutral-900 sm:text-sm dark:text-white">
                           {regime.regime}
                         </p>
-                        <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                        <p className="text-[9px] text-neutral-500 sm:text-xs dark:text-neutral-400">
                           {regime.forecasts.toLocaleString()} forecasts
                         </p>
                       </div>
                       <p
-                        className="text-xl font-semibold"
+                        className="text-base font-semibold sm:text-xl"
                         style={{ color: regime.color }}
                       >
                         {regime.accuracy}%
@@ -398,7 +398,7 @@ const HistoricalPerformance = () => {
                     </div>
 
                     {/* Progress bar */}
-                    <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-700">
+                    <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-neutral-100 sm:mt-3 sm:h-1.5 dark:bg-neutral-700">
                       <div
                         className="h-full rounded-full transition-all duration-700"
                         style={{
@@ -421,10 +421,10 @@ const HistoricalPerformance = () => {
               </div>
 
               {/* Insight */}
-              <div className="mt-6 rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
+              <div className="mt-4 rounded-lg bg-neutral-50 p-3 sm:mt-6 sm:rounded-xl sm:p-4 dark:bg-neutral-800">
                 <div className="flex items-start gap-2">
                   <svg
-                    className="h-4 w-4 mt-0.5 shrink-0"
+                    className="mt-0.5 h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4"
                     style={{ color: "var(--brand)" }}
                     fill="none"
                     viewBox="0 0 24 24"
@@ -437,7 +437,7 @@ const HistoricalPerformance = () => {
                       d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  <p className="text-xs leading-relaxed text-neutral-600 dark:text-neutral-300">
+                  <p className="text-[10px] leading-snug text-neutral-600 sm:text-xs sm:leading-relaxed dark:text-neutral-300">
                     Performance is strongest in trending markets and weaker
                     during high volatility. This is expected—and honestly
                     reported.
