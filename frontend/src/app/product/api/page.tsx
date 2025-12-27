@@ -1,9 +1,10 @@
-import { APIHero } from "@/components/sections/product/api";
+import { APIHero, EndpointsOverview } from "@/components/sections/product/api";
 
 const Api = () => {
   return (
     <div>
       <APIHero />
+      <EndpointsOverview />
     </div>
   );
 };
