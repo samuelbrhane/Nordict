@@ -9,9 +9,9 @@ const font = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Modelis - AI-powered Market Forecasts",
+  title: "Nordict: AI-powered Market Forecasts",
   description:
-    "Modelis provides AI-powered price forecasts with confidence bands, multi-model ensemble predictions, and transparent performance metrics including MAE, calibration scores, and walk-forward backtesting.",
+    "Nordict provides AI-powered price forecasts with confidence bands, multi-model ensemble predictions, and transparent performance metrics including MAE, calibration scores, and walk-forward backtesting.",
 };
 
 export default function RootLayout({

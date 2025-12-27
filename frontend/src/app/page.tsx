@@ -9,12 +9,14 @@ import {
   UseCases,
   FAQ,
   FinalCTA,
+  MarketLogos,
 } from "@/components/sections/home";
 
 const Home = () => {
   return (
     <main>
       <Hero />
+      <MarketLogos />
       <TrustStrip />
       <ProblemSolution />
       <CoreFeatures />
