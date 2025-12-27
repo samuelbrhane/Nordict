@@ -1,7 +1,25 @@
-import React from "react";
+"use client";
 
-const page = () => {
-  return <div></div>;
+import { useState } from "react";
+import {
+  BlogGrid,
+  BlogHero,
+  BlogNewsletter,
+} from "@/components/sections/resources/blog";
+
+const Blog = () => {
+  const [activeCategory, setActiveCategory] = useState("all");
+
+  return (
+    <div>
+      <BlogHero
+        activeCategory={activeCategory}
+        setActiveCategory={setActiveCategory}
+      />
+      <BlogGrid activeCategory={activeCategory} />
+      <BlogNewsletter />
+    </div>
+  );
 };
 
-export default page;
+export default Blog;
