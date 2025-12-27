@@ -158,6 +158,7 @@ const PIPELINE_STEPS = [
 const ForecastProcess = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
+  const [isPaused, setIsPaused] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -177,6 +178,43 @@ const ForecastProcess = () => {
 
     return () => observer.disconnect();
   }, []);
+
+  // Auto-cycle through steps
+  useEffect(() => {
+    if (!isVisible || isPaused) return;
+
+    const interval = setInterval(() => {
+      setActiveStep((prev) => (prev >= PIPELINE_STEPS.length ? 1 : prev + 1));
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [isVisible, isPaused]);
+
+  // Resume auto-cycle after 10 seconds of no interaction
+  useEffect(() => {
+    if (!isPaused) return;
+
+    const timeout = setTimeout(() => {
+      setIsPaused(false);
+    }, 2000);
+
+    return () => clearTimeout(timeout);
+  }, [isPaused]);
+
+  const handleStepClick = (stepId: number) => {
+    setActiveStep(stepId);
+    setIsPaused(true);
+  };
+
+  const handlePrevious = () => {
+    setActiveStep(Math.max(1, activeStep - 1));
+    setIsPaused(true);
+  };
+
+  const handleNext = () => {
+    setActiveStep(Math.min(PIPELINE_STEPS.length, activeStep + 1));
+    setIsPaused(true);
+  };
 
   const currentStep = PIPELINE_STEPS.find((s) => s.id === activeStep);
 
@@ -280,7 +318,7 @@ const ForecastProcess = () => {
               {PIPELINE_STEPS.map((step) => (
                 <button
                   key={step.id}
-                  onClick={() => setActiveStep(step.id)}
+                  onClick={() => handleStepClick(step.id)}
                   className="flex flex-col items-center"
                 >
                   <div
@@ -425,7 +463,7 @@ const ForecastProcess = () => {
               {/* Navigation */}
               <div className="mt-8 flex items-center justify-between border-t border-neutral-200 pt-6 dark:border-neutral-700">
                 <button
-                  onClick={() => setActiveStep(Math.max(1, activeStep - 1))}
+                  onClick={handlePrevious}
                   disabled={activeStep === 1}
                   className={`flex items-center gap-2 text-sm font-medium transition-colors ${
                     activeStep === 1
@@ -453,7 +491,7 @@ const ForecastProcess = () => {
                   {PIPELINE_STEPS.map((step) => (
                     <button
                       key={step.id}
-                      onClick={() => setActiveStep(step.id)}
+                      onClick={() => handleStepClick(step.id)}
                       className={`h-2 rounded-full transition-all duration-300 ${
                         activeStep === step.id
                           ? "w-6"
@@ -468,11 +506,7 @@ const ForecastProcess = () => {
                 </div>
 
                 <button
-                  onClick={() =>
-                    setActiveStep(
-                      Math.min(PIPELINE_STEPS.length, activeStep + 1)
-                    )
-                  }
+                  onClick={handleNext}
                   disabled={activeStep === PIPELINE_STEPS.length}
                   className={`flex items-center gap-2 text-sm font-medium transition-colors ${
                     activeStep === PIPELINE_STEPS.length
