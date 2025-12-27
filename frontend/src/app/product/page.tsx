@@ -1,6 +1,8 @@
 import {
   ProductHero,
   ForecastingCapabilities,
+  ConfidenceUncertainty,
+  BacktestingPerformance,
 } from "@/components/sections/product";
 
 const Product = () => {
@@ -8,6 +10,8 @@ const Product = () => {
     <div>
       <ProductHero />
       <ForecastingCapabilities />
+      <ConfidenceUncertainty />
+      <BacktestingPerformance />
     </div>
   );
 };
