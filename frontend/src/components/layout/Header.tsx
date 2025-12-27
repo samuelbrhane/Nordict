@@ -64,19 +64,16 @@ const Header = () => {
             setMobileOpenIndex(null);
           }}
         >
-          <Image
-            src="/main_logo.png"
-            alt="Nordict"
-            width={46}
-            height={46}
-            priority
-            className="transition-transform duration-200 group-hover:scale-105"
-          />
-          <span className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100 uppercase">
+          <div
+            className="h-10 w-10 rounded-xl flex items-center justify-center text-2xl font-bold text-black shrink-0 transition-transform duration-200 group-hover:scale-105"
+            style={{ backgroundColor: "var(--brand)" }}
+          >
+            N
+          </div>
+          <span className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100 uppercase ml-2">
             <span style={{ color: "var(--brand)" }}>Nordict</span>
           </span>
         </Link>
-
         {/* Desktop Navigation */}
         <nav className="hidden items-center gap-8 lg:flex">
           {NAV_ITEMS.map((item, index) =>
