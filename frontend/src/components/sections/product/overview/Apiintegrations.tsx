@@ -307,7 +307,7 @@ const APIIntegrations = () => {
         <div className="mt-6 grid gap-5 sm:mt-12 sm:gap-8 lg:grid-cols-5">
           {/* Left: Code preview (3 cols on lg) */}
           <div
-            className={`hidden lg:block lg:col-span-3 transition-all duration-700 ease-out ${
+            className={`hidden lg:block lg:col-span-3  transition-all duration-700 ease-out ${
               isVisible
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-6"
