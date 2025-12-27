@@ -1,5 +1,6 @@
 import {
   Forecastingenginehero,
+  ForecastOutputs,
   SupportedHorizons,
 } from "@/components/sections/product/engine";
 
@@ -8,6 +9,7 @@ const ForecastEngine = () => {
     <div>
       <Forecastingenginehero />
       <SupportedHorizons />
+      <ForecastOutputs />
     </div>
   );
 };
