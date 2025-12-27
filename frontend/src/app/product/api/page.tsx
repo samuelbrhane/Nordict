@@ -1,10 +1,17 @@
-import { APIHero, EndpointsOverview } from "@/components/sections/product/api";
+import {
+  APIHero,
+  Authentication,
+  EndpointsOverview,
+  Webhooks,
+} from "@/components/sections/product/api";
 
 const Api = () => {
   return (
     <div>
       <APIHero />
       <EndpointsOverview />
+      <Authentication />
+      <Webhooks />
     </div>
   );
 };

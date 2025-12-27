@@ -1,2 +1,4 @@
 export { default as APIHero } from "./Apihero";
 export { default as EndpointsOverview } from "./Endpointsoverview";
+export { default as Authentication } from "./ApiAuthentication";
+export { default as Webhooks } from "./Webhooks";
