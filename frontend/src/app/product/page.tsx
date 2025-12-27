@@ -4,7 +4,11 @@ import {
   ConfidenceUncertainty,
   BacktestingPerformance,
   AlertsSignals,
-} from "@/components/sections/product";
+  APIIntegrations,
+  ProductArchitecture,
+  WhyDifferent,
+  ProductCTA,
+} from "@/components/sections/product/overview";
 
 const Product = () => {
   return (
@@ -14,6 +18,10 @@ const Product = () => {
       <ConfidenceUncertainty />
       <BacktestingPerformance />
       <AlertsSignals />
+      <APIIntegrations />
+      <ProductArchitecture />
+      <WhyDifferent />
+      <ProductCTA />
     </div>
   );
 };
