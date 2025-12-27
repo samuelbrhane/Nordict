@@ -2,6 +2,7 @@ import {
   APIHero,
   Authentication,
   EndpointsOverview,
+  SDKs,
   Webhooks,
 } from "@/components/sections/product/api";
 
@@ -12,6 +13,7 @@ const Api = () => {
       <EndpointsOverview />
       <Authentication />
       <Webhooks />
+      <SDKs />
     </div>
   );
 };
