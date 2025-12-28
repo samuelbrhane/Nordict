@@ -18,7 +18,7 @@ const ForecastsOverviewPage = () => {
   const [category, setCategory] = useState("all");
   const [search, setSearch] = useState("");
   const [horizon, setHorizon] = useState<Horizon>("7D");
-  const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "table">("table");
   const [currentPage, setCurrentPage] = useState(1);
 
   const toggleFavorite = (symbol: string) => {
