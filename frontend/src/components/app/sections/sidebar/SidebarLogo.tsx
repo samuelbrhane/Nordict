@@ -26,7 +26,7 @@ const SidebarLogo = ({ isCollapsed, onCloseMobile }: SidebarLogoProps) => {
             className="transition-colors duration-200 group-hover:brightness-110"
             style={{ color: "var(--brand)" }}
           >
-            ordict
+            Nordict
           </span>
         </span>
       )}
