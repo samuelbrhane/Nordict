@@ -342,7 +342,7 @@ const Header = () => {
                 </Link>
 
                 <Link
-                  href="/get-started"
+                  href="/signup"
                   className="flex-1 rounded-xl px-4 py-3 text-center text-sm font-medium text-black transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
                   style={{ backgroundColor: "var(--brand)" }}
                   onClick={() => {
