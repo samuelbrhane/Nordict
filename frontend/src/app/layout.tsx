@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Header, Footer } from "@/components/layout";
 
 import { Outfit } from "next/font/google";
 const font = Outfit({
@@ -39,9 +38,7 @@ export default function RootLayout({
       <body
         className={`${font.className} antialiased bg-white text-neutral-900 dark:bg-black dark:text-neutral-100`}
       >
-        <Header />
         {children}
-        <Footer />
       </body>
     </html>
   );
