@@ -71,7 +71,7 @@ const Header = () => {
             N
           </div>
           <span className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100  ml-2">
-            <span style={{ color: "var(--brand)" }}>ordict</span>
+            <span style={{ color: "var(--brand)" }}>Nordict</span>
           </span>
         </Link>
         {/* Desktop Navigation */}
