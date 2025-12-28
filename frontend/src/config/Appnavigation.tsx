@@ -151,31 +151,26 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Performance",
     href: "/app/performance",
     icon: <PerformanceIcon />,
-    children: [
-      { label: "Backtesting", href: "/app/performance" },
-      { label: "Live Tracking", href: "/app/performance/live" },
-      { label: "Model Comparison", href: "/app/performance/compare" },
-    ],
   },
   {
     label: "Alerts",
     href: "/app/alerts",
     icon: <AlertsIcon />,
   },
-  {
-    label: "Markets",
-    href: "/app/markets",
-    icon: <MarketsIcon />,
-  },
-  {
-    label: "Models",
-    href: "/app/models",
-    icon: <ModelsIcon />,
-    children: [
-      { label: "Registry", href: "/app/models" },
-      { label: "Version Detail", href: "/app/models/v0.3" },
-    ],
-  },
+  // {
+  //   label: "Markets",
+  //   href: "/app/markets",
+  //   icon: <MarketsIcon />,
+  // },
+  // {
+  //   label: "Models",
+  //   href: "/app/models",
+  //   icon: <ModelsIcon />,
+  //   children: [
+  //     { label: "Registry", href: "/app/models" },
+  //     { label: "Version Detail", href: "/app/models/v0.3" },
+  //   ],
+  // },
 ];
 
 export const BOTTOM_NAV_ITEMS: NavItem[] = [
