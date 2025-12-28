@@ -33,23 +33,6 @@ const DashboardHeader = ({
 
         {/* Right - Controls */}
         <div className="flex flex-wrap items-center gap-3">
-          {/* Market selector */}
-          <div className="flex rounded-lg border border-neutral-200 bg-neutral-50 p-1 dark:border-neutral-700 dark:bg-neutral-800">
-            {(["all", "favorites"] as const).map((filter) => (
-              <button
-                key={filter}
-                onClick={() => onMarketFilterChange(filter)}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-all duration-200 ${
-                  marketFilter === filter
-                    ? "bg-white text-neutral-900 shadow-sm dark:bg-neutral-700 dark:text-white"
-                    : "text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
-                }`}
-              >
-                {filter === "all" ? "All" : "Favorites"}
-              </button>
-            ))}
-          </div>
-
           {/* Horizon selector */}
           <div className="flex rounded-lg border border-neutral-200 bg-neutral-50 p-1 dark:border-neutral-700 dark:bg-neutral-800">
             {(["1D", "7D", "30D"] as const).map((h) => (
