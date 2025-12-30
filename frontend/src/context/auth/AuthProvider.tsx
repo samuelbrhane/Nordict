@@ -35,6 +35,7 @@ import {
   revokeSessionApi,
   revokeAllSessionsApi,
   deleteAccountApi,
+  getUserApi,
 } from "./api";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -212,6 +213,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push("/login");
   };
 
+  const refreshUser = async () => {
+    if (!tokens?.access) return;
+
+    try {
+      const updatedUser = await getUserApi(tokens.access);
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+    } catch (err) {
+      console.error("Failed to refresh user:", err);
+    }
+  };
   return (
     <AuthContext.Provider
       value={{
@@ -230,6 +242,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         revokeSession,
         revokeAllSessions,
         deleteAccount,
+        refreshUser,
       }}
     >
       {children}
