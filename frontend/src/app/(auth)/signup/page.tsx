@@ -103,11 +103,14 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
+      const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
       await register({
         email: formData.email,
         full_name: formData.fullName,
         password: formData.password,
         password_confirm: formData.confirmPassword,
+        timezone: userTimezone,
       });
 
       router.push("/app/dashboard");

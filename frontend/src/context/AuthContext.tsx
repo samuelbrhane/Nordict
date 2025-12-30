@@ -9,6 +9,7 @@ import {
   useCallback,
 } from "react";
 import { useRouter } from "next/navigation";
+import { time } from "console";
 
 interface User {
   id: number;
@@ -44,6 +45,7 @@ interface RegisterData {
   full_name: string;
   password: string;
   password_confirm: string;
+  timezone?: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -195,10 +197,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   const login = async (email: string, password: string) => {
+    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
     const response = await fetch(`${API_URL}/api/v1/auth/login/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, timezone: userTimezone }),
     });
 
     if (!response.ok) {
