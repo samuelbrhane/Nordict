@@ -33,6 +33,44 @@ venv/
 # Misc
 coverage/
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+media/
+staticfiles/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Docker
+.docker/
+
+# OS
+.DS_Store
+Thumbs.db
 
 chainforcast_overview.docx
 logo
