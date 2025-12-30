@@ -1,7 +1,9 @@
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+
 export default function AppRouteLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return <ProtectedRoute>{children}</ProtectedRoute>;
 }

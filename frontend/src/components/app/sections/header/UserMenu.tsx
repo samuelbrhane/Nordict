@@ -2,19 +2,11 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 import { USER_MENU_ITEMS, SIGN_OUT_ITEM } from "./userMenuItems";
 
-interface UserMenuProps {
-  userName?: string;
-  userEmail?: string;
-  userInitial?: string;
-}
-
-const UserMenu = ({
-  userName = "Samuel",
-  userEmail = "samuel@example.com",
-  userInitial = "S",
-}: UserMenuProps) => {
+const UserMenu = () => {
+  const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -32,8 +24,12 @@ const UserMenu = ({
 
   const handleSignOut = () => {
     setIsOpen(false);
-    // TODO: Implement sign out
+    logout();
   };
+
+  const userName = user?.full_name || user?.first_name || "User";
+  const userEmail = user?.email || "";
+  const userInitial = userName.charAt(0).toUpperCase();
 
   return (
     <div className="relative" ref={menuRef}>
@@ -78,7 +74,7 @@ const UserMenu = ({
             </p>
           </div>
 
-          {/* Menu items - rendered with loop */}
+          {/* Menu items */}
           <div className="p-2">
             {USER_MENU_ITEMS.map((item) => (
               <Link
