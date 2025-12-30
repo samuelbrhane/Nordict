@@ -74,6 +74,7 @@ export interface AuthContextType {
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
   refreshToken: () => Promise<boolean>;
+  refreshUser: () => Promise<void>;
   requestPasswordReset: (email: string) => Promise<void>;
   updateProfile: (data: ProfileUpdateData) => Promise<void>;
   changePassword: (data: PasswordChangeData) => Promise<void>;
@@ -97,13 +98,16 @@ export interface NotificationSettings {
 
 export interface UserSubscription {
   plan: string;
-  billing_cycle: string;
+  billing_cycle: "monthly" | "yearly";
   is_trial_active: boolean;
   trial_days_remaining: number;
   is_subscription_active: boolean;
   effective_plan: string;
-  plan_limits: PlanLimits;
+  plan_limits: Record<string, number>;
   next_billing_date: string | null;
+  cancelled_at: string | null;
+  is_cancelled: boolean;
+  stripe_customer_id: string | null;
   stripe_card_last4: string | null;
   stripe_card_brand: string | null;
   stripe_card_exp_month: number | null;

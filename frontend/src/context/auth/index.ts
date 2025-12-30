@@ -1,6 +1,8 @@
 export { AuthProvider, useAuth } from "./AuthProvider";
 export type {
   User,
+  UserSubscription,
+  UserPreferences,
   Session,
   Tokens,
   PlanLimits,
