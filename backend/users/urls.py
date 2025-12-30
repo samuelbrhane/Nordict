@@ -18,6 +18,8 @@ urlpatterns = [
     path('me/', UserProfileView.as_view(), name='user-profile'),
     path('me/preferences/', UserPreferencesView.as_view(), name='user-preferences'),
     path('me/delete/', DeleteAccountView.as_view(), name='delete-account'),
+    path('me/notifications/', NotificationSettingsView.as_view(), name='notification-settings'),
+
     
     # API keys
     path('api-keys/', APIKeyView.as_view(), name='api-keys'),

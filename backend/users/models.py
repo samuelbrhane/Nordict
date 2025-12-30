@@ -54,6 +54,12 @@ class User(AbstractUser):
     timezone = models.CharField(max_length=50, default='UTC')
     company = models.CharField(max_length=100, blank=True, null=True)
     
+    # Notification preferences (add after timezone field)
+    notify_alerts_email = models.BooleanField(default=True)
+    notify_alerts_push = models.BooleanField(default=False)
+    notify_forecast_daily = models.BooleanField(default=True)
+    notify_forecast_significant = models.BooleanField(default=True)
+    
     # API access
     api_key = models.CharField(max_length=64, null=True, blank=True, unique=True)
     api_key_created_at = models.DateTimeField(null=True, blank=True)

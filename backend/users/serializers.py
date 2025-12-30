@@ -198,3 +198,16 @@ class DeleteAccountSerializer(serializers.Serializer):
         if value != "DELETE":
             raise serializers.ValidationError("Please type DELETE to confirm.")
         return value
+    
+    
+class NotificationSettingsSerializer(serializers.ModelSerializer):
+    """Serializer for notification settings."""
+    
+    class Meta:
+        model = User
+        fields = [
+            'notify_alerts_email',
+            'notify_alerts_push',
+            'notify_forecast_daily',
+            'notify_forecast_significant',
+        ]
