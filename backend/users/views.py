@@ -13,16 +13,9 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from drf_spectacular.utils import extend_schema
-
-from .serializers import (
-    UserSerializer,
-    RegisterSerializer,
-    LoginSerializer,
-    UserPreferencesSerializer,
-    APIKeySerializer,
-    PasswordResetRequestSerializer,
-    PasswordResetConfirmSerializer,
-)
+from .utils import get_client_info, get_location_from_ip
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+from .serializers import *
 
 User = get_user_model()
 
@@ -64,7 +57,6 @@ class RegisterView(APIView):
             }
         }, status=status.HTTP_201_CREATED)
 
-
 class LoginView(APIView):
     """Login and get JWT tokens."""
     
@@ -99,24 +91,78 @@ class LoginView(APIView):
                 {'error': 'Account is disabled'},
                 status=status.HTTP_401_UNAUTHORIZED
             )
+        
+        # Check session limit
+        max_sessions = user.max_sessions
+        if max_sessions is not None:
+            active_sessions = UserSession.objects.filter(user=user, is_active=True)
+            active_count = active_sessions.count()
             
+            if active_count >= max_sessions:
+                # Option 1: Reject login
+                # return Response(
+                #     {'error': f'Maximum {max_sessions} device(s) allowed. Please sign out from another device.'},
+                #     status=status.HTTP_403_FORBIDDEN
+                # )
+                
+                # Option 2: Remove oldest session (better UX)
+                sessions_to_remove = active_count - max_sessions + 1
+                oldest_sessions = active_sessions.order_by('last_active')[:sessions_to_remove]
+                
+                for session in oldest_sessions:
+                    # Blacklist the refresh token
+                    try:
+                        
+                        outstanding = OutstandingToken.objects.get(jti=session.refresh_token_jti)
+                        BlacklistedToken.objects.get_or_create(token=outstanding)
+                    except:
+                        pass
+                    session.is_active = False
+                    session.save()
+        
         # Update timezone if provided
         if data.get('timezone'):
             user.timezone = data['timezone']
             user.save(update_fields=['timezone'])
-            
+        
         # Generate tokens
         refresh = RefreshToken.for_user(user)
+        access_token = refresh.access_token
         
-        return Response({
+        # Create session record
+        client_info = get_client_info(request)
+        UserSession.objects.create(
+            user=user,
+            refresh_token_jti=str(refresh['jti']),
+            access_token_jti=str(access_token['jti']),
+            device=client_info['device'],
+            browser=client_info['browser'],
+            os=client_info['os'],
+            ip_address=client_info['ip_address'],
+            location=get_location_from_ip(client_info['ip_address']),
+        )
+        
+        
+        # After creating new session, before return
+        response_data = {
             'user': UserSerializer(user).data,
             'tokens': {
                 'refresh': str(refresh),
-                'access': str(refresh.access_token),
+                'access': str(access_token),
             }
-        })
+        }
 
+        # Add session info
+        if max_sessions is not None:
+            current_sessions = UserSession.objects.filter(user=user, is_active=True).count()
+            response_data['session_info'] = {
+                'current_sessions': current_sessions,
+                'max_sessions': max_sessions,
+                'removed_old_session': sessions_to_remove > 0 if 'sessions_to_remove' in locals() else False,
+            }
 
+        return Response(response_data)
+        
 class LogoutView(APIView):
     """Logout and blacklist refresh token."""
     
@@ -317,3 +363,154 @@ class PasswordResetConfirmView(APIView):
                 {'error': 'User not found'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+            
+            
+class UserProfileView(generics.RetrieveUpdateAPIView):
+    """Get or update current user profile."""
+    
+    permission_classes = [IsAuthenticated]
+    
+    def get_serializer_class(self):
+        if self.request.method in ['PUT', 'PATCH']:
+            return ProfileUpdateSerializer
+        return UserSerializer
+    
+    def get_object(self):
+        return self.request.user
+    
+    @extend_schema(tags=['Auth'], summary="Get current user profile")
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+    
+    @extend_schema(tags=['Auth'], summary="Update current user profile")
+    def put(self, request, *args, **kwargs):
+        return super().put(request, *args, **kwargs)
+    
+    @extend_schema(tags=['Auth'], summary="Partial update current user profile")
+    def patch(self, request, *args, **kwargs):
+        response = super().patch(request, *args, **kwargs)
+        # Return full user data after update
+        return Response(UserSerializer(self.get_object()).data)
+    
+    
+class PasswordChangeView(APIView):
+    """Change password for authenticated user."""
+    
+    permission_classes = [IsAuthenticated]
+    serializer_class = PasswordChangeSerializer
+    
+    @extend_schema(tags=['Auth'], summary="Change password")
+    def post(self, request):
+        serializer = PasswordChangeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        user = request.user
+        
+        # Verify current password
+        if not user.check_password(serializer.validated_data['current_password']):
+            return Response(
+                {'error': 'Current password is incorrect'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Update password
+        user.set_password(serializer.validated_data['new_password'])
+        user.save()
+        
+        return Response({'message': 'Password changed successfully'})
+    
+    
+class SessionListView(APIView):
+    """List user's active sessions."""
+    
+    permission_classes = [IsAuthenticated]
+    
+    @extend_schema(tags=['Auth'], summary="List active sessions")
+    def get(self, request):
+        sessions = UserSession.objects.filter(user=request.user, is_active=True)
+        
+        # Get current access token JTI
+        current_jti = None
+        auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+        
+        if auth_header.startswith('Bearer '):
+            try:
+                token = auth_header.split(' ')[1]
+                payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+                current_jti = payload.get('jti')
+                print(f"Current access token JTI: {current_jti}")
+            except Exception as e:
+                print(f"JWT decode error: {e}")
+        
+        session_data = []
+        for session in sessions:
+            data = SessionSerializer(session).data
+            is_current = session.access_token_jti == current_jti
+            data['is_current'] = is_current
+            print(f"Session {session.id}: access_jti={session.access_token_jti}, current_jti={current_jti}, is_current={is_current}")
+            session_data.append(data)
+        
+        return Response(session_data)
+
+
+class SessionRevokeView(APIView):
+    """Revoke a specific session."""
+    
+    permission_classes = [IsAuthenticated]
+    
+    @extend_schema(tags=['Auth'], summary="Revoke session")
+    def delete(self, request, session_id):
+        try:
+            session = UserSession.objects.get(
+                id=session_id,
+                user=request.user,
+                is_active=True
+            )
+            
+            # Blacklist the refresh token
+            try:
+                from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+                outstanding = OutstandingToken.objects.get(jti=session.refresh_token_jti)
+                BlacklistedToken.objects.get_or_create(token=outstanding)
+            except:
+                pass
+            
+            # Mark session as inactive
+            session.is_active = False
+            session.save()
+            
+            return Response({'message': 'Session revoked'})
+            
+        except UserSession.DoesNotExist:
+            return Response(
+                {'error': 'Session not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+class SessionRevokeAllView(APIView):
+    """Revoke all sessions including current."""
+    
+    permission_classes = [IsAuthenticated]
+    
+    @extend_schema(tags=['Auth'], summary="Revoke all sessions")
+    def post(self, request):
+        # Get ALL active sessions (including current)
+        sessions = UserSession.objects.filter(
+            user=request.user,
+            is_active=True
+        )
+        
+        count = sessions.count()
+        
+        # Blacklist and deactivate all
+        for session in sessions:
+            try:
+                from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+                outstanding = OutstandingToken.objects.get(jti=session.refresh_token_jti)
+                BlacklistedToken.objects.get_or_create(token=outstanding)
+            except:
+                pass
+            session.is_active = False
+            session.save()
+        
+        return Response({'message': f'Revoked {count} sessions'})
