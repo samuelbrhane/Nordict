@@ -1,6 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 from .views import *
+from . import stripe_views
 
 urlpatterns = [
     # Authentication
@@ -28,4 +29,12 @@ urlpatterns = [
     path('sessions/', SessionListView.as_view(), name='session-list'),
     path('sessions/<int:session_id>/', SessionRevokeView.as_view(), name='session-revoke'),
     path('sessions/revoke-all/', SessionRevokeAllView.as_view(), name='session-revoke-all'),
+    
+    # Billing
+     path('billing/create-checkout/', stripe_views.CreateCheckoutSessionView.as_view(), name='create-checkout'),
+    path('billing/create-portal/', stripe_views.CreatePortalSessionView.as_view(), name='create-portal'),
+    path('billing/change-plan/', stripe_views.ChangePlanView.as_view(), name='change-plan'),
+    path('billing/cancel/', stripe_views.CancelSubscriptionView.as_view(), name='cancel-subscription'),
+    path('billing/reactivate/', stripe_views.ReactivateSubscriptionView.as_view(), name='reactivate-subscription'),
+    path('billing/webhook/', stripe_views.StripeWebhookView.as_view(), name='stripe-webhook'),
 ]
