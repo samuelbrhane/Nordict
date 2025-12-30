@@ -6,33 +6,82 @@ from .models import *
 User = get_user_model()
 
 
+class UserSubscriptionSerializer(serializers.ModelSerializer):
+    """Serializer for subscription data."""
+    
+    is_trial_active = serializers.BooleanField(read_only=True)
+    trial_days_remaining = serializers.IntegerField(read_only=True)
+    is_subscription_active = serializers.BooleanField(read_only=True)
+    effective_plan = serializers.CharField(read_only=True)
+    plan_limits = serializers.DictField(read_only=True)
+    next_billing_date = serializers.DateTimeField(read_only=True)
+    
+    class Meta:
+        model = UserSubscription
+        fields = [
+            'plan',
+            'billing_cycle',
+            'is_trial_active',
+            'trial_days_remaining',
+            'is_subscription_active',
+            'effective_plan',
+            'plan_limits',
+            'next_billing_date',
+            'stripe_card_last4',
+            'stripe_card_brand',
+            'stripe_card_exp_month',
+            'stripe_card_exp_year',
+        ]
+
+
+class UserPreferencesSerializer(serializers.ModelSerializer):
+    """Serializer for user preferences."""
+    
+    class Meta:
+        model = UserPreferences
+        fields = [
+            'default_market',
+            'default_horizon',
+            'notify_alerts_email',
+            'notify_alerts_push',
+            'notify_forecast_daily',
+            'notify_forecast_significant',
+        ]
+
+
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for user profile."""
     
     full_name = serializers.CharField(read_only=True)
+    subscription = UserSubscriptionSerializer(source='subscription_data', read_only=True)
+    preferences = UserPreferencesSerializer(source='preferences_data', read_only=True)
+    
+    # Shortcuts for easy access
     effective_plan = serializers.CharField(read_only=True)
     is_trial_active = serializers.BooleanField(read_only=True)
-    is_subscription_active = serializers.BooleanField(read_only=True) 
+    is_subscription_active = serializers.BooleanField(read_only=True)
     trial_days_remaining = serializers.IntegerField(read_only=True)
     plan_limits = serializers.DictField(read_only=True)
-     
+    
     class Meta:
         model = User
         fields = [
             'id',
             'email',
             'first_name',
-            'last_name',      
+            'last_name',
             'full_name',
             'company',
-            'timezone',       
+            'timezone',
+            # Nested objects
+            'subscription',
+            'preferences',
+            # Shortcuts
             'effective_plan',
             'is_trial_active',
+            'is_subscription_active',
             'trial_days_remaining',
-            'is_subscription_active', 
             'plan_limits',
-            'default_market',
-            'default_horizon',
         ]
 
 class RegisterSerializer(serializers.Serializer):
@@ -72,16 +121,6 @@ class LoginSerializer(serializers.Serializer):
     timezone = serializers.CharField(required=False, default='UTC')
 
 
-class UserPreferencesSerializer(serializers.ModelSerializer):
-    """Serializer for user preferences."""
-    
-    class Meta:
-        model = User
-        fields = [
-            'default_market',
-            'default_horizon',
-            'timezone',
-        ]
 
 
 class APIKeySerializer(serializers.Serializer):
@@ -204,7 +243,7 @@ class NotificationSettingsSerializer(serializers.ModelSerializer):
     """Serializer for notification settings."""
     
     class Meta:
-        model = User
+        model = UserPreferences  
         fields = [
             'notify_alerts_email',
             'notify_alerts_push',

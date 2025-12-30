@@ -46,6 +46,13 @@ class RegisterView(APIView):
             timezone=data.get('timezone', 'UTC'),
         )
         
+        # Create subscription with trial
+        subscription = UserSubscription.objects.create(user=user)
+        subscription.start_trial()
+        
+        # Create preferences
+        UserPreferences.objects.create(user=user)
+        
         # Generate tokens
         refresh = RefreshToken.for_user(user)
         access_token = refresh.access_token
@@ -70,7 +77,7 @@ class RegisterView(APIView):
                 'access': str(access_token),
             }
         }, status=status.HTTP_201_CREATED)
-        
+           
 
 class LoginView(APIView):
     """Login and get JWT tokens."""
@@ -577,7 +584,6 @@ class DeleteAccountView(APIView):
         return Response({'message': 'Account deleted successfully'})
     
     
-
 class NotificationSettingsView(generics.RetrieveUpdateAPIView):
     """Get or update notification settings."""
     
@@ -585,7 +591,9 @@ class NotificationSettingsView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
     
     def get_object(self):
-        return self.request.user
+        # Get or create preferences for the user
+        prefs, _ = UserPreferences.objects.get_or_create(user=self.request.user)
+        return prefs
     
     @extend_schema(tags=['Auth'], summary="Get notification settings")
     def get(self, request, *args, **kwargs):
