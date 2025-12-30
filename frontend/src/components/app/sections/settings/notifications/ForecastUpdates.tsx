@@ -1,24 +1,20 @@
-"use client";
-
-import AnimatedCard from "../../dashboard/AnimatedCard";
-import Toggle from "./Toggle";
+import { AnimatedCard } from "../../dashboard";
+import ToggleRow from "./ToggleRow";
 
 interface ForecastUpdatesProps {
-  daily: boolean;
-  weekly: boolean;
-  significant: boolean;
-  onDailyChange: (v: boolean) => void;
-  onWeeklyChange: (v: boolean) => void;
-  onSignificantChange: (v: boolean) => void;
+  dailyEnabled: boolean;
+  significantEnabled: boolean;
+  onDailyChange: (value: boolean) => void;
+  onSignificantChange: (value: boolean) => void;
+  disabled?: boolean;
 }
 
 const ForecastUpdates = ({
-  daily,
-  weekly,
-  significant,
+  dailyEnabled,
+  significantEnabled,
   onDailyChange,
-  onWeeklyChange,
   onSignificantChange,
+  disabled,
 }: ForecastUpdatesProps) => {
   return (
     <AnimatedCard delay={100}>
@@ -27,45 +23,24 @@ const ForecastUpdates = ({
           Forecast Updates
         </h3>
         <p className="mt-0.5 text-sm text-neutral-500 dark:text-neutral-400">
-          Regular forecast summaries
+          When to notify you about forecast changes
         </p>
 
-        <div className="mt-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-neutral-900 dark:text-white">
-                Daily Summary
-              </p>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                Overview each morning
-              </p>
-            </div>
-            <Toggle enabled={daily} onChange={onDailyChange} />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-neutral-900 dark:text-white">
-                Weekly Report
-              </p>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                Performance every Monday
-              </p>
-            </div>
-            <Toggle enabled={weekly} onChange={onWeeklyChange} />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-neutral-900 dark:text-white">
-                Significant Changes
-              </p>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                Direction or confidence spikes
-              </p>
-            </div>
-            <Toggle enabled={significant} onChange={onSignificantChange} />
-          </div>
+        <div className="mt-4 space-y-4">
+          <ToggleRow
+            label="Daily summary"
+            description="Get a daily recap of your tracked markets"
+            enabled={dailyEnabled}
+            onChange={onDailyChange}
+            disabled={disabled}
+          />
+          <ToggleRow
+            label="Significant changes"
+            description="Alert when forecasts change significantly"
+            enabled={significantEnabled}
+            onChange={onSignificantChange}
+            disabled={disabled}
+          />
         </div>
       </div>
     </AnimatedCard>

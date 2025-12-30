@@ -1,7 +1,7 @@
 "use client";
 
 import AnimatedCard from "../../dashboard/AnimatedCard";
-import Toggle from "./Toggle";
+import Toggle from "./ToggleRow";
 
 interface DigestSettingsProps {
   enabled: boolean;
