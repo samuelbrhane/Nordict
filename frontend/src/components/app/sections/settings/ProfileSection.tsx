@@ -1,42 +1,69 @@
 "use client";
 
-import { useState } from "react";
-import AnimatedCard from "../dashboard/AnimatedCard";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { ProfileAvatar, ProfileField, ProfileActions } from ".";
+import { TIMEZONES, getTimezoneLabel } from "@/config/timezones";
+import { AnimatedCard } from "../dashboard";
 
-interface Profile {
-  firstName: string;
-  lastName: string;
-  email: string;
-  company: string;
-  timezone: string;
-}
-
-interface ProfileSectionProps {
-  profile: Profile;
-  onProfileChange: (profile: Profile) => void;
-}
-
-const ProfileSection = ({ profile, onProfileChange }: ProfileSectionProps) => {
+const ProfileSection = () => {
+  const { user, updateProfile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [editedProfile, setEditedProfile] = useState(profile);
+  const [error, setError] = useState<string | null>(null);
+  const [editedProfile, setEditedProfile] = useState({
+    first_name: "",
+    last_name: "",
+    company: "",
+  });
+
+  useEffect(() => {
+    if (user) {
+      setEditedProfile({
+        first_name: user.first_name || "",
+        last_name: user.last_name || "",
+        company: user.company || "",
+      });
+    }
+  }, [user]);
 
   const handleSave = async () => {
     setIsSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    onProfileChange(editedProfile);
-    setIsSaving(false);
-    setIsEditing(false);
+    setError(null);
+
+    try {
+      await updateProfile(editedProfile);
+      setIsEditing(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update profile");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
-    setEditedProfile(profile);
+    if (user) {
+      setEditedProfile({
+        first_name: user.first_name || "",
+        last_name: user.last_name || "",
+        company: user.company || "",
+      });
+    }
+    setError(null);
     setIsEditing(false);
   };
+
+  const updateField =
+    (field: keyof typeof editedProfile) => (value: string) => {
+      setEditedProfile((prev) => ({ ...prev, [field]: value }));
+    };
+
+  if (!user) return null;
 
   return (
     <AnimatedCard delay={50}>
       <div className="rounded-2xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-semibold text-neutral-900 dark:text-white">
@@ -56,180 +83,75 @@ const ProfileSection = ({ profile, onProfileChange }: ProfileSectionProps) => {
           )}
         </div>
 
-        <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start">
-          <div className="relative shrink-0">
-            <div
-              className="flex h-16 w-16 items-center justify-center rounded-xl text-xl font-bold text-black"
-              style={{ backgroundColor: "var(--brand)" }}
-            >
-              {profile.firstName.charAt(0)}
-              {profile.lastName.charAt(0)}
-            </div>
+        {/* Error */}
+        {error && (
+          <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/50 dark:text-red-300">
+            {error}
           </div>
+        )}
+
+        {/* Content */}
+        <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start">
+          <ProfileAvatar
+            firstName={editedProfile.first_name}
+            lastName={editedProfile.last_name}
+          />
 
           <div className="flex-1 space-y-3">
+            {/* Name fields */}
             <div className="grid gap-3 sm:grid-cols-2">
-              <div>
-                <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400">
-                  First Name
-                </label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={editedProfile.firstName}
-                    onChange={(e) =>
-                      setEditedProfile({
-                        ...editedProfile,
-                        firstName: e.target.value,
-                      })
-                    }
-                    className="mt-1 block w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm outline-none transition-all focus:border-[var(--brand)] dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-                  />
-                ) : (
-                  <p className="mt-1 text-sm text-neutral-900 dark:text-white">
-                    {profile.firstName}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400">
-                  Last Name
-                </label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={editedProfile.lastName}
-                    onChange={(e) =>
-                      setEditedProfile({
-                        ...editedProfile,
-                        lastName: e.target.value,
-                      })
-                    }
-                    className="mt-1 block w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm outline-none transition-all focus:border-[var(--brand)] dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-                  />
-                ) : (
-                  <p className="mt-1 text-sm text-neutral-900 dark:text-white">
-                    {profile.lastName}
-                  </p>
-                )}
-              </div>
+              <ProfileField
+                label="First Name"
+                value={
+                  isEditing ? editedProfile.first_name : user.first_name || ""
+                }
+                isEditing={isEditing}
+                onChange={updateField("first_name")}
+              />
+              <ProfileField
+                label="Last Name"
+                value={
+                  isEditing ? editedProfile.last_name : user.last_name || ""
+                }
+                isEditing={isEditing}
+                onChange={updateField("last_name")}
+              />
             </div>
 
-            <div>
-              <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400">
-                Email
-              </label>
-              {isEditing ? (
-                <input
-                  type="email"
-                  value={editedProfile.email}
-                  onChange={(e) =>
-                    setEditedProfile({
-                      ...editedProfile,
-                      email: e.target.value,
-                    })
-                  }
-                  className="mt-1 block w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm outline-none transition-all focus:border-[var(--brand)] dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-                />
-              ) : (
-                <p className="mt-1 text-sm text-neutral-900 dark:text-white">
-                  {profile.email}
-                </p>
-              )}
-            </div>
+            {/* Email */}
+            <ProfileField
+              label="Email"
+              value={user.email}
+              isEditing={isEditing}
+              disabled
+              hint="Contact support to change your email"
+            />
 
+            {/* Company & Timezone */}
             <div className="grid gap-3 sm:grid-cols-2">
-              <div>
-                <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400">
-                  Company
-                </label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={editedProfile.company}
-                    onChange={(e) =>
-                      setEditedProfile({
-                        ...editedProfile,
-                        company: e.target.value,
-                      })
-                    }
-                    className="mt-1 block w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm outline-none transition-all focus:border-[var(--brand)] dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-                  />
-                ) : (
-                  <p className="mt-1 text-sm text-neutral-900 dark:text-white">
-                    {profile.company || "—"}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400">
-                  Timezone
-                </label>
-                {isEditing ? (
-                  <select
-                    value={editedProfile.timezone}
-                    onChange={(e) =>
-                      setEditedProfile({
-                        ...editedProfile,
-                        timezone: e.target.value,
-                      })
-                    }
-                    className="mt-1 block w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm outline-none transition-all focus:border-[var(--brand)] dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-                  >
-                    <option value="America/New_York">Eastern (ET)</option>
-                    <option value="America/Chicago">Central (CT)</option>
-                    <option value="America/Denver">Mountain (MT)</option>
-                    <option value="America/Los_Angeles">Pacific (PT)</option>
-                    <option value="Europe/London">London (GMT)</option>
-                    <option value="Europe/Paris">Paris (CET)</option>
-                    <option value="Asia/Tokyo">Tokyo (JST)</option>
-                  </select>
-                ) : (
-                  <p className="mt-1 text-sm text-neutral-900 dark:text-white">
-                    {profile.timezone.split("/")[1]?.replace("_", " ")}
-                  </p>
-                )}
-              </div>
+              <ProfileField
+                label="Company"
+                value={isEditing ? editedProfile.company : user.company || ""}
+                isEditing={isEditing}
+                onChange={updateField("company")}
+                placeholder="Optional"
+              />
+              <ProfileField
+                label="Timezone"
+                value={getTimezoneLabel(user.timezone)}
+                isEditing={false}
+                disabled
+                hint="Automatically detected from your browser"
+              />
             </div>
 
+            {/* Actions */}
             {isEditing && (
-              <div className="flex gap-2 pt-2">
-                <button
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-black transition-all hover:opacity-90 disabled:opacity-50"
-                  style={{ backgroundColor: "var(--brand)" }}
-                >
-                  {isSaving && (
-                    <svg
-                      className="h-3.5 w-3.5 animate-spin"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                      />
-                    </svg>
-                  )}
-                  Save
-                </button>
-                <button
-                  onClick={handleCancel}
-                  className="rounded-lg border border-neutral-200 px-3 py-1.5 text-sm font-medium text-neutral-700 transition-all hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-300"
-                >
-                  Cancel
-                </button>
-              </div>
+              <ProfileActions
+                onSave={handleSave}
+                onCancel={handleCancel}
+                isSaving={isSaving}
+              />
             )}
           </div>
         </div>
