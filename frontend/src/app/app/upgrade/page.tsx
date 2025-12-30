@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/auth/AuthProvider";
 import Link from "next/link";
 
 export default function UpgradePage() {

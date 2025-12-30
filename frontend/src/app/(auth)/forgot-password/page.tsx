@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/auth/AuthProvider";
 import { AuthCard, AuthInput, AuthButton, AuthError } from "@/components/auth";
 
 export default function ForgotPasswordPage() {
