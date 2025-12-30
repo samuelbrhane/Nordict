@@ -17,6 +17,7 @@ urlpatterns = [
     # User profile
     path('me/', UserProfileView.as_view(), name='user-profile'),
     path('me/preferences/', UserPreferencesView.as_view(), name='user-preferences'),
+    path('me/delete/', DeleteAccountView.as_view(), name='delete-account'),
     
     # API keys
     path('api-keys/', APIKeyView.as_view(), name='api-keys'),

@@ -540,3 +540,38 @@ class SessionRevokeAllView(APIView):
             session.save()
         
         return Response({'message': f'Revoked {count} sessions'})
+    
+    
+
+class DeleteAccountView(APIView):
+    """Permanently delete user account."""
+    
+    permission_classes = [IsAuthenticated]
+    serializer_class = DeleteAccountSerializer
+    
+    @extend_schema(tags=['Auth'], summary="Delete account")
+    def post(self, request):
+        serializer = DeleteAccountSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        user = request.user
+        
+        # Verify password
+        if not user.check_password(serializer.validated_data['password']):
+            return Response(
+                {'error': 'Incorrect password'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Deactivate all sessions
+        UserSession.objects.filter(user=user).update(is_active=False)
+        
+        # Option 1: Soft delete (recommended)
+        user.is_active = False
+        user.email = f"deleted_{user.id}_{user.email}"  # Prevent email reuse issues
+        user.save()
+        
+        # Option 2: Hard delete (uncomment if you prefer)
+        # user.delete()
+        
+        return Response({'message': 'Account deleted successfully'})

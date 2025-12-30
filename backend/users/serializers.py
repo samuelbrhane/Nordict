@@ -186,3 +186,15 @@ class SessionSerializer(serializers.ModelSerializer):
             return f"{hours} hour{'s' if hours != 1 else ''} ago"
         else:
             return timesince(obj.last_active) + " ago"
+        
+        
+class DeleteAccountSerializer(serializers.Serializer):
+    """Serializer for account deletion - requires password confirmation."""
+    
+    password = serializers.CharField(required=True, write_only=True)
+    confirmation = serializers.CharField(required=True)
+    
+    def validate_confirmation(self, value):
+        if value != "DELETE":
+            raise serializers.ValidationError("Please type DELETE to confirm.")
+        return value
