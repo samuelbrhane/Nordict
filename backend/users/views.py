@@ -575,3 +575,26 @@ class DeleteAccountView(APIView):
         # user.delete()
         
         return Response({'message': 'Account deleted successfully'})
+    
+    
+
+class NotificationSettingsView(generics.RetrieveUpdateAPIView):
+    """Get or update notification settings."""
+    
+    serializer_class = NotificationSettingsSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_object(self):
+        return self.request.user
+    
+    @extend_schema(tags=['Auth'], summary="Get notification settings")
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+    
+    @extend_schema(tags=['Auth'], summary="Update notification settings")
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
+    
+    @extend_schema(tags=['Auth'], summary="Update notification settings")
+    def put(self, request, *args, **kwargs):
+        return super().put(request, *args, **kwargs)

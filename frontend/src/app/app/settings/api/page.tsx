@@ -1,4 +1,9 @@
 "use client";
+import { notFound } from "next/navigation";
+
+// TODO: Enable API Keys page when ready
+// Remove this line to enable the page
+notFound();
 
 import { useState } from "react";
 import { AppLayout } from "@/components/app";

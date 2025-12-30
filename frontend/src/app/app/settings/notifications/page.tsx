@@ -1,86 +1,111 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/app";
+import { useAuth } from "@/context/AuthContext";
 import {
   NotificationsHeader,
   AlertChannels,
   ForecastUpdates,
-  SystemNotifications,
-  DigestSettings,
-  QuietHours,
 } from "@/components/app/sections/settings/notifications";
+import {
+  getNotificationSettingsApi,
+  updateNotificationSettingsApi,
+  NotificationSettings,
+} from "@/context/auth/api";
 
 const SettingsNotificationsPage = () => {
-  const [settings, setSettings] = useState({
-    alertsEmail: true,
-    alertsPush: false,
-    forecastDaily: true,
-    forecastWeekly: false,
-    forecastSignificant: true,
-    systemMaintenance: true,
-    systemNewFeatures: true,
-    systemNewsletter: false,
-    digestEnabled: true,
-    digestFrequency: "daily",
-    digestTime: "09:00",
-    quietHoursEnabled: false,
-    quietHoursStart: "22:00",
-    quietHoursEnd: "08:00",
+  const { tokens } = useAuth();
+  const [settings, setSettings] = useState<NotificationSettings>({
+    notify_alerts_email: true,
+    notify_alerts_push: false,
+    notify_forecast_daily: true,
+    notify_forecast_significant: true,
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const update = (key: string, value: boolean | string) => {
+  useEffect(() => {
+    const fetchSettings = async () => {
+      if (!tokens?.access) return;
+
+      try {
+        const data = await getNotificationSettingsApi(tokens.access);
+        setSettings(data);
+      } catch (err) {
+        setError("Failed to load notification settings");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSettings();
+  }, [tokens?.access]);
+
+  const updateSetting = async (
+    key: keyof NotificationSettings,
+    value: boolean
+  ) => {
+    if (!tokens?.access) return;
+
+    const previousValue = settings[key];
+
+    // Optimistic update
     setSettings((prev) => ({ ...prev, [key]: value }));
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      await updateNotificationSettingsApi(tokens.access, { [key]: value });
+    } catch (err) {
+      // Revert on error
+      setSettings((prev) => ({ ...prev, [key]: previousValue }));
+      setError("Failed to update setting");
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <AppLayout title="" subtitle="">
+        <div className="flex items-center justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-neutral-300 border-t-[var(--brand)]" />
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout title="" subtitle="">
       <div className="space-y-6">
         <NotificationsHeader />
 
+        {/* Error */}
+        {error && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/50 dark:text-red-300">
+            {error}
+          </div>
+        )}
+
         <AlertChannels
-          email={settings.alertsEmail}
-          push={settings.alertsPush}
-          onEmailChange={(v) => update("alertsEmail", v)}
-          onPushChange={(v) => update("alertsPush", v)}
+          emailEnabled={settings.notify_alerts_email}
+          pushEnabled={settings.notify_alerts_push}
+          onEmailChange={(v) => updateSetting("notify_alerts_email", v)}
+          onPushChange={(v) => updateSetting("notify_alerts_push", v)}
+          disabled={isSaving}
         />
 
         <ForecastUpdates
-          daily={settings.forecastDaily}
-          weekly={settings.forecastWeekly}
-          significant={settings.forecastSignificant}
-          onDailyChange={(v) => update("forecastDaily", v)}
-          onWeeklyChange={(v) => update("forecastWeekly", v)}
-          onSignificantChange={(v) => update("forecastSignificant", v)}
+          dailyEnabled={settings.notify_forecast_daily}
+          significantEnabled={settings.notify_forecast_significant}
+          onDailyChange={(v) => updateSetting("notify_forecast_daily", v)}
+          onSignificantChange={(v) =>
+            updateSetting("notify_forecast_significant", v)
+          }
+          disabled={isSaving}
         />
-
-        <SystemNotifications
-          maintenance={settings.systemMaintenance}
-          newFeatures={settings.systemNewFeatures}
-          newsletter={settings.systemNewsletter}
-          onMaintenanceChange={(v) => update("systemMaintenance", v)}
-          onNewFeaturesChange={(v) => update("systemNewFeatures", v)}
-          onNewsletterChange={(v) => update("systemNewsletter", v)}
-        />
-
-        <div className="grid gap-6 lg:grid-cols-2">
-          <DigestSettings
-            enabled={settings.digestEnabled}
-            frequency={settings.digestFrequency}
-            time={settings.digestTime}
-            onEnabledChange={(v) => update("digestEnabled", v)}
-            onFrequencyChange={(v) => update("digestFrequency", v)}
-            onTimeChange={(v) => update("digestTime", v)}
-          />
-          <QuietHours
-            enabled={settings.quietHoursEnabled}
-            start={settings.quietHoursStart}
-            end={settings.quietHoursEnd}
-            onEnabledChange={(v) => update("quietHoursEnabled", v)}
-            onStartChange={(v) => update("quietHoursStart", v)}
-            onEndChange={(v) => update("quietHoursEnd", v)}
-          />
-        </div>
       </div>
     </AppLayout>
   );
