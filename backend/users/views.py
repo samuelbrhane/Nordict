@@ -48,14 +48,29 @@ class RegisterView(APIView):
         
         # Generate tokens
         refresh = RefreshToken.for_user(user)
+        access_token = refresh.access_token
+        
+        # Create first session
+        client_info = get_client_info(request)
+        UserSession.objects.create(
+            user=user,
+            refresh_token_jti=str(refresh['jti']),
+            access_token_jti=str(access_token['jti']),
+            device=client_info['device'],
+            browser=client_info['browser'],
+            os=client_info['os'],
+            ip_address=client_info['ip_address'],
+            location=get_location_from_ip(client_info['ip_address']),
+        )
         
         return Response({
             'user': UserSerializer(user).data,
             'tokens': {
                 'refresh': str(refresh),
-                'access': str(refresh.access_token),
+                'access': str(access_token),
             }
         }, status=status.HTTP_201_CREATED)
+        
 
 class LoginView(APIView):
     """Login and get JWT tokens."""
@@ -92,77 +107,88 @@ class LoginView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED
             )
         
-        # Check session limit
-        max_sessions = user.max_sessions
-        if max_sessions is not None:
-            active_sessions = UserSession.objects.filter(user=user, is_active=True)
-            active_count = active_sessions.count()
-            
-            if active_count >= max_sessions:
-                # Option 1: Reject login
-                # return Response(
-                #     {'error': f'Maximum {max_sessions} device(s) allowed. Please sign out from another device.'},
-                #     status=status.HTTP_403_FORBIDDEN
-                # )
-                
-                # Option 2: Remove oldest session (better UX)
-                sessions_to_remove = active_count - max_sessions + 1
-                oldest_sessions = active_sessions.order_by('last_active')[:sessions_to_remove]
-                
-                for session in oldest_sessions:
-                    # Blacklist the refresh token
-                    try:
-                        
-                        outstanding = OutstandingToken.objects.get(jti=session.refresh_token_jti)
-                        BlacklistedToken.objects.get_or_create(token=outstanding)
-                    except:
-                        pass
-                    session.is_active = False
-                    session.save()
-        
         # Update timezone if provided
         if data.get('timezone'):
             user.timezone = data['timezone']
             user.save(update_fields=['timezone'])
         
-        # Generate tokens
-        refresh = RefreshToken.for_user(user)
-        access_token = refresh.access_token
-        
-        # Create session record
+        # Get client info
         client_info = get_client_info(request)
-        UserSession.objects.create(
+        
+        # Check for existing session from same device/browser/IP
+        existing_session = UserSession.objects.filter(
             user=user,
-            refresh_token_jti=str(refresh['jti']),
-            access_token_jti=str(access_token['jti']),
+            is_active=True,
             device=client_info['device'],
             browser=client_info['browser'],
             os=client_info['os'],
             ip_address=client_info['ip_address'],
-            location=get_location_from_ip(client_info['ip_address']),
-        )
+        ).first()
         
+        if existing_session:
+            # Blacklist old refresh token
+            try:
+                from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+                outstanding = OutstandingToken.objects.get(jti=existing_session.refresh_token_jti)
+                BlacklistedToken.objects.get_or_create(token=outstanding)
+            except:
+                pass
+            
+            # Generate new tokens
+            refresh = RefreshToken.for_user(user)
+            access_token = refresh.access_token
+            
+            # Update existing session with new tokens
+            existing_session.refresh_token_jti = str(refresh['jti'])
+            existing_session.access_token_jti = str(access_token['jti'])
+            existing_session.last_active = timezone.now()
+            existing_session.save()
+        else:
+            # Check session limit for new device
+            max_sessions = user.max_sessions
+            if max_sessions is not None:
+                active_sessions = UserSession.objects.filter(user=user, is_active=True)
+                active_count = active_sessions.count()
+                
+                if active_count >= max_sessions:
+                    # Remove oldest session
+                    sessions_to_remove = active_count - max_sessions + 1
+                    oldest_sessions = active_sessions.order_by('last_active')[:sessions_to_remove]
+                    
+                    for session in oldest_sessions:
+                        try:
+                            from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+                            outstanding = OutstandingToken.objects.get(jti=session.refresh_token_jti)
+                            BlacklistedToken.objects.get_or_create(token=outstanding)
+                        except:
+                            pass
+                        session.is_active = False
+                        session.save()
+            
+            # Generate tokens
+            refresh = RefreshToken.for_user(user)
+            access_token = refresh.access_token
+            
+            # Create new session
+            UserSession.objects.create(
+                user=user,
+                refresh_token_jti=str(refresh['jti']),
+                access_token_jti=str(access_token['jti']),
+                device=client_info['device'],
+                browser=client_info['browser'],
+                os=client_info['os'],
+                ip_address=client_info['ip_address'],
+                location=get_location_from_ip(client_info['ip_address']),
+            )
         
-        # After creating new session, before return
-        response_data = {
+        return Response({
             'user': UserSerializer(user).data,
             'tokens': {
                 'refresh': str(refresh),
                 'access': str(access_token),
             }
-        }
-
-        # Add session info
-        if max_sessions is not None:
-            current_sessions = UserSession.objects.filter(user=user, is_active=True).count()
-            response_data['session_info'] = {
-                'current_sessions': current_sessions,
-                'max_sessions': max_sessions,
-                'removed_old_session': sessions_to_remove > 0 if 'sessions_to_remove' in locals() else False,
-            }
-
-        return Response(response_data)
-        
+        })
+          
 class LogoutView(APIView):
     """Logout and blacklist refresh token."""
     

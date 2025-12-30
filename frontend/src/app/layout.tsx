@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import { Outfit } from "next/font/google";
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider } from "@/context/auth/AuthProvider";
 const font = Outfit({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],

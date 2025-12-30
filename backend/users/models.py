@@ -134,7 +134,7 @@ class User(AbstractUser):
             return self.subscription_plan
         
         if self.is_trial_active:
-            return self.SubscriptionPlan.PRO
+            return self.SubscriptionPlan.PREMIUM
         
         return self.SubscriptionPlan.FREE
     
