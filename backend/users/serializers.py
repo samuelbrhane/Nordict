@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+from .models import *
 
 User = get_user_model()
 
@@ -11,23 +12,28 @@ class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(read_only=True)
     effective_plan = serializers.CharField(read_only=True)
     is_trial_active = serializers.BooleanField(read_only=True)
+    is_subscription_active = serializers.BooleanField(read_only=True) 
     trial_days_remaining = serializers.IntegerField(read_only=True)
-    
+    plan_limits = serializers.DictField(read_only=True)
+     
     class Meta:
         model = User
         fields = [
             'id',
             'email',
             'first_name',
+            'last_name',      
             'full_name',
-            'timezone',
+            'company',
+            'timezone',       
             'effective_plan',
             'is_trial_active',
             'trial_days_remaining',
+            'is_subscription_active', 
+            'plan_limits',
             'default_market',
             'default_horizon',
         ]
-
 
 class RegisterSerializer(serializers.Serializer):
     """Serializer for user registration - validation only."""
@@ -104,3 +110,79 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
                 'password_confirm': "Passwords don't match."
             })
         return attrs
+    
+    
+class ProfileUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for updating user profile."""
+    
+    class Meta:
+        model = User
+        fields = [
+            'first_name',
+            'last_name',
+            'company',
+            'timezone',
+        ]
+        
+        
+class PasswordChangeSerializer(serializers.Serializer):
+    """Serializer for password change - validation only."""
+    
+    current_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True, validators=[validate_password])
+    new_password_confirm = serializers.CharField(required=True)
+    
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['new_password_confirm']:
+            raise serializers.ValidationError({
+                'new_password_confirm': "Passwords don't match."
+            })
+        return attrs
+    
+    
+class SessionSerializer(serializers.ModelSerializer):
+    """Serializer for user sessions."""
+    
+    is_current = serializers.SerializerMethodField()
+    last_active_display = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = UserSession
+        fields = [
+            'id',
+            'device',
+            'browser',
+            'os',
+            'ip_address',
+            'location',
+            'created_at',
+            'last_active',
+            'last_active_display',
+            'is_current',
+        ]
+    
+    def get_is_current(self, obj):
+        request = self.context.get('request')
+        if not request:
+            return False
+        current_jti = request.auth.get('jti') if request.auth else None
+        # Compare with stored refresh token jti
+        return False  # We'll handle this differently
+    
+    def get_last_active_display(self, obj):
+        from django.utils import timezone
+        from django.utils.timesince import timesince
+        
+        now = timezone.now()
+        diff = now - obj.last_active
+        
+        if diff.total_seconds() < 60:
+            return "Now"
+        elif diff.total_seconds() < 3600:
+            minutes = int(diff.total_seconds() / 60)
+            return f"{minutes} minute{'s' if minutes != 1 else ''} ago"
+        elif diff.total_seconds() < 86400:
+            hours = int(diff.total_seconds() / 3600)
+            return f"{hours} hour{'s' if hours != 1 else ''} ago"
+        else:
+            return timesince(obj.last_active) + " ago"

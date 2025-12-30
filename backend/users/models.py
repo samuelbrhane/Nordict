@@ -52,6 +52,7 @@ class User(AbstractUser):
     default_market = models.CharField(max_length=20, default='BTC-USD')
     default_horizon = models.CharField(max_length=20, default='daily')
     timezone = models.CharField(max_length=50, default='UTC')
+    company = models.CharField(max_length=100, blank=True, null=True)
     
     # API access
     api_key = models.CharField(max_length=64, null=True, blank=True, unique=True)
@@ -169,3 +170,32 @@ class User(AbstractUser):
         """End trial and mark as used."""
         self.trial_used = True
         self.save(update_fields=['trial_used'])
+        
+    @property
+    def max_sessions(self):
+        """Get max sessions for user's plan."""
+        return self.plan_limits.get('max_sessions')
+    
+        
+        
+class UserSession(models.Model):
+    """Track user login sessions."""
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sessions')
+    refresh_token_jti = models.CharField(max_length=255, unique=True)
+    access_token_jti = models.CharField(max_length=255, blank=True, null=True)  # Add this
+    device = models.CharField(max_length=255, blank=True)
+    browser = models.CharField(max_length=100, blank=True)
+    os = models.CharField(max_length=100, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    location = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_active = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
+    
+    class Meta:
+        db_table = 'user_sessions'
+        ordering = ['-last_active']
+        
+    def __str__(self):
+        return f"{self.user.email} - {self.device}"

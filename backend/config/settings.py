@@ -238,6 +238,7 @@ SUBSCRIPTION_PLANS = {
     'free': {
         'max_markets': 2,
         'max_alerts': 1,
+        'max_sessions': 1,  # Only 1 device
         'horizons': ['daily'],
         'api_access': False,
         'backtest_days': 7,
@@ -245,20 +246,23 @@ SUBSCRIPTION_PLANS = {
     'pro': {
         'max_markets': 5,
         'max_alerts': 5,
+        'max_sessions': 2,  # 2 devices
         'horizons': ['daily'],
         'api_access': False,
         'backtest_days': 30,
     },
     'premium': {
-        'max_markets': None,  # Unlimited
-        'max_alerts': None,   # Unlimited
+        'max_markets': None,
+        'max_alerts': None,
+        'max_sessions': 5,  # 5 devices
         'horizons': ['hourly', 'daily', 'weekly', 'monthly'],
         'api_access': True,
-        'backtest_days': None,  # Full history
+        'backtest_days': None,
     },
     'teams': {
         'max_markets': None,
         'max_alerts': None,
+        'max_sessions': None,  # Unlimited
         'horizons': ['hourly', 'daily', 'weekly', 'monthly'],
         'api_access': True,
         'backtest_days': None,
