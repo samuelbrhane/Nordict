@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/auth/AuthProvider";
 import { USER_MENU_ITEMS, SIGN_OUT_ITEM } from "./userMenuItems";
 
 const UserMenu = () => {

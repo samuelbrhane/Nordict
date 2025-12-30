@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/auth/AuthProvider";
 import { ProfileAvatar, ProfileField, ProfileActions } from ".";
 import { TIMEZONES, getTimezoneLabel } from "@/config/timezones";
 import { AnimatedCard } from "../dashboard";
