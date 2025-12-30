@@ -1,3 +1,11 @@
 export { default as AuthHeader } from "./Authheader";
 export { default as AuthFooter } from "./Authfooter";
 export { default as AuthLayout } from "./Authlayout";
+export { AuthCard } from "./AuthCard";
+export { AuthInput } from "./AuthInput";
+export { AuthButton } from "./AuthButton";
+export { AuthError } from "./AuthError";
+export { AuthDivider } from "./AuthDivider";
+export { AuthLink } from "./AuthLink";
+export { AuthCheckbox } from "./AuthCheckbox";
+export { ProtectedRoute } from "./ProtectedRoute";
