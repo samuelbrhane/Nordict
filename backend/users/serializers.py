@@ -20,6 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
             'email',
             'first_name',
             'full_name',
+            'timezone',
             'effective_plan',
             'is_trial_active',
             'trial_days_remaining',
@@ -39,6 +40,7 @@ class RegisterSerializer(serializers.Serializer):
         validators=[validate_password],
     )
     password_confirm = serializers.CharField(required=True, write_only=True)
+    timezone = serializers.CharField(required=False, default='UTC')
     
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
@@ -61,6 +63,7 @@ class LoginSerializer(serializers.Serializer):
     
     email = serializers.EmailField(required=True)
     password = serializers.CharField(required=True, write_only=True)
+    timezone = serializers.CharField(required=False, default='UTC')
 
 
 class UserPreferencesSerializer(serializers.ModelSerializer):

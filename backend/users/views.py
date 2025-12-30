@@ -50,6 +50,7 @@ class RegisterView(APIView):
             password=data['password'],
             first_name=first_name,
             last_name=last_name,
+            timezone=data.get('timezone', 'UTC'),
         )
         
         # Generate tokens
@@ -98,7 +99,12 @@ class LoginView(APIView):
                 {'error': 'Account is disabled'},
                 status=status.HTTP_401_UNAUTHORIZED
             )
-        
+            
+        # Update timezone if provided
+        if data.get('timezone'):
+            user.timezone = data['timezone']
+            user.save(update_fields=['timezone'])
+            
         # Generate tokens
         refresh = RefreshToken.for_user(user)
         
