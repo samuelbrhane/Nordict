@@ -148,6 +148,11 @@ class UserSubscription(models.Model):
     stripe_card_exp_month = models.IntegerField(blank=True, null=True)
     stripe_card_exp_year = models.IntegerField(blank=True, null=True)
     
+    pending_plan = models.CharField(max_length=20, blank=True, null=True)
+    pending_billing_cycle = models.CharField(max_length=20, blank=True, null=True)
+    pending_stripe_subscription_id = models.CharField(max_length=255, blank=True, null=True)
+    pending_expires_at = models.DateTimeField(blank=True, null=True)
+    
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

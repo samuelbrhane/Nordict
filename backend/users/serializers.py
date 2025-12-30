@@ -15,6 +15,7 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
     effective_plan = serializers.CharField(read_only=True)
     plan_limits = serializers.DictField(read_only=True)
     next_billing_date = serializers.DateTimeField(read_only=True)
+    is_cancelled = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = UserSubscription
@@ -27,13 +28,20 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
             'effective_plan',
             'plan_limits',
             'next_billing_date',
+            'cancelled_at',
+            'is_cancelled',
+            'stripe_customer_id',
             'stripe_card_last4',
             'stripe_card_brand',
             'stripe_card_exp_month',
             'stripe_card_exp_year',
         ]
-
-
+    
+    def get_is_cancelled(self, obj):
+        """Check if subscription is cancelled but still active."""
+        return obj.cancelled_at is not None and obj.is_subscription_active
+    
+    
 class UserPreferencesSerializer(serializers.ModelSerializer):
     """Serializer for user preferences."""
     

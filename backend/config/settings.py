@@ -269,3 +269,17 @@ SUBSCRIPTION_PLANS = {
         'team_features': True,
     },
 }
+
+
+# Stripe
+STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY')
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
+STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET')
+
+# Stripe Price IDs
+STRIPE_PRICES = {
+    'pro_monthly': config('STRIPE_PRICE_PRO_MONTHLY'),
+    'pro_yearly': config('STRIPE_PRICE_PRO_YEARLY'),
+    'premium_monthly': config('STRIPE_PRICE_PREMIUM_MONTHLY'),
+    'premium_yearly': config('STRIPE_PRICE_PREMIUM_YEARLY'),
+}
