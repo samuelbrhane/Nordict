@@ -36,6 +36,7 @@ interface AuthContextType {
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
   refreshToken: () => Promise<boolean>;
+  requestPasswordReset: (email: string) => Promise<void>;
 }
 
 interface RegisterData {
@@ -47,7 +48,7 @@ interface RegisterData {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Helper to check if token is expired
 function isTokenExpired(token: string): boolean {
@@ -247,6 +248,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push("/login");
   };
 
+  const requestPasswordReset = async (email: string) => {
+    const response = await fetch(`${API_URL}/api/v1/auth/password-reset/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Request failed");
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -258,6 +272,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         register,
         logout,
         refreshToken,
+        requestPasswordReset,
       }}
     >
       {children}
