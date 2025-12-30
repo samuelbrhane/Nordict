@@ -27,29 +27,25 @@ class UserSerializer(serializers.ModelSerializer):
             'default_horizon',
         ]
 
-class RegisterSerializer(serializers.ModelSerializer):
-    """Serializer for user registration."""
+
+class RegisterSerializer(serializers.Serializer):
+    """Serializer for user registration - validation only."""
     
-    full_name = serializers.CharField(write_only=True, required=True)
+    email = serializers.EmailField(required=True)
+    full_name = serializers.CharField(required=True, min_length=2)
     password = serializers.CharField(
-        write_only=True,
         required=True,
+        write_only=True,
         validators=[validate_password],
     )
-    password_confirm = serializers.CharField(write_only=True, required=True)
+    password_confirm = serializers.CharField(required=True, write_only=True)
     
-    class Meta:
-        model = User
-        fields = [
-            'email',
-            'full_name',
-            'password',
-            'password_confirm',
-        ]
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Email already registered.")
+        return value.lower()
     
     def validate_full_name(self, value):
-        if len(value.strip()) < 2:
-            raise serializers.ValidationError("Name must be at least 2 characters.")
         return value.strip()
     
     def validate(self, attrs):
@@ -58,27 +54,10 @@ class RegisterSerializer(serializers.ModelSerializer):
                 'password_confirm': "Passwords don't match."
             })
         return attrs
-    
-    def create(self, validated_data):
-        validated_data.pop('password_confirm')
-        full_name = validated_data.pop('full_name')
-        
-        # Split full name into first and last name
-        name_parts = full_name.split(' ', 1)
-        first_name = name_parts[0]
-        last_name = name_parts[1] if len(name_parts) > 1 else ''
-        
-        user = User.objects.create_user(
-            email=validated_data['email'],
-            password=validated_data['password'],
-            first_name=first_name,
-            last_name=last_name,
-        )
-        return user
 
 
 class LoginSerializer(serializers.Serializer):
-    """Serializer for user login."""
+    """Serializer for user login - validation only."""
     
     email = serializers.EmailField(required=True)
     password = serializers.CharField(required=True, write_only=True)
@@ -101,3 +80,24 @@ class APIKeySerializer(serializers.Serializer):
     
     api_key = serializers.CharField(read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    """Serializer for password reset request - validation only."""
+    
+    email = serializers.EmailField(required=True)
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    """Serializer for password reset confirmation - validation only."""
+    
+    token = serializers.CharField(required=True)
+    password = serializers.CharField(required=True, validators=[validate_password])
+    password_confirm = serializers.CharField(required=True)
+    
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password_confirm']:
+            raise serializers.ValidationError({
+                'password_confirm': "Passwords don't match."
+            })
+        return attrs
