@@ -10,7 +10,7 @@ const NotificationsHeader = () => {
           Notifications
         </h1>
         <p className="mt-0.5 text-sm text-neutral-500 dark:text-neutral-400">
-          Control how you receive updates
+          Manage how you receive updates and alerts
         </p>
       </div>
     </AnimatedCard>
