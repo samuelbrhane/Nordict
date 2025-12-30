@@ -197,3 +197,46 @@ export async function deleteAccountApi(
     throw new Error(error.error || "Failed to delete account");
   }
 }
+
+export interface NotificationSettings {
+  notify_alerts_email: boolean;
+  notify_alerts_push: boolean;
+  notify_forecast_daily: boolean;
+  notify_forecast_significant: boolean;
+}
+
+export async function getNotificationSettingsApi(
+  accessToken: string
+): Promise<NotificationSettings> {
+  const response = await fetch(`${API_URL}/api/v1/auth/me/notifications/`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch notification settings");
+  }
+
+  return response.json();
+}
+
+export async function updateNotificationSettingsApi(
+  accessToken: string,
+  data: Partial<NotificationSettings>
+): Promise<NotificationSettings> {
+  const response = await fetch(`${API_URL}/api/v1/auth/me/notifications/`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update notification settings");
+  }
+
+  return response.json();
+}

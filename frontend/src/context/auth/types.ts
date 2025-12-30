@@ -85,3 +85,10 @@ export interface DeleteAccountData {
   password: string;
   confirmation: string;
 }
+
+export interface NotificationSettings {
+  notify_alerts_email: boolean;
+  notify_alerts_push: boolean;
+  notify_forecast_daily: boolean;
+  notify_forecast_significant: boolean;
+}

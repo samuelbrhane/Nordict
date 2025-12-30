@@ -7,6 +7,7 @@ export type {
   RegisterData,
   ProfileUpdateData,
   PasswordChangeData,
-  AuthContextType,
   DeleteAccountData,
+  NotificationSettings,
+  AuthContextType,
 } from "./types";
