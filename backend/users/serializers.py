@@ -8,48 +8,29 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for user profile."""
     
+    full_name = serializers.CharField(read_only=True)
     effective_plan = serializers.CharField(read_only=True)
     is_trial_active = serializers.BooleanField(read_only=True)
     trial_days_remaining = serializers.IntegerField(read_only=True)
-    is_subscription_active = serializers.BooleanField(read_only=True)
     
     class Meta:
         model = User
         fields = [
             'id',
             'email',
-            'username',
             'first_name',
-            'last_name',
-            'subscription_plan',
-            'subscription_expires_at',
+            'full_name',
             'effective_plan',
             'is_trial_active',
             'trial_days_remaining',
-            'trial_ends_at',
-            'is_subscription_active',
             'default_market',
             'default_horizon',
-            'timezone',
-            'created_at',
         ]
-        read_only_fields = [
-            'id',
-            'email',
-            'subscription_plan',
-            'subscription_expires_at',
-            'effective_plan',
-            'is_trial_active',
-            'trial_days_remaining',
-            'trial_ends_at',
-            'is_subscription_active',
-            'created_at',
-        ]
-
 
 class RegisterSerializer(serializers.ModelSerializer):
     """Serializer for user registration."""
     
+    full_name = serializers.CharField(write_only=True, required=True)
     password = serializers.CharField(
         write_only=True,
         required=True,
@@ -61,12 +42,15 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'email',
-            'username',
+            'full_name',
             'password',
             'password_confirm',
-            'first_name',
-            'last_name',
         ]
+    
+    def validate_full_name(self, value):
+        if len(value.strip()) < 2:
+            raise serializers.ValidationError("Name must be at least 2 characters.")
+        return value.strip()
     
     def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
@@ -77,8 +61,19 @@ class RegisterSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         validated_data.pop('password_confirm')
-        user = User.objects.create_user(**validated_data)
-        # Trial starts automatically in model save()
+        full_name = validated_data.pop('full_name')
+        
+        # Split full name into first and last name
+        name_parts = full_name.split(' ', 1)
+        first_name = name_parts[0]
+        last_name = name_parts[1] if len(name_parts) > 1 else ''
+        
+        user = User.objects.create_user(
+            email=validated_data['email'],
+            password=validated_data['password'],
+            first_name=first_name,
+            last_name=last_name,
+        )
         return user
 
 

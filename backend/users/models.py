@@ -1,10 +1,27 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
+import uuid
 
-
+class CustomUserManager(BaseUserManager):
+    """Custom manager for User model with email as identifier."""
+    
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('Email is required')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+    
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(email, password, **extra_fields)
+    
 class User(AbstractUser):
     """Custom user model with subscription and preferences."""
     
@@ -15,6 +32,7 @@ class User(AbstractUser):
         TEAMS = 'teams', 'Teams'
     
     email = models.EmailField(unique=True)
+    username = models.CharField(max_length=150, blank=True, null=True, unique=True)
     
     # Subscription
     subscription_plan = models.CharField(
@@ -43,8 +61,10 @@ class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    objects = CustomUserManager()
+    
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = []  
     
     class Meta:
         db_table = 'users'
@@ -55,10 +75,20 @@ class User(AbstractUser):
         return self.email
     
     def save(self, *args, **kwargs):
+        # Auto-generate username if not provided
+        if not self.username:
+            self.username = str(uuid.uuid4())[:8]
+        
         # Auto-start trial for new users
         if not self.pk and not self.trial_used:
             self.start_trial()
         super().save(*args, **kwargs)
+    
+    @property
+    def full_name(self):
+        """Get user's full name."""
+        name = f"{self.first_name} {self.last_name}".strip()
+        return name or self.email
     
     def start_trial(self, days=7):
         """Start the free trial period."""
@@ -99,15 +129,12 @@ class User(AbstractUser):
     @property
     def effective_plan(self):
         """Get the effective plan (considering trial)."""
-        # Paid subscription takes priority
         if self.is_subscription_active:
             return self.subscription_plan
         
-        # Trial gives Pro access
         if self.is_trial_active:
             return self.SubscriptionPlan.PRO
         
-        # Otherwise free
         return self.SubscriptionPlan.FREE
     
     @property
