@@ -6,13 +6,15 @@ export interface User {
   full_name: string;
   company: string | null;
   timezone: string;
+  // Nested objects
+  subscription: UserSubscription;
+  preferences: UserPreferences;
+  // Shortcuts (same as subscription, for convenience)
   effective_plan: string;
   is_trial_active: boolean;
   is_subscription_active: boolean;
   trial_days_remaining: number;
   plan_limits: PlanLimits;
-  default_market: string;
-  default_horizon: string;
 }
 
 export interface Session {
@@ -87,6 +89,30 @@ export interface DeleteAccountData {
 }
 
 export interface NotificationSettings {
+  notify_alerts_email: boolean;
+  notify_alerts_push: boolean;
+  notify_forecast_daily: boolean;
+  notify_forecast_significant: boolean;
+}
+
+export interface UserSubscription {
+  plan: string;
+  billing_cycle: string;
+  is_trial_active: boolean;
+  trial_days_remaining: number;
+  is_subscription_active: boolean;
+  effective_plan: string;
+  plan_limits: PlanLimits;
+  next_billing_date: string | null;
+  stripe_card_last4: string | null;
+  stripe_card_brand: string | null;
+  stripe_card_exp_month: number | null;
+  stripe_card_exp_year: number | null;
+}
+
+export interface UserPreferences {
+  default_market: string;
+  default_horizon: string;
   notify_alerts_email: boolean;
   notify_alerts_push: boolean;
   notify_forecast_daily: boolean;
