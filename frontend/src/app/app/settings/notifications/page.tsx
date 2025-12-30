@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AppLayout } from "@/components/app";
+import { AppLayout, LoadingSpinner } from "@/components/app";
 import { useAuth } from "@/context/AuthContext";
 import {
   NotificationsHeader,
@@ -67,12 +67,11 @@ const SettingsNotificationsPage = () => {
     }
   };
 
+  // Loading skeleton
   if (isLoading) {
     return (
       <AppLayout title="" subtitle="">
-        <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-neutral-300 border-t-[var(--brand)]" />
-        </div>
+        <LoadingSpinner text="Loading..." />
       </AppLayout>
     );
   }
