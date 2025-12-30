@@ -53,7 +53,7 @@ const MarketCard = ({ market, horizon, onToggleFavorite }: MarketCardProps) => {
           </svg>
         </button>
       </div>
-      <Link href={`/app/forecasts/${market.symbol}`}>
+      <Link href={`/app/${market.symbol}`}>
         <div className="mt-4 flex items-end justify-between">
           <div>
             <p className="text-lg font-semibold text-neutral-900 dark:text-white">

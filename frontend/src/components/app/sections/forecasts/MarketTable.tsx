@@ -27,7 +27,7 @@ const MarketTable = ({
             >
               <div className="flex items-center justify-between">
                 <Link
-                  href={`/app/forecasts/${market.symbol}`}
+                  href={`/app/${market.symbol}`}
                   className="flex items-center gap-3"
                 >
                   <div

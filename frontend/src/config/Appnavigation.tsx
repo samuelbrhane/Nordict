@@ -130,6 +130,39 @@ const SettingsIcon = () => (
     />
   </svg>
 );
+// Compare icon
+const CompareIcon = () => (
+  <svg
+    className="h-5 w-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={1.5}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"
+    />
+  </svg>
+);
+
+// Market Detail icon
+const MarketDetailIcon = () => (
+  <svg
+    className="h-5 w-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={1.5}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605"
+    />
+  </svg>
+);
 
 export const NAV_ITEMS: NavItem[] = [
   {
@@ -141,11 +174,16 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Forecasts",
     href: "/app/forecasts",
     icon: <ForecastsIcon />,
-    children: [
-      { label: "Overview", href: "/app/forecasts" },
-      { label: "Market Detail", href: "/app/forecasts/BTC-USD" },
-      { label: "Compare", href: "/app/forecasts/compare" },
-    ],
+  },
+  {
+    label: "Markets",
+    href: "/app/BTC-USD",
+    icon: <MarketsIcon />,
+  },
+  {
+    label: "Compare",
+    href: "/app/compare",
+    icon: <CompareIcon />,
   },
   {
     label: "Performance",
@@ -157,20 +195,6 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/app/alerts",
     icon: <AlertsIcon />,
   },
-  // {
-  //   label: "Markets",
-  //   href: "/app/markets",
-  //   icon: <MarketsIcon />,
-  // },
-  // {
-  //   label: "Models",
-  //   href: "/app/models",
-  //   icon: <ModelsIcon />,
-  //   children: [
-  //     { label: "Registry", href: "/app/models" },
-  //     { label: "Version Detail", href: "/app/models/v0.3" },
-  //   ],
-  // },
 ];
 
 export const BOTTOM_NAV_ITEMS: NavItem[] = [
@@ -181,7 +205,7 @@ export const BOTTOM_NAV_ITEMS: NavItem[] = [
     children: [
       { label: "Account", href: "/app/settings" },
       { label: "Notifications", href: "/app/settings/notifications" },
-      { label: "API Keys", href: "/app/settings/api" },
+      // { label: "API Keys", href: "/app/settings/api" },
       { label: "Billing", href: "/app/settings/billing" },
     ],
   },
