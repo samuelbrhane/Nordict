@@ -9,18 +9,34 @@ import {
   useCallback,
 } from "react";
 import { useRouter } from "next/navigation";
-import { time } from "console";
 
 interface User {
   id: number;
   email: string;
   first_name: string;
+  last_name: string;
   full_name: string;
+  company: string | null;
+  timezone: string;
   effective_plan: string;
   is_trial_active: boolean;
   trial_days_remaining: number;
+  plan_limits: PlanLimits;
   default_market: string;
   default_horizon: string;
+  is_subscription_active: boolean;
+}
+interface Session {
+  id: number;
+  device: string;
+  browser: string;
+  os: string;
+  ip_address: string;
+  location: string;
+  created_at: string;
+  last_active: string;
+  last_active_display: string;
+  is_current: boolean;
 }
 
 interface Tokens {
@@ -38,6 +54,18 @@ interface AuthContextType {
   logout: () => void;
   refreshToken: () => Promise<boolean>;
   requestPasswordReset: (email: string) => Promise<void>;
+  updateProfile: (data: ProfileUpdateData) => Promise<void>;
+  changePassword: (data: PasswordChangeData) => Promise<void>;
+  getSessions: () => Promise<Session[]>;
+  revokeSession: (sessionId: number) => Promise<void>;
+  revokeAllSessions: () => Promise<void>;
+}
+
+interface ProfileUpdateData {
+  first_name?: string;
+  last_name?: string;
+  company?: string;
+  timezone?: string;
 }
 
 interface RegisterData {
@@ -46,6 +74,21 @@ interface RegisterData {
   password: string;
   password_confirm: string;
   timezone?: string;
+}
+
+interface PasswordChangeData {
+  current_password: string;
+  new_password: string;
+  new_password_confirm: string;
+}
+
+interface PlanLimits {
+  max_markets: number | null;
+  max_alerts: number | null;
+  max_sessions: number | null;
+  horizons: string[];
+  api_access: boolean;
+  backtest_days: number | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -252,6 +295,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push("/login");
   };
 
+  const updateProfile = async (data: ProfileUpdateData) => {
+    if (!tokens?.access) throw new Error("Not authenticated");
+
+    const response = await fetch(`${API_URL}/api/v1/auth/me/`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${tokens.access}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || "Failed to update profile");
+    }
+
+    const updatedUser = await response.json();
+    setUser(updatedUser);
+  };
+
   const requestPasswordReset = async (email: string) => {
     const response = await fetch(`${API_URL}/api/v1/auth/password-reset/`, {
       method: "POST",
@@ -262,6 +326,76 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.error || "Request failed");
+    }
+  };
+
+  const changePassword = async (data: PasswordChangeData) => {
+    if (!tokens?.access) throw new Error("Not authenticated");
+
+    const response = await fetch(`${API_URL}/api/v1/auth/password-change/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${tokens.access}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Failed to change password");
+    }
+  };
+
+  const getSessions = async (): Promise<Session[]> => {
+    if (!tokens?.access) throw new Error("Not authenticated");
+
+    const response = await fetch(`${API_URL}/api/v1/auth/sessions/`, {
+      headers: {
+        Authorization: `Bearer ${tokens.access}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch sessions");
+    }
+
+    return response.json();
+  };
+
+  const revokeSession = async (sessionId: number) => {
+    if (!tokens?.access) throw new Error("Not authenticated");
+
+    const response = await fetch(
+      `${API_URL}/api/v1/auth/sessions/${sessionId}/`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${tokens.access}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to revoke session");
+    }
+  };
+
+  const revokeAllSessions = async () => {
+    if (!tokens?.access) throw new Error("Not authenticated");
+
+    const response = await fetch(
+      `${API_URL}/api/v1/auth/sessions/revoke-all/`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${tokens.access}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to revoke sessions");
     }
   };
 
@@ -277,6 +411,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         refreshToken,
         requestPasswordReset,
+        updateProfile,
+        changePassword,
+        getSessions,
+        revokeSession,
+        revokeAllSessions,
       }}
     >
       {children}
