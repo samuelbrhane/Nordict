@@ -1,24 +1,61 @@
 "use client";
 
 import { useState } from "react";
-import AnimatedCard from "../dashboard/AnimatedCard";
+import { useAuth } from "@/context/AuthContext";
+import { AnimatedCard } from "../dashboard";
 
 const PasswordSection = () => {
+  const { changePassword } = useAuth();
   const [form, setForm] = useState({ current: "", new: "", confirm: "" });
   const [isChanging, setIsChanging] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const handleChange = async () => {
-    if (form.new !== form.confirm) {
-      alert("Passwords do not match");
+    setError(null);
+    setSuccess(false);
+
+    // Validation
+    if (form.new.length < 8) {
+      setError("New password must be at least 8 characters");
       return;
     }
+
+    if (form.new !== form.confirm) {
+      setError("New passwords do not match");
+      return;
+    }
+
+    if (form.current === form.new) {
+      setError("New password must be different from current password");
+      return;
+    }
+
     setIsChanging(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsChanging(false);
-    setForm({ current: "", new: "", confirm: "" });
+
+    try {
+      await changePassword({
+        current_password: form.current,
+        new_password: form.new,
+        new_password_confirm: form.confirm,
+      });
+      setSuccess(true);
+      setForm({ current: "", new: "", confirm: "" });
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to change password"
+      );
+    } finally {
+      setIsChanging(false);
+    }
   };
 
-  const isDisabled = isChanging || !form.current || !form.new || !form.confirm;
+  const isDisabled =
+    isChanging ||
+    !form.current ||
+    !form.new ||
+    !form.confirm ||
+    form.new.length < 8;
 
   return (
     <AnimatedCard delay={100}>
@@ -30,46 +67,85 @@ const PasswordSection = () => {
           Update your password for security
         </p>
 
+        {/* Error */}
+        {error && (
+          <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/50 dark:text-red-300">
+            {error}
+          </div>
+        )}
+
+        {/* Success */}
+        {success && (
+          <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700 dark:border-green-900/50 dark:bg-green-950/50 dark:text-green-300">
+            Password changed successfully
+          </div>
+        )}
+
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
           <div>
             <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400">
-              Current
+              Current Password
             </label>
             <input
               type="password"
               value={form.current}
-              onChange={(e) => setForm({ ...form, current: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, current: e.target.value });
+                setError(null);
+                setSuccess(false);
+              }}
+              autoComplete="current-password"
               className="mt-1 block w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm outline-none transition-all focus:border-[var(--brand)] dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
             />
           </div>
           <div>
             <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400">
-              New
+              New Password
             </label>
             <input
               type="password"
               value={form.new}
-              onChange={(e) => setForm({ ...form, new: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, new: e.target.value });
+                setError(null);
+                setSuccess(false);
+              }}
+              autoComplete="new-password"
               className="mt-1 block w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm outline-none transition-all focus:border-[var(--brand)] dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
             />
+            {form.new && form.new.length < 8 && (
+              <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
+                Must be at least 8 characters
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400">
-              Confirm
+              Confirm New Password
             </label>
             <input
               type="password"
               value={form.confirm}
-              onChange={(e) => setForm({ ...form, confirm: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, confirm: e.target.value });
+                setError(null);
+                setSuccess(false);
+              }}
+              autoComplete="new-password"
               className="mt-1 block w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm outline-none transition-all focus:border-[var(--brand)] dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
             />
+            {form.confirm && form.new !== form.confirm && (
+              <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
+                Passwords don't match
+              </p>
+            )}
           </div>
         </div>
 
         <button
           onClick={handleChange}
           disabled={isDisabled}
-          className="mt-4 inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-black transition-all hover:opacity-90 disabled:opacity-50"
+          className="mt-4 inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-black transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           style={{ backgroundColor: "var(--brand)" }}
         >
           {isChanging && (
