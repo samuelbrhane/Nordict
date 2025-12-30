@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import { Outfit } from "next/font/google";
+import { AuthProvider } from "@/context/AuthContext";
 const font = Outfit({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
@@ -38,7 +39,7 @@ export default function RootLayout({
       <body
         className={`${font.className} antialiased bg-white text-neutral-900 dark:bg-black dark:text-neutral-100`}
       >
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );
