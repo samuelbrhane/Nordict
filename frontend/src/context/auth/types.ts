@@ -78,4 +78,10 @@ export interface AuthContextType {
   getSessions: () => Promise<Session[]>;
   revokeSession: (sessionId: number) => Promise<void>;
   revokeAllSessions: () => Promise<void>;
+  deleteAccount: (data: DeleteAccountData) => Promise<void>;
+}
+
+export interface DeleteAccountData {
+  password: string;
+  confirmation: string;
 }

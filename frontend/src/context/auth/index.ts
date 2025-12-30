@@ -8,4 +8,5 @@ export type {
   ProfileUpdateData,
   PasswordChangeData,
   AuthContextType,
+  DeleteAccountData,
 } from "./types";
