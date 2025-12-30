@@ -18,6 +18,7 @@ import {
   ProfileUpdateData,
   PasswordChangeData,
   AuthContextType,
+  DeleteAccountData,
 } from "./types";
 
 import { isTokenExpired, getTokenExpiry, getUserTimezone } from "./utils";
@@ -33,6 +34,7 @@ import {
   getSessionsApi,
   revokeSessionApi,
   revokeAllSessionsApi,
+  deleteAccountApi,
 } from "./api";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -203,6 +205,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await revokeAllSessionsApi(tokens.access);
   };
 
+  const deleteAccount = async (data: DeleteAccountData) => {
+    if (!tokens?.access) throw new Error("Not authenticated");
+    await deleteAccountApi(tokens.access, data);
+    clearAuth();
+    router.push("/login");
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -220,6 +229,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         getSessions,
         revokeSession,
         revokeAllSessions,
+        deleteAccount,
       }}
     >
       {children}

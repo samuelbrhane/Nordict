@@ -173,3 +173,27 @@ export async function revokeAllSessionsApi(accessToken: string): Promise<void> {
     throw new Error("Failed to revoke sessions");
   }
 }
+
+export interface DeleteAccountData {
+  password: string;
+  confirmation: string;
+}
+
+export async function deleteAccountApi(
+  accessToken: string,
+  data: DeleteAccountData
+): Promise<void> {
+  const response = await fetch(`${API_URL}/api/v1/auth/me/delete/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to delete account");
+  }
+}
