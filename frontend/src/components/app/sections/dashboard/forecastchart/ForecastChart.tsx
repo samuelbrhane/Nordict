@@ -1,54 +1,94 @@
-// components/app/sections/dashboard/forecastchart/ForecastChart.tsx
-
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import AnimatedCard from "../AnimatedCard";
 import MarketSelectorModal from "./MarketSelectorModal";
 import ChartArea from "./ChartArea";
-import {
-  Horizon,
-  markets,
-  getHorizonConfig,
-  generateForecastData,
-  getSummaryData,
-} from "./utils";
+import { Horizon } from "@/lib/hooks/useDashboardKpi";
+import { useForecastChart } from "@/lib/hooks/useForecastChart";
 
 interface ForecastChartProps {
   horizon: Horizon;
 }
 
-const ForecastChart = ({ horizon }: ForecastChartProps) => {
-  const [selectedMarket, setSelectedMarket] = useState(markets[0]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const data = useMemo(
-    () => generateForecastData(horizon, selectedMarket.symbol),
-    [horizon, selectedMarket.symbol]
-  );
+const getHorizonConfig = (horizon: Horizon) => {
+  const configs = {
+    "24H": { points: 24, label: "Hours" },
+    "30D": { points: 30, label: "Days" },
+    "12W": { points: 12, label: "Weeks" },
+    "12M": { points: 12, label: "Months" },
+  };
+  return configs[horizon];
+};
 
-  const summary = useMemo(
-    () => getSummaryData(horizon, selectedMarket.symbol),
-    [horizon, selectedMarket.symbol]
-  );
+const ForecastChart = ({ horizon }: ForecastChartProps) => {
+  const [selectedMarket, setSelectedMarket] = useState({
+    symbol: "BTC-USD",
+    name: "Bitcoin",
+  });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const {
+    data: forecast,
+    isLoading,
+    error,
+  } = useForecastChart(horizon, selectedMarket.symbol);
 
   const config = getHorizonConfig(horizon);
+
+  // Handle market selection from modal
+  const handleMarketSelect = (market: { symbol: string; name: string }) => {
+    setSelectedMarket(market);
+    setIsModalOpen(false);
+  };
+
+  // Format direction for display
+  const getDirectionDisplay = (direction?: string) => {
+    if (!direction) return "Neutral";
+    return direction.charAt(0).toUpperCase() + direction.slice(1);
+  };
+
+  // Get direction styling
+  const getDirectionStyle = (direction?: string) => {
+    switch (direction) {
+      case "up":
+        return {
+          bg: "bg-emerald-100 dark:bg-emerald-900/30",
+          text: "text-emerald-600 dark:text-emerald-400",
+          rotate: "",
+        };
+      case "down":
+        return {
+          bg: "bg-red-100 dark:bg-red-900/30",
+          text: "text-red-600 dark:text-red-400",
+          rotate: "rotate-180",
+        };
+      default:
+        return {
+          bg: "bg-neutral-100 dark:bg-neutral-700",
+          text: "text-neutral-500",
+          rotate: "rotate-90",
+        };
+    }
+  };
+
+  const directionStyle = getDirectionStyle(forecast?.direction);
 
   return (
     <>
       {/* Market Selector Modal */}
       <MarketSelectorModal
-        markets={markets}
         selected={selectedMarket}
-        onSelect={setSelectedMarket}
+        onSelect={handleMarketSelect}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
 
       <AnimatedCard delay={350}>
         <div className="rounded-2xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
-          {/* Header - Above Chart */}
+          {/* Header */}
           <div className="flex flex-col gap-4 border-b border-neutral-100 p-4 dark:border-neutral-800 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-            {/* Left - Market selector button and title */}
+            {/* Left - Market selector and title */}
             <div className="flex items-center gap-4">
               {/* Market Selector Button */}
               <button
@@ -98,74 +138,117 @@ const ForecastChart = ({ horizon }: ForecastChartProps) => {
 
             {/* Right - Summary stats */}
             <div className="flex flex-wrap items-center gap-4 sm:gap-6">
-              {/* Direction */}
-              <div className="flex items-center gap-2">
-                <span
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg ${
-                    summary.direction === "Bullish"
-                      ? "bg-emerald-100 dark:bg-emerald-900/30"
-                      : summary.direction === "Bearish"
-                      ? "bg-red-100 dark:bg-red-900/30"
-                      : "bg-neutral-100 dark:bg-neutral-700"
-                  }`}
-                >
-                  <svg
-                    className={`h-4 w-4 ${
-                      summary.direction === "Bullish"
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : summary.direction === "Bearish"
-                        ? "rotate-180 text-red-600 dark:text-red-400"
-                        : "rotate-90 text-neutral-500"
-                    }`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M5 10l7-7m0 0l7 7m-7-7v18"
-                    />
-                  </svg>
-                </span>
-                <div>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                    Direction
-                  </p>
-                  <p
-                    className={`text-sm font-semibold ${
-                      summary.direction === "Bullish"
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : summary.direction === "Bearish"
-                        ? "text-red-600 dark:text-red-400"
-                        : "text-neutral-600 dark:text-neutral-300"
-                    }`}
-                  >
-                    {summary.direction}
-                  </p>
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-20 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
+                  <div className="h-8 w-24 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
                 </div>
-              </div>
+              ) : error ? (
+                <span className="text-sm text-red-500">Error loading data</span>
+              ) : (
+                <>
+                  {/* Direction */}
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`flex h-8 w-8 items-center justify-center rounded-lg ${directionStyle.bg}`}
+                    >
+                      <svg
+                        className={`h-4 w-4 ${directionStyle.text} ${directionStyle.rotate}`}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M5 10l7-7m0 0l7 7m-7-7v18"
+                        />
+                      </svg>
+                    </span>
+                    <div>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                        Direction
+                      </p>
+                      <p
+                        className={`text-sm font-semibold ${directionStyle.text}`}
+                      >
+                        {getDirectionDisplay(forecast?.direction)}
+                      </p>
+                    </div>
+                  </div>
 
-              <div className="hidden h-10 w-px bg-neutral-200 dark:bg-neutral-700 sm:block" />
+                  <div className="hidden h-10 w-px bg-neutral-200 dark:bg-neutral-700 sm:block" />
 
-              {/* Range */}
-              <div>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                  Range
-                </p>
-                <p className="text-sm font-semibold text-neutral-900 dark:text-white">
-                  {summary.range}
-                </p>
-              </div>
+                  {/* Confidence */}
+                  <div>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                      Confidence
+                    </p>
+                    <p className="text-sm font-semibold text-neutral-900 dark:text-white">
+                      {forecast?.confidence_score
+                        ? `${(forecast.confidence_score * 100).toFixed(0)}%`
+                        : "N/A"}
+                    </p>
+                  </div>
 
-              <div className="hidden h-10 w-px bg-neutral-200 dark:bg-neutral-700 sm:block" />
+                  <div className="hidden h-10 w-px bg-neutral-200 dark:bg-neutral-700 sm:block" />
+
+                  {/* Range */}
+                  <div>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                      Range
+                    </p>
+                    <p className="text-sm font-semibold text-neutral-900 dark:text-white">
+                      {forecast?.price_range || "N/A"}
+                    </p>
+                  </div>
+
+                  <div className="hidden h-10 w-px bg-neutral-200 dark:bg-neutral-700 sm:block" />
+
+                  {/* Change */}
+                  <div>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                      Predicted Change
+                    </p>
+                    <p
+                      className={`text-sm font-semibold ${
+                        (forecast?.change_percent || 0) > 0
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : (forecast?.change_percent || 0) < 0
+                          ? "text-red-600 dark:text-red-400"
+                          : "text-neutral-600 dark:text-neutral-300"
+                      }`}
+                    >
+                      {forecast?.change_percent
+                        ? `${
+                            forecast.change_percent > 0 ? "+" : ""
+                          }${forecast.change_percent.toFixed(2)}%`
+                        : "N/A"}
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
-          {/* Chart Area - Full Width */}
+          {/* Chart Area */}
           <div className="p-4 sm:p-6">
-            <ChartArea data={data} horizon={horizon} />
+            {isLoading ? (
+              <div className="flex h-[400px] items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-neutral-200 border-t-emerald-500" />
+              </div>
+            ) : error ? (
+              <div className="flex h-[400px] items-center justify-center">
+                <p className="text-red-500">Failed to load chart: {error}</p>
+              </div>
+            ) : forecast ? (
+              <ChartArea forecast={forecast} horizon={horizon} />
+            ) : (
+              <div className="flex h-[400px] items-center justify-center">
+                <p className="text-neutral-500">No forecast data available</p>
+              </div>
+            )}
           </div>
         </div>
       </AnimatedCard>
