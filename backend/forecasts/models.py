@@ -1,6 +1,4 @@
 from django.db import models
-from django.conf import settings
-
 
 class MLModel(models.Model):
     """Machine learning model registry."""
@@ -11,60 +9,66 @@ class MLModel(models.Model):
         PRODUCTION = 'production', 'Production'
         DEPRECATED = 'deprecated', 'Deprecated'
     
+    class Horizon(models.TextChoices):
+        H24 = '24H', '24 Hours'
+        D30 = '30D', '30 Days'
+        W12 = '12W', '12 Weeks'
+        M12 = '12M', '12 Months'
+    
     name = models.CharField(max_length=100)
     version = models.CharField(max_length=20)
+    horizon = models.CharField(
+        max_length=10,
+        choices=Horizon.choices,
+    )
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
         default=Status.CANDIDATE,
     )
     
-    # Training info
     training_started_at = models.DateTimeField(null=True, blank=True)
     training_completed_at = models.DateTimeField(null=True, blank=True)
     training_data_start = models.DateField(null=True, blank=True)
     training_data_end = models.DateField(null=True, blank=True)
     
-    # Supported horizons
-    supports_hourly = models.BooleanField(default=True)
-    supports_daily = models.BooleanField(default=True)
-    supports_weekly = models.BooleanField(default=True)
-    supports_monthly = models.BooleanField(default=True)
+    artifact_path = models.CharField(max_length=500, blank=True)
     
-    # Storage
-    artifact_path = models.CharField(max_length=500)  # S3 path
-    
-    # Performance metrics (validation)
     mae = models.FloatField(null=True, blank=True)
     rmse = models.FloatField(null=True, blank=True)
     mape = models.FloatField(null=True, blank=True)
     directional_accuracy = models.FloatField(null=True, blank=True)
     
-    # Metadata
-    description = models.TextField(blank=True)
-    config = models.JSONField(default=dict)  # Model hyperparameters
+    r2 = models.FloatField(null=True, blank=True)  # R-squared
+    median_ae = models.FloatField(null=True, blank=True)  # Median Absolute Error
+    max_error = models.FloatField(null=True, blank=True)  # Worst prediction
+    bias = models.FloatField(null=True, blank=True)  # Prediction bias
+    correlation = models.FloatField(null=True, blank=True) 
     
-    # Timestamps
+    config = models.JSONField(default=dict)
+    description = models.TextField(blank=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
         db_table = 'ml_models'
-        unique_together = ['name', 'version']
+        unique_together = ['name', 'version', 'horizon']
         ordering = ['-created_at']
     
     def __str__(self):
-        return f"{self.name} v{self.version} ({self.status})"
-
+        return f"{self.name} v{self.version} ({self.horizon}) - {self.status}"
+    
+    
 
 class Forecast(models.Model):
     """Generated forecast for a market."""
     
     class Horizon(models.TextChoices):
-        HOURLY = 'hourly', 'Hourly (24H)'
-        DAILY = 'daily', 'Daily (7D)'
-        WEEKLY = 'weekly', 'Weekly (4W)'
-        MONTHLY = 'monthly', 'Monthly (12M)'
+        H24 = '24H', '24 Hours'
+        D30 = '30D', '30 Days'
+        W12 = '12W', '12 Weeks'
+        M12 = '12M', '12 Months'
     
     class Direction(models.TextChoices):
         UP = 'up', 'Up'
@@ -82,25 +86,24 @@ class Forecast(models.Model):
         related_name='forecasts',
     )
     
-    # Forecast metadata
     horizon = models.CharField(
-        max_length=20,
+        max_length=10,
         choices=Horizon.choices,
     )
+    
+    # When forecast was generated and its validity
     generated_at = models.DateTimeField()
     valid_from = models.DateTimeField()
     valid_until = models.DateTimeField()
     
-    # Summary metrics
+    # Summary
     direction = models.CharField(
         max_length=10,
         choices=Direction.choices,
     )
-    confidence_score = models.FloatField()  # 0-1
-    probability_up = models.FloatField()
-    probability_down = models.FloatField()
+    confidence_score = models.FloatField()  # 0.0 to 1.0
     
-    # Current price at generation
+    # Price at generation time
     current_price = models.DecimalField(max_digits=20, decimal_places=8)
     
     # Predicted range
@@ -111,7 +114,6 @@ class Forecast(models.Model):
     # Is this the latest forecast for this market/horizon?
     is_latest = models.BooleanField(default=True)
     
-    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -124,8 +126,9 @@ class Forecast(models.Model):
     
     def __str__(self):
         return f"{self.market.symbol} {self.horizon} @ {self.generated_at}"
-
-
+    
+    
+    
 class ForecastPoint(models.Model):
     """Individual forecast data points (time series)."""
     
@@ -135,19 +138,21 @@ class ForecastPoint(models.Model):
         related_name='points',
     )
     
-    # Point data
-    step = models.IntegerField()  # 0, 1, 2, ... (step in the forecast)
-    timestamp = models.DateTimeField()  # Target timestamp
+    step = models.IntegerField()  # 0, 1, 2, ... (position in forecast)
+    timestamp = models.DateTimeField()  # Target time for this prediction
     
     # Predictions
     predicted_price = models.DecimalField(max_digits=20, decimal_places=8)
     confidence_low = models.DecimalField(max_digits=20, decimal_places=8)
     confidence_high = models.DecimalField(max_digits=20, decimal_places=8)
-    confidence_score = models.FloatField()
+    confidence_score = models.FloatField()  # 0.0 to 1.0
     
-    # Actual outcome (filled later for performance tracking)
+    # Actual outcome (filled later when time passes)
     actual_price = models.DecimalField(
-        max_digits=20, decimal_places=8, null=True, blank=True
+        max_digits=20, 
+        decimal_places=8, 
+        null=True, 
+        blank=True
     )
     
     class Meta:
@@ -157,10 +162,25 @@ class ForecastPoint(models.Model):
     
     def __str__(self):
         return f"{self.forecast} - Step {self.step}"
-
-
+    
+    @property
+    def error(self):
+        """Calculate prediction error if actual price exists."""
+        if self.actual_price is None:
+            return None
+        return float(self.actual_price - self.predicted_price)
+    
+    @property
+    def error_percent(self):
+        """Calculate percentage error if actual price exists."""
+        if self.actual_price is None or self.predicted_price == 0:
+            return None
+        return (float(self.actual_price - self.predicted_price) / float(self.predicted_price)) * 100
+    
+    
+    
 class BacktestRun(models.Model):
-    """Backtesting run results."""
+    """Backtesting results for model evaluation."""
     
     model = models.ForeignKey(
         MLModel,
@@ -172,23 +192,22 @@ class BacktestRun(models.Model):
         on_delete=models.CASCADE,
         related_name='backtest_runs',
     )
-    horizon = models.CharField(max_length=20)
+    horizon = models.CharField(max_length=10)
     
-    # Time window
+    # Test period
     test_start = models.DateField()
     test_end = models.DateField()
     
-    # Metrics
-    mae = models.FloatField()
-    rmse = models.FloatField()
-    mape = models.FloatField()
-    directional_accuracy = models.FloatField()
-    calibration_score = models.FloatField(null=True, blank=True)
+    # Performance metrics
+    mae = models.FloatField()  # Mean Absolute Error
+    rmse = models.FloatField()  # Root Mean Square Error
+    mape = models.FloatField()  # Mean Absolute Percentage Error
+    directional_accuracy = models.FloatField()  # % correct direction
     
-    # Regime breakdown (optional)
-    regime_metrics = models.JSONField(default=dict)
+    # Optional detailed metrics
+    total_predictions = models.IntegerField(default=0)
+    correct_directions = models.IntegerField(default=0)
     
-    # Timestamps
     run_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -196,4 +215,4 @@ class BacktestRun(models.Model):
         ordering = ['-run_at']
     
     def __str__(self):
-        return f"Backtest {self.model} on {self.market.symbol} ({self.test_start} - {self.test_end})"
+        return f"{self.model} on {self.market.symbol} ({self.test_start} to {self.test_end})"

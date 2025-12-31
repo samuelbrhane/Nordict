@@ -18,9 +18,7 @@ urlpatterns = [
     # API v1
     path('api/v1/', include([
         path('auth/', include('users.urls')),
-        path('markets/', include('markets.urls')),
         path('forecasts/', include('forecasts.urls')),
-        path('alerts/', include('alerts.urls')),
     ])),
     
     # API Documentation
