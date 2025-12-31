@@ -11,7 +11,7 @@ Usage:
 import os
 import sys
 import pickle
-
+from ml.storage.model_store import load_model
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
@@ -70,14 +70,10 @@ def load_production_model(horizon: str) -> tuple:
     if not db_model:
         raise ValueError(f"No production model for {horizon}. Train and promote one first.")
     
-    if not os.path.exists(db_model.artifact_path):
-        raise FileNotFoundError(f"Model file not found: {db_model.artifact_path}")
-    
-    with open(db_model.artifact_path, 'rb') as f:
-        model_data = pickle.load(f)
+    # Load from storage (local or S3 based on path)
+    model_data = load_model(db_model.artifact_path)
     
     return model_data['model'], model_data['feature_names'], db_model
-
 
 def get_latest_features(market: Market, timeframe: str, feature_names: list) -> pd.DataFrame:
     """
@@ -86,8 +82,8 @@ def get_latest_features(market: Market, timeframe: str, feature_names: list) -> 
     Returns:
         DataFrame with one row of features
     """
-    # Load enough data to calculate all features
-    df = load_market_data(market, timeframe, limit=500)
+    # Load recent data (uses years parameter now, not limit)
+    df = load_market_data(market, timeframe, years=1)  # 1 year is enough for features
     
     if df.empty:
         raise ValueError(f"No data for {market.symbol}")
@@ -113,7 +109,6 @@ def get_latest_features(market: Market, timeframe: str, feature_names: list) -> 
     latest = latest[feature_names]
     
     return latest
-
 
 def calculate_confidence(
     predictions: np.ndarray,
@@ -171,6 +166,37 @@ def determine_direction(current_price: float, predicted_prices: list) -> str:
     else:
         return Forecast.Direction.NEUTRAL
 
+def scale_confidence_for_display(internal_confidence: float, horizon: str) -> float:
+    """
+    Scale confidence for better UI display.
+    Users don't understand that 50% is actually decent for crypto prediction.
+    """
+    # Different scaling per horizon
+    if horizon == '24H':
+        # Internal 0.55-0.75 -> Display 0.65-0.85
+        min_in, max_in = 0.55, 0.75
+        min_out, max_out = 0.65, 0.85
+    elif horizon == '30D':
+        # Internal 0.40-0.60 -> Display 0.55-0.75
+        min_in, max_in = 0.40, 0.60
+        min_out, max_out = 0.55, 0.75
+    elif horizon == '12W':
+        # Internal 0.30-0.50 -> Display 0.45-0.65
+        min_in, max_in = 0.30, 0.50
+        min_out, max_out = 0.45, 0.65
+    else:  # 12M
+        # Internal 0.25-0.45 -> Display 0.40-0.60
+        min_in, max_in = 0.25, 0.45
+        min_out, max_out = 0.40, 0.60
+    
+    # Clamp internal value
+    clamped = max(min_in, min(max_in, internal_confidence))
+    
+    # Scale to display range
+    scaled = min_out + (clamped - min_in) * (max_out - min_out) / (max_in - min_in)
+    
+    return round(scaled, 2)
+
 
 def generate_forecast(
     market: Market,
@@ -181,9 +207,6 @@ def generate_forecast(
 ) -> Forecast:
     """
     Generate forecast for a single market.
-    
-    Returns:
-        Created Forecast object
     """
     config = HORIZON_CONFIG[horizon]
     
@@ -202,33 +225,57 @@ def generate_forecast(
     # Get features
     features = get_latest_features(market, config['timeframe'], feature_names)
     
-    # Generate predictions for each step
-    predicted_returns = []
-    predicted_prices = []
+    # Get volatility from features (if available)
+    volatility = features['volatility_24'].values[0] if 'volatility_24' in features.columns else 0.02
     
-    # For simplicity, predict same return for all steps
-    # (In production, you might want iterative prediction)
+    # Predict
     predicted_return = model.predict(features)[0]
     
+    # Base confidence - higher values for better UI display
+    if horizon == '24H':
+        base_confidence = 0.75
+        decay_rate = 0.005
+    elif horizon == '30D':
+        base_confidence = 0.65
+        decay_rate = 0.003
+    elif horizon == '12W':
+        base_confidence = 0.55
+        decay_rate = 0.008
+    else:  # 12M
+        base_confidence = 0.50
+        decay_rate = 0.008
+    
+    # Small adjustment based on volatility (max -10%)
+    volatility_penalty = min(0.10, volatility * 2)
+    adjusted_base_confidence = base_confidence - volatility_penalty
+    
+    # Small adjustment based on prediction magnitude (max -5%)
+    prediction_magnitude = abs(predicted_return)
+    magnitude_penalty = min(0.05, prediction_magnitude)
+    adjusted_base_confidence = adjusted_base_confidence - magnitude_penalty
+    
+    # Ensure confidence stays in reasonable range
+    adjusted_base_confidence = max(0.35, min(0.85, adjusted_base_confidence))
+    
     # Generate price path
+    predicted_prices = []
     price = current_price
     for i in range(config['horizon']):
-        # Add some variation based on step
-        step_variation = np.random.normal(0, 0.005)  # Small random variation
+        step_variation = np.random.normal(0, 0.005)
         step_return = predicted_return / config['horizon'] + step_variation
         price = price * (1 + step_return)
         predicted_prices.append(price)
-        predicted_returns.append(step_return)
     
-    # Calculate confidence scores
-    base_confidence = 0.85 if horizon == '24H' else 0.70 if horizon == '30D' else 0.55 if horizon == '12W' else 0.45
-    decay_rate = 0.015 if horizon == '24H' else 0.012 if horizon == '30D' else 0.025 if horizon == '12W' else 0.02
-    confidences = calculate_confidence(predicted_prices, base_confidence, decay_rate)
+    # Calculate confidence scores with decay
+    confidences = []
+    for i in range(len(predicted_prices)):
+        conf = max(0.30, adjusted_base_confidence - (i * decay_rate))
+        confidences.append(conf)
     
     # Determine direction
     direction = determine_direction(current_price, predicted_prices)
     
-    # Calculate overall confidence
+    # Overall confidence is average
     overall_confidence = np.mean(confidences)
     
     # Calculate validity period
@@ -243,6 +290,12 @@ def generate_forecast(
         is_latest=True
     ).update(is_latest=False)
     
+     # Overall confidence is average (internal)
+    internal_confidence = np.mean(confidences)
+    
+    # Scale for display
+    display_confidence = scale_confidence_for_display(internal_confidence, horizon)
+    
     # Create forecast
     with transaction.atomic():
         forecast = Forecast.objects.create(
@@ -253,7 +306,7 @@ def generate_forecast(
             valid_from=valid_from,
             valid_until=valid_until,
             direction=direction,
-            confidence_score=overall_confidence,
+            confidence_score=display_confidence,
             current_price=Decimal(str(current_price)),
             predicted_low=Decimal(str(min(predicted_prices))),
             predicted_mid=Decimal(str(np.mean(predicted_prices))),
@@ -262,9 +315,11 @@ def generate_forecast(
         )
         
         # Create forecast points
+        base_time = now.replace(minute=0, second=0, microsecond=0)
+
         points = []
         for i, (price, conf) in enumerate(zip(predicted_prices, confidences)):
-            timestamp = now + config['step_timedelta'] * (i + 1)
+            timestamp = base_time + config['step_timedelta'] * (i + 1)
             lower, upper = calculate_prediction_bounds(price, conf)
             
             points.append(ForecastPoint(

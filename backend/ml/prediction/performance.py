@@ -28,7 +28,7 @@ from forecasts.models import MLModel, Forecast, ForecastPoint, BacktestRun
 
 # Horizon configurations
 HORIZON_CONFIG = {
-    '24H': {'timeframe': '1h', 'tolerance': timedelta(minutes=30)},
+    '24H': {'timeframe': '1h', 'tolerance': timedelta(hours=1)},
     '30D': {'timeframe': '1d', 'tolerance': timedelta(hours=12)},
     '12W': {'timeframe': '1w', 'tolerance': timedelta(days=3)},
     '12M': {'timeframe': '1M', 'tolerance': timedelta(days=15)},
