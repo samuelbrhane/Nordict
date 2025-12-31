@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.utils import timezone
+import math
 
 
 class CustomUserManager(BaseUserManager):
@@ -193,8 +194,8 @@ class UserSubscription(models.Model):
     def trial_days_remaining(self):
         if not self.is_trial_active:
             return 0
-        remaining = self.trial_ends_at - timezone.now()
-        return max(0, remaining.days)
+        remaining = (self.trial_ends_at - timezone.now()).total_seconds()
+        return max(0, math.ceil(remaining / 86400))
     
     @property
     def is_subscription_active(self):
@@ -230,6 +231,14 @@ class UserSubscription(models.Model):
         if not self.is_subscription_active:
             return None
         return self.expires_at
+    
+    @property
+    def available_horizons(self):
+        return self.plan_limits.get('horizons', [])
+
+    @property
+    def max_markets(self):
+        return self.plan_limits.get('max_markets')
 
 
 class UserPreferences(models.Model):
