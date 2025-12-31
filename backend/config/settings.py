@@ -281,3 +281,12 @@ STRIPE_PRICES = {
     'premium_monthly': config('STRIPE_PRICE_PREMIUM_MONTHLY'),
     'premium_yearly': config('STRIPE_PRICE_PREMIUM_YEARLY'),
 }
+
+
+# ML Model Storage Configuration
+ML_STORAGE = {
+    'TYPE': config('ML_STORAGE_TYPE', default='local'),  # 'local' or 's3'
+    'LOCAL_PATH': config('ML_STORAGE_LOCAL_PATH', default='ml/models'),
+    'S3_BUCKET': config('ML_STORAGE_S3_BUCKET', default=''),
+    'S3_PREFIX': config('ML_STORAGE_S3_PREFIX', default='models'),
+}
