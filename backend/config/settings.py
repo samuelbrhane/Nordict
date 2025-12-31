@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'markets.apps.MarketsConfig',
     'forecasts.apps.ForecastsConfig',
-    'alerts.apps.AlertsConfig',
 ]
 
 MIDDLEWARE = [
@@ -227,49 +226,48 @@ FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:3000')
 
 # Forecast horizons configuration
 FORECAST_HORIZONS = {
-    'hourly': {'steps': 24, 'step_size': '1H', 'update_frequency': '6H'},
-    'daily': {'steps': 7, 'step_size': '1D', 'update_frequency': '24H'},
-    'weekly': {'steps': 4, 'step_size': '1W', 'update_frequency': '24H'},
-    'monthly': {'steps': 12, 'step_size': '30D', 'update_frequency': '24H'},
+    '24H': {'steps': 24, 'step_size': '1H', 'update_frequency': '6H'},
+    '30D': {'steps': 30, 'step_size': '1D', 'update_frequency': '24H'},
+    '12W': {'steps': 12, 'step_size': '1W', 'update_frequency': '24H'},
+    '12M': {'steps': 12, 'step_size': '1M', 'update_frequency': '24H'},
 }
 
 # Subscription plan limits
 SUBSCRIPTION_PLANS = {
     'free': {
-        'max_markets': 2,
-        'max_alerts': 1,
-        'max_sessions': 1,  # Only 1 device
-        'horizons': ['daily'],
+        'max_markets': 0,  # No access after trial ends
+        'max_alerts': 0,
+        'max_sessions': 1,
+        'horizons': [],
         'api_access': False,
-        'backtest_days': 7,
+        'backtest_days': 0,
     },
     'pro': {
-        'max_markets': 5,
+        'max_markets': 10,
         'max_alerts': 5,
-        'max_sessions': 2,  # 2 devices
-        'horizons': ['daily'],
+        'max_sessions': 3,
+        'horizons': ['24H', '30D'],
         'api_access': False,
         'backtest_days': 30,
     },
     'premium': {
-        'max_markets': None,
+        'max_markets': None,  # Unlimited
         'max_alerts': None,
-        'max_sessions': 5,  # 5 devices
-        'horizons': ['hourly', 'daily', 'weekly', 'monthly'],
+        'max_sessions': 5,
+        'horizons': ['24H', '30D', '12W', '12M'],
         'api_access': True,
         'backtest_days': None,
     },
     'teams': {
         'max_markets': None,
         'max_alerts': None,
-        'max_sessions': None,  # Unlimited
-        'horizons': ['hourly', 'daily', 'weekly', 'monthly'],
+        'max_sessions': None,
+        'horizons': ['24H', '30D', '12W', '12M'],
         'api_access': True,
         'backtest_days': None,
         'team_features': True,
     },
 }
-
 
 # Stripe
 STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY')
