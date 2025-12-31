@@ -1,13 +1,14 @@
+// components/app/sections/dashboard/DashboardHeader.tsx
+
 "use client";
 
-import { useState } from "react";
 import AnimatedCard from "./AnimatedCard";
 
 interface DashboardHeaderProps {
   marketFilter: "all" | "favorites";
   onMarketFilterChange: (filter: "all" | "favorites") => void;
-  horizon: "1D" | "7D" | "30D";
-  onHorizonChange: (horizon: "1D" | "7D" | "30D") => void;
+  horizon: "24H" | "30D" | "12W" | "12M";
+  onHorizonChange: (horizon: "24H" | "30D" | "12W" | "12M") => void;
   lastUpdated: string;
 }
 
@@ -21,7 +22,6 @@ const DashboardHeader = ({
   return (
     <AnimatedCard delay={0}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        {/* Left - Title */}
         <div>
           <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
             Dashboard
@@ -31,11 +31,9 @@ const DashboardHeader = ({
           </p>
         </div>
 
-        {/* Right - Controls */}
         <div className="flex flex-wrap items-center gap-3">
-          {/* Horizon selector */}
           <div className="flex rounded-lg border border-neutral-200 bg-neutral-50 p-1 dark:border-neutral-700 dark:bg-neutral-800">
-            {(["1D", "7D", "30D"] as const).map((h) => (
+            {(["24H", "30D", "12W", "12M"] as const).map((h) => (
               <button
                 key={h}
                 onClick={() => onHorizonChange(h)}
@@ -50,7 +48,6 @@ const DashboardHeader = ({
             ))}
           </div>
 
-          {/* Last updated */}
           <div className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800">
             <span
               className="h-2 w-2 animate-pulse rounded-full"

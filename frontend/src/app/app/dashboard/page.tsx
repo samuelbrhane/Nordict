@@ -1,3 +1,5 @@
+// app/app/dashboard/page.tsx
+
 "use client";
 
 import { useState } from "react";
@@ -5,13 +7,16 @@ import { AppLayout } from "@/components/app";
 import {
   DashboardHeader,
   KpiTiles,
-  ForecastChart,
   TopSignalsTable,
 } from "@/components/app/sections/dashboard";
+import {
+  ForecastChart,
+  PerformanceChart,
+} from "@/components/app/sections/dashboard/forecastchart";
 
 const DashboardPage = () => {
   const [marketFilter, setMarketFilter] = useState<"all" | "favorites">("all");
-  const [horizon, setHorizon] = useState<"1D" | "7D" | "30D">("7D");
+  const [horizon, setHorizon] = useState<"24H" | "30D" | "12W" | "12M">("30D");
 
   return (
     <AppLayout title="" subtitle="">
@@ -25,6 +30,7 @@ const DashboardPage = () => {
         />
         <KpiTiles horizon={horizon} />
         <ForecastChart horizon={horizon} />
+        <PerformanceChart horizon={horizon} />
         <TopSignalsTable horizon={horizon} />
       </div>
     </AppLayout>

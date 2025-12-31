@@ -12,7 +12,7 @@ interface KpiTile {
 }
 
 interface KpiTilesProps {
-  horizon: "1D" | "7D" | "30D";
+  horizon: "24H" | "30D" | "12W" | "12M";
 }
 
 const ClockIcon = () => (
@@ -95,9 +95,9 @@ const TrendIcon = () => (
   </svg>
 );
 
-const getKpiData = (horizon: "1D" | "7D" | "30D"): KpiTile[] => {
+const getKpiData = (horizon: "24H" | "30D" | "12W" | "12M"): KpiTile[] => {
   const baseData: Record<string, KpiTile[]> = {
-    "1D": [
+    "24H": [
       {
         label: "Forecast Run",
         value: "2 min ago",
@@ -120,20 +120,20 @@ const getKpiData = (horizon: "1D" | "7D" | "30D"): KpiTile[] => {
       },
       {
         label: "Avg Confidence",
-        value: "74%",
+        value: "78%",
         change: "+3%",
         changeType: "positive",
         icon: <TargetIcon />,
       },
       {
-        label: "1D Performance",
+        label: "24H Performance",
         value: "+2.1%",
         change: "vs baseline",
         changeType: "positive",
         icon: <TrendIcon />,
       },
     ],
-    "7D": [
+    "30D": [
       {
         label: "Forecast Run",
         value: "2 min ago",
@@ -156,20 +156,20 @@ const getKpiData = (horizon: "1D" | "7D" | "30D"): KpiTile[] => {
       },
       {
         label: "Avg Confidence",
-        value: "68%",
+        value: "62%",
         change: "-2%",
         changeType: "negative",
         icon: <TargetIcon />,
       },
       {
-        label: "7D Performance",
-        value: "+5.8%",
+        label: "30D Performance",
+        value: "+8.4%",
         change: "vs baseline",
         changeType: "positive",
         icon: <TrendIcon />,
       },
     ],
-    "30D": [
+    "12W": [
       {
         label: "Forecast Run",
         value: "2 min ago",
@@ -185,21 +185,57 @@ const getKpiData = (horizon: "1D" | "7D" | "30D"): KpiTile[] => {
       },
       {
         label: "Active Alerts",
-        value: "18",
-        change: "+6",
+        value: "15",
+        change: "+5",
         changeType: "neutral",
         icon: <BellIcon />,
       },
       {
         label: "Avg Confidence",
-        value: "61%",
+        value: "48%",
         change: "-5%",
         changeType: "negative",
         icon: <TargetIcon />,
       },
       {
-        label: "30D Performance",
-        value: "+12.4%",
+        label: "12W Performance",
+        value: "+15.2%",
+        change: "vs baseline",
+        changeType: "positive",
+        icon: <TrendIcon />,
+      },
+    ],
+    "12M": [
+      {
+        label: "Forecast Run",
+        value: "2 min ago",
+        icon: <ClockIcon />,
+        status: "healthy",
+      },
+      {
+        label: "Markets",
+        value: "24",
+        change: "+2",
+        changeType: "positive",
+        icon: <ChartIcon />,
+      },
+      {
+        label: "Active Alerts",
+        value: "20",
+        change: "+8",
+        changeType: "neutral",
+        icon: <BellIcon />,
+      },
+      {
+        label: "Avg Confidence",
+        value: "38%",
+        change: "-8%",
+        changeType: "negative",
+        icon: <TargetIcon />,
+      },
+      {
+        label: "12M Performance",
+        value: "+24.6%",
         change: "vs baseline",
         changeType: "positive",
         icon: <TrendIcon />,
