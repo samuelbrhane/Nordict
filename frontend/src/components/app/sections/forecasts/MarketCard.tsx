@@ -1,16 +1,18 @@
+// components/app/sections/forecasts/MarketCard.tsx
+
 "use client";
 
 import Link from "next/link";
-import { Market, Horizon } from "@/config/marketsData";
+import { MarketForecast } from "@/lib/hooks/useMarketsWithForecasts";
+import { Horizon } from "@/lib/hooks/useDashboardKpi";
+
 interface MarketCardProps {
-  market: Market;
+  market: MarketForecast;
   horizon: Horizon;
   onToggleFavorite: (symbol: string) => void;
 }
 
 const MarketCard = ({ market, horizon, onToggleFavorite }: MarketCardProps) => {
-  const horizonData = market.horizons[horizon];
-
   return (
     <div className="group rounded-2xl border border-neutral-200 bg-white p-4 transition-all duration-200 hover:border-neutral-300 hover:shadow-lg dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700">
       <div className="flex items-start justify-between">
@@ -39,11 +41,11 @@ const MarketCard = ({ market, horizon, onToggleFavorite }: MarketCardProps) => {
         >
           <svg
             className="h-5 w-5"
-            fill={market.isFavorite ? "currentColor" : "none"}
+            fill={market.is_favorite ? "currentColor" : "none"}
             viewBox="0 0 24 24"
             stroke="currentColor"
             strokeWidth={1.5}
-            style={market.isFavorite ? { color: "#FBBF24" } : {}}
+            style={market.is_favorite ? { color: "#FBBF24" } : {}}
           >
             <path
               strokeLinecap="round"
@@ -53,37 +55,38 @@ const MarketCard = ({ market, horizon, onToggleFavorite }: MarketCardProps) => {
           </svg>
         </button>
       </div>
-      <Link href={`/app/${market.symbol}`}>
+      <Link href={`/app/forecasts/${market.symbol}`}>
         <div className="mt-4 flex items-end justify-between">
           <div>
             <p className="text-lg font-semibold text-neutral-900 dark:text-white">
-              {market.price}
+              {market.price_formatted}
             </p>
             <span
               className={`text-sm font-medium ${
-                market.changeDirection === "up"
+                market.change_direction === "up"
                   ? "text-emerald-600 dark:text-emerald-400"
                   : "text-red-600 dark:text-red-400"
               }`}
             >
-              {market.change24h}
+              {market.change_24h >= 0 ? "+" : ""}
+              {market.change_24h}%
             </span>
           </div>
           <div className="flex items-center gap-2">
             <div
               className={`flex h-7 w-7 items-center justify-center rounded-lg ${
-                horizonData.signal === "up"
+                market.forecast.direction === "up"
                   ? "bg-emerald-100 dark:bg-emerald-900/30"
-                  : horizonData.signal === "down"
+                  : market.forecast.direction === "down"
                   ? "bg-red-100 dark:bg-red-900/30"
                   : "bg-neutral-100 dark:bg-neutral-700"
               }`}
             >
               <svg
                 className={`h-4 w-4 ${
-                  horizonData.signal === "up"
+                  market.forecast.direction === "up"
                     ? "text-emerald-600 dark:text-emerald-400"
-                    : horizonData.signal === "down"
+                    : market.forecast.direction === "down"
                     ? "rotate-180 text-red-600 dark:text-red-400"
                     : "rotate-90 text-neutral-500"
                 }`}
@@ -104,7 +107,7 @@ const MarketCard = ({ market, horizon, onToggleFavorite }: MarketCardProps) => {
                 {horizon} Conf
               </p>
               <p className="text-sm font-medium text-neutral-900 dark:text-white">
-                {horizonData.confidence}%
+                {market.forecast.confidence}%
               </p>
             </div>
           </div>

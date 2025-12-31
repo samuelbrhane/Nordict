@@ -1,19 +1,13 @@
-// components/app/sections/dashboard/forecastchart/PerformanceChart.tsx
-
 "use client";
 
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef } from "react";
 import AnimatedCard from "../AnimatedCard";
 import MarketSelectorModal from "./MarketSelectorModal";
+import { Horizon } from "@/lib/hooks/useDashboardKpi";
 import {
-  Horizon,
-  Market,
-  markets,
-  getHorizonConfig,
-  formatPrice,
+  useForecastPerformance,
   PerformanceDataPoint,
-  generatePerformanceData,
-} from "./utils";
+} from "@/lib/hooks/useForecastPerformance";
 
 interface PerformanceChartProps {
   horizon: Horizon;
@@ -24,40 +18,86 @@ interface TooltipData {
   point: PerformanceDataPoint;
 }
 
-const getPerformanceStats = (data: PerformanceDataPoint[]) => {
-  const errors = data.map((d) => Math.abs(d.errorPercent));
-  const avgError = errors.reduce((a, b) => a + b, 0) / errors.length;
-
-  const correctDirection = data.filter((d, i) => {
-    if (i === 0) return true;
-    const actualDir = d.actual > data[i - 1].actual;
-    const predictedDir = d.predicted > data[i - 1].predicted;
-    return actualDir === predictedDir;
-  }).length;
-
-  const directionAccuracy = Math.round((correctDirection / data.length) * 100);
-
-  return {
-    avgError: Math.round(avgError * 100) / 100,
-    directionAccuracy,
-    totalPoints: data.length,
+const getHorizonConfig = (horizon: Horizon) => {
+  const configs = {
+    "24H": { points: 24, label: "Hours" },
+    "30D": { points: 30, label: "Days" },
+    "12W": { points: 12, label: "Weeks" },
+    "12M": { points: 12, label: "Months" },
   };
+  return configs[horizon];
+};
+
+const formatPrice = (value: number): string => {
+  if (value >= 1000) {
+    return `$${(value / 1000).toFixed(1)}k`;
+  }
+  return `$${value.toFixed(2)}`;
 };
 
 const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
-  const [selectedMarket, setSelectedMarket] = useState<Market>(markets[0]);
+  const [selectedMarket, setSelectedMarket] = useState({
+    symbol: "BTC-USD",
+    name: "Bitcoin",
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const data = useMemo(
-    () => generatePerformanceData(horizon, selectedMarket.symbol),
-    [horizon, selectedMarket.symbol]
-  );
+  const {
+    data: performance,
+    isLoading,
+    error,
+  } = useForecastPerformance(horizon, selectedMarket.symbol);
 
-  const stats = useMemo(() => getPerformanceStats(data), [data]);
   const config = getHorizonConfig(horizon);
+
+  // Handle market selection
+  const handleMarketSelect = (market: { symbol: string; name: string }) => {
+    setSelectedMarket(market);
+  };
+
+  // If loading or error, show states
+  if (isLoading) {
+    return (
+      <AnimatedCard delay={400}>
+        <div className="flex h-[400px] items-center justify-center rounded-2xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-neutral-200 border-t-blue-500" />
+        </div>
+      </AnimatedCard>
+    );
+  }
+
+  if (error) {
+    return (
+      <AnimatedCard delay={400}>
+        <div className="flex h-[400px] items-center justify-center rounded-2xl border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20">
+          <p className="text-red-600 dark:text-red-400">{error}</p>
+        </div>
+      </AnimatedCard>
+    );
+  }
+
+  const data = performance?.points || [];
+  const stats = performance?.stats || {
+    avgError: 0,
+    directionAccuracy: 0,
+    totalPoints: 0,
+  };
+
+  // If no data
+  if (data.length === 0) {
+    return (
+      <AnimatedCard delay={400}>
+        <div className="flex h-[400px] items-center justify-center rounded-2xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+          <p className="text-neutral-500 dark:text-neutral-400">
+            No performance data available yet
+          </p>
+        </div>
+      </AnimatedCard>
+    );
+  }
 
   // Calculate chart bounds
   const allValues = data.flatMap((d) => [d.predicted, d.actual]);
@@ -88,42 +128,14 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
     .join(" ");
 
   // X-axis labels
-  // In ChartArea.tsx, update getXLabels function:
-
   const getXLabels = () => {
-    if (horizon === "24H") {
-      // Show every 4 hours
-      return data
-        .filter((_, i) => i % 4 === 0 || i === data.length - 1)
-        .map((d) => ({
-          index: d.index,
-          label: d.label,
-        }));
-    } else if (horizon === "30D") {
-      // Show every 5 days
-      return data
-        .filter((_, i) => i % 5 === 0 || i === data.length - 1)
-        .map((d) => ({
-          index: d.index,
-          label: d.label,
-        }));
-    } else if (horizon === "12W") {
-      // Show every 2 weeks
-      return data
-        .filter((_, i) => i % 2 === 0 || i === data.length - 1)
-        .map((d) => ({
-          index: d.index,
-          label: d.label,
-        }));
-    } else {
-      // 12M - Show every 2 months
-      return data
-        .filter((_, i) => i % 2 === 0 || i === data.length - 1)
-        .map((d) => ({
-          index: d.index,
-          label: d.label,
-        }));
-    }
+    const step = horizon === "24H" ? 4 : horizon === "30D" ? 5 : 2;
+    return data
+      .filter((_, i) => i % step === 0 || i === data.length - 1)
+      .map((d) => ({
+        index: d.index,
+        label: d.label,
+      }));
   };
 
   const xLabels = getXLabels();
@@ -179,9 +191,8 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
   return (
     <>
       <MarketSelectorModal
-        markets={markets}
         selected={selectedMarket}
-        onSelect={setSelectedMarket}
+        onSelect={handleMarketSelect}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
