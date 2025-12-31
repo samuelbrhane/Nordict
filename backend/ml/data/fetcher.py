@@ -1,6 +1,6 @@
 import requests
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone as dt_timezone
 from typing import Optional
 from decimal import Decimal
 
@@ -56,25 +56,9 @@ def fetch_klines(
 def parse_kline(kline: list) -> dict:
     """
     Parse Binance kline to our format.
-    
-    Binance kline format:
-    [
-        0: Open time (ms),
-        1: Open,
-        2: High,
-        3: Low,
-        4: Close,
-        5: Volume,
-        6: Close time (ms),
-        7: Quote asset volume,
-        8: Number of trades,
-        9: Taker buy base volume,
-        10: Taker buy quote volume,
-        11: Ignore
-    ]
     """
     return {
-        'timestamp': datetime.utcfromtimestamp(kline[0] / 1000),
+        'timestamp': datetime.utcfromtimestamp(kline[0] / 1000).replace(tzinfo=dt_timezone.utc),  
         'open': Decimal(kline[1]),
         'high': Decimal(kline[2]),
         'low': Decimal(kline[3]),

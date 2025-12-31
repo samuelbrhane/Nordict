@@ -78,7 +78,7 @@ def aggregate_to_daily(market: Market, since: datetime = None):
         
         obj, created = MarketData.objects.update_or_create(
             market=market,
-            timestamp=day['date'],
+            timestamp=timezone.make_aware(datetime.combine(day['date'], datetime.min.time())),
             timeframe='1d',
             defaults={
                 'open': first_candle.open,
@@ -142,7 +142,7 @@ def aggregate_to_weekly(market: Market, since: datetime = None):
         
         obj, created = MarketData.objects.update_or_create(
             market=market,
-            timestamp=week['week'],
+            timestamp=timezone.make_aware(datetime.combine(week['week'], datetime.min.time())), 
             timeframe='1w',
             defaults={
                 'open': first_candle.open,
@@ -206,7 +206,7 @@ def aggregate_to_monthly(market: Market, since: datetime = None):
         
         obj, created = MarketData.objects.update_or_create(
             market=market,
-            timestamp=month['month'],
+            timestamp=timezone.make_aware(datetime.combine(month['month'], datetime.min.time())), 
             timeframe='1M',
             defaults={
                 'open': first_candle.open,
