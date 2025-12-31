@@ -1,0 +1,26 @@
+{
+  "horizon": "24H",
+  "timeframe": "1h",
+  "horizon_steps": 24,
+  "best_params": {
+    "subsample": 0.7,
+    "reg_lambda": 1.5,
+    "reg_alpha": 0.1,
+    "n_estimators": 100,
+    "min_child_weight": 7,
+    "max_depth": 3,
+    "learning_rate": 0.02,
+    "gamma": 0.2,
+    "colsample_bytree": 0.8
+  },
+  "cv_score_mse": 0.002940242509641592,
+  "cv_score_rmse": 0.05422400307651208,
+  "test_rmse": 0.051223843611126314,
+  "test_mae": 0.033903130423419685,
+  "n_iter": 30,
+  "cv_splits": 5,
+  "train_samples": 680478,
+  "test_samples": 170120,
+  "n_features": 64,
+  "tuned_at": "2025-12-31T16:08:24.574442"
+}
