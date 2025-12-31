@@ -3,21 +3,20 @@
 "use client";
 
 import AnimatedCard from "./AnimatedCard";
+import { Horizon } from "@/lib/hooks/useDashboardKpi";
 
 interface DashboardHeaderProps {
-  marketFilter: "all" | "favorites";
-  onMarketFilterChange: (filter: "all" | "favorites") => void;
-  horizon: "24H" | "30D" | "12W" | "12M";
-  onHorizonChange: (horizon: "24H" | "30D" | "12W" | "12M") => void;
-  lastUpdated: string;
+  horizon: Horizon;
+  onHorizonChange: (horizon: Horizon) => void;
+  lastUpdatedAgo?: string;
+  isLoading: boolean;
 }
 
 const DashboardHeader = ({
-  marketFilter,
-  onMarketFilterChange,
   horizon,
   onHorizonChange,
-  lastUpdated,
+  lastUpdatedAgo,
+  isLoading,
 }: DashboardHeaderProps) => {
   return (
     <AnimatedCard delay={0}>
@@ -32,6 +31,7 @@ const DashboardHeader = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          {/* Horizon Toggle */}
           <div className="flex rounded-lg border border-neutral-200 bg-neutral-50 p-1 dark:border-neutral-700 dark:bg-neutral-800">
             {(["24H", "30D", "12W", "12M"] as const).map((h) => (
               <button
@@ -48,14 +48,26 @@ const DashboardHeader = ({
             ))}
           </div>
 
+          {/* Last Updated Status */}
           <div className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800">
-            <span
-              className="h-2 w-2 animate-pulse rounded-full"
-              style={{ backgroundColor: "var(--brand)" }}
-            />
-            <span className="text-sm text-neutral-500 dark:text-neutral-400">
-              Updated {lastUpdated}
-            </span>
+            {isLoading ? (
+              <>
+                <span className="h-2 w-2 animate-pulse rounded-full bg-neutral-400" />
+                <span className="text-sm text-neutral-500 dark:text-neutral-400">
+                  Loading...
+                </span>
+              </>
+            ) : (
+              <>
+                <span
+                  className="h-2 w-2 animate-pulse rounded-full"
+                  style={{ backgroundColor: "var(--brand)" }}
+                />
+                <span className="text-sm text-neutral-500 dark:text-neutral-400">
+                  Updated {lastUpdatedAgo || "Never"}
+                </span>
+              </>
+            )}
           </div>
         </div>
       </div>
