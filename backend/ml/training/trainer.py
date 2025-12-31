@@ -1,5 +1,3 @@
-# ml/training/trainer.py
-
 """
 Train XGBoost model with tuned hyperparameters.
 
@@ -12,7 +10,7 @@ import os
 import sys
 import json
 import pickle
-
+from ml.storage.model_store import save_model as save_model_to_storage
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
@@ -21,6 +19,7 @@ django.setup()
 
 import numpy as np
 from datetime import datetime
+from django.utils import timezone
 from xgboost import XGBRegressor
 
 from markets.models import Market
@@ -198,7 +197,7 @@ def train_model(
     
     # Create model
     print("\nTraining model...")
-    training_started = datetime.utcnow()
+    training_started = timezone.now()
     
     model = XGBRegressor(
         objective='reg:squarederror',
@@ -213,7 +212,7 @@ def train_model(
         verbose=False,
     )
     
-    training_completed = datetime.utcnow()
+    training_completed = timezone.now()
     training_duration = (training_completed - training_started).total_seconds()
     
     print(f"Training completed in {training_duration:.1f} seconds")
@@ -250,13 +249,9 @@ def train_model(
     db_model = None
     
     if save_model:
-        # Create models directory
-        os.makedirs(MODELS_DIR, exist_ok=True)
-        
         # Generate version
-        version = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
+        version = timezone.now().strftime('%Y%m%d_%H%M%S')
         model_filename = f'xgboost_{horizon}_{version}.pkl'
-        model_path = os.path.join(MODELS_DIR, model_filename)
         
         # Save model with metadata
         model_data = {
@@ -269,12 +264,11 @@ def train_model(
             'trained_at': training_completed.isoformat(),
         }
         
-        with open(model_path, 'wb') as f:
-            pickle.dump(model_data, f)
+        # Save to storage (local or S3 based on env)
+        model_path = save_model_to_storage(model_data, model_filename)
         
         print(f"\nModel saved to: {model_path}")
         
-
         # Save to database
         db_model = MLModel.objects.create(
             name='XGBoost',
@@ -286,14 +280,10 @@ def train_model(
             training_data_start=X_train.index.min().date(),
             training_data_end=X_train.index.max().date(),
             artifact_path=model_path,
-            
-            # Primary metrics
             mae=test_metrics['mae'],
             rmse=test_metrics['rmse'],
             mape=test_metrics['mape'],
             directional_accuracy=test_metrics['directional_accuracy'],
-            
-            # Store everything in config
             config={
                 'hyperparameters': params,
                 'train_metrics': train_metrics,

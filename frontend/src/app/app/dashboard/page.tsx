@@ -1,5 +1,3 @@
-// app/app/dashboard/page.tsx
-
 "use client";
 
 import { useState } from "react";
@@ -13,22 +11,27 @@ import {
   ForecastChart,
   PerformanceChart,
 } from "@/components/app/sections/dashboard/forecastchart";
+import { Horizon, useDashboardKpi } from "@/lib/hooks/useDashboardKpi";
 
 const DashboardPage = () => {
-  const [marketFilter, setMarketFilter] = useState<"all" | "favorites">("all");
-  const [horizon, setHorizon] = useState<"24H" | "30D" | "12W" | "12M">("30D");
+  const [horizon, setHorizon] = useState<Horizon>("24H");
+  const { data: kpi, isLoading, error } = useDashboardKpi(horizon);
 
   return (
     <AppLayout title="" subtitle="">
       <div className="space-y-6">
         <DashboardHeader
-          marketFilter={marketFilter}
-          onMarketFilterChange={setMarketFilter}
           horizon={horizon}
           onHorizonChange={setHorizon}
-          lastUpdated="2m ago"
+          lastUpdatedAgo={kpi?.last_updated_ago}
+          isLoading={isLoading}
         />
-        <KpiTiles horizon={horizon} />
+        <KpiTiles
+          kpi={kpi}
+          isLoading={isLoading}
+          error={error}
+          horizon={horizon}
+        />
         <ForecastChart horizon={horizon} />
         <PerformanceChart horizon={horizon} />
         <TopSignalsTable horizon={horizon} />
