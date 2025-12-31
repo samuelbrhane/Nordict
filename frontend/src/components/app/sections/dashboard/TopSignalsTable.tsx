@@ -14,10 +14,10 @@ interface Signal {
 }
 
 interface TopSignalsTableProps {
-  horizon: "1D" | "7D" | "30D";
+  horizon: "24H" | "30D" | "12W" | "12M";
 }
 
-const getSignalsData = (horizon: "1D" | "7D" | "30D"): Signal[] => {
+const getSignalsData = (horizon: "24H" | "30D" | "12W" | "12M"): Signal[] => {
   const baseSignals: Signal[] = [
     {
       symbol: "BTC-USD",
@@ -66,14 +66,18 @@ const getSignalsData = (horizon: "1D" | "7D" | "30D"): Signal[] => {
     },
   ];
 
+  const confidenceAdjust =
+    horizon === "24H"
+      ? 0
+      : horizon === "30D"
+      ? -10
+      : horizon === "12W"
+      ? -22
+      : -32;
+
   return baseSignals.map((s) => ({
     ...s,
-    confidence:
-      horizon === "1D"
-        ? s.confidence
-        : horizon === "7D"
-        ? s.confidence - 5
-        : s.confidence - 12,
+    confidence: Math.max(25, s.confidence + confidenceAdjust),
   }));
 };
 
