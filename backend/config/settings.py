@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'markets.apps.MarketsConfig',
     'forecasts.apps.ForecastsConfig',
+    'alerts.apps.AlertsConfig',
 ]
 
 MIDDLEWARE = [

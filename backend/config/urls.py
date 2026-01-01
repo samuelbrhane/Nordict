@@ -20,6 +20,7 @@ urlpatterns = [
         path('auth/', include('users.urls')),
         path('forecasts/', include('forecasts.urls')),
         path('markets/', include('markets.urls')),
+        path('alerts/', include('alerts.urls')),
     ])),
     
     # API Documentation
