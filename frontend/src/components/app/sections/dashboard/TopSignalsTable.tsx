@@ -98,7 +98,7 @@ const SignalRow = ({ signal }: { signal: Signal }) => {
     <tr className="group transition-colors duration-150 hover:bg-neutral-50 dark:hover:bg-neutral-800/50">
       <td className="whitespace-nowrap px-4 py-4 sm:px-6">
         <Link
-          href={`/app/${signal.symbol}`}
+          href={`/app/forecast/${signal.symbol}`}
           className="flex items-center gap-3"
         >
           <div

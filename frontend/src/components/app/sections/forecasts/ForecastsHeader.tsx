@@ -1,8 +1,7 @@
-// components/app/sections/forecasts/ForecastsHeader.tsx
-
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import AnimatedCard from "../dashboard/AnimatedCard";
 import { Horizon } from "@/lib/hooks/useDashboardKpi";
 
@@ -36,7 +35,15 @@ const ForecastsHeader = ({
   onViewModeChange,
   lastUpdatedAgo,
 }: ForecastsHeaderProps) => {
+  const { user } = useAuth();
   const [searchInput, setSearchInput] = useState(search);
+
+  const availableHorizons = user?.plan_limits?.horizons || [
+    "24H",
+    "30D",
+    "12W",
+    "12M",
+  ];
 
   const handleSearch = () => {
     onSearchChange(searchInput);
@@ -51,6 +58,12 @@ const ForecastsHeader = ({
   const handleClear = () => {
     setSearchInput("");
     onSearchChange("");
+  };
+
+  const handleHorizonClick = (h: Horizon) => {
+    if (availableHorizons.includes(h)) {
+      onHorizonChange(h);
+    }
   };
 
   return (
@@ -68,22 +81,48 @@ const ForecastsHeader = ({
             </div>
             <div className="flex items-center gap-3">
               <div className="flex rounded-lg border border-neutral-200 bg-neutral-50 p-1 dark:border-neutral-700 dark:bg-neutral-800">
-                {HORIZONS.map((h) => (
-                  <button
-                    key={h}
-                    onClick={() => onHorizonChange(h)}
-                    className={`rounded-md px-3 py-1.5 text-sm font-medium transition-all ${
-                      horizon === h
-                        ? "text-black shadow-sm"
-                        : "text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
-                    }`}
-                    style={
-                      horizon === h ? { backgroundColor: "var(--brand)" } : {}
-                    }
-                  >
-                    {h}
-                  </button>
-                ))}
+                {HORIZONS.map((h) => {
+                  const isAvailable = availableHorizons.includes(h);
+                  const isActive = horizon === h;
+
+                  return (
+                    <button
+                      key={h}
+                      onClick={() => handleHorizonClick(h)}
+                      disabled={!isAvailable}
+                      title={
+                        !isAvailable
+                          ? "Upgrade to Premium to access this horizon"
+                          : undefined
+                      }
+                      className={`relative rounded-md px-3 py-1.5 text-sm font-medium transition-all ${
+                        isActive
+                          ? "text-black shadow-sm"
+                          : isAvailable
+                          ? "text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+                          : "cursor-not-allowed text-neutral-300 dark:text-neutral-600"
+                      }`}
+                      style={
+                        isActive ? { backgroundColor: "var(--brand)" } : {}
+                      }
+                    >
+                      {h}
+                      {!isAvailable && (
+                        <svg
+                          className="absolute -right-1 -top-1 h-3 w-3 text-amber-500"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
               {lastUpdatedAgo && (
                 <div className="flex items-center gap-2">

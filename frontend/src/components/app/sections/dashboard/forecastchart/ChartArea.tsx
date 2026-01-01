@@ -42,7 +42,7 @@ const ChartArea = ({ forecast, horizon }: ChartAreaProps) => {
 
   return (
     <div className="h-[400px] w-full">
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%" minHeight={400}>
         <AreaChart
           data={chartData}
           margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
