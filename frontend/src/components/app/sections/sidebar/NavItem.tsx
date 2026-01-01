@@ -20,11 +20,28 @@ const NavItem = ({
   onCloseMobile,
 }: NavItemProps) => {
   const pathname = usePathname();
-
   const isActive = (href: string) => {
     if (href === "/app/dashboard") {
       return pathname === href;
     }
+
+    if (href === "/app/forecasts") {
+      return pathname === href;
+    }
+
+    if (href === "/app/forecast/compare") {
+      return pathname === href;
+    }
+
+    if (href.startsWith("/app/forecast/") && !href.includes("compare")) {
+      return (
+        pathname.startsWith("/app/forecast/") &&
+        pathname !== "/app/forecasts" &&
+        !pathname.includes("compare")
+      );
+    }
+
+    // Default - starts with
     return pathname.startsWith(href);
   };
 

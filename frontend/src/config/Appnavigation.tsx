@@ -177,12 +177,12 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     label: "Markets",
-    href: "/app/BTC-USD",
+    href: "/app/forecast/BTC-USD",
     icon: <MarketsIcon />,
   },
   {
     label: "Compare",
-    href: "/app/compare",
+    href: "/app/forecast/compare",
     icon: <CompareIcon />,
   },
   {
