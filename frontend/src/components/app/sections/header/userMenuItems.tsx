@@ -97,11 +97,11 @@ export const USER_MENU_ITEMS: UserMenuItem[] = [
     href: "/app/settings",
     icon: <ProfileIcon />,
   },
-  {
-    label: "Notifications",
-    href: "/app/settings/notifications",
-    icon: <NotificationsIcon />,
-  },
+  // {
+  //   label: "Notifications",
+  //   href: "/app/settings/notifications",
+  //   icon: <NotificationsIcon />,
+  // },
   // {
   //   label: "API Keys",
   //   href: "/app/settings/api",
