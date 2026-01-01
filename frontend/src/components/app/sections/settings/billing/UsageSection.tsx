@@ -1,20 +1,40 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { AnimatedCard } from "../../dashboard";
+import { api } from "@/lib/api";
+
+interface UsageData {
+  alerts: number;
+  sessions: number;
+}
 
 const UsageSection = () => {
   const { user } = useAuth();
+  const [usage, setUsage] = useState<UsageData>({ alerts: 0, sessions: 0 });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUsage = async () => {
+      try {
+        const data = await api.get<UsageData>("/api/v1/auth/me/usage/");
+        setUsage(data);
+      } catch (error) {
+        console.error("Failed to fetch usage:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchUsage();
+    }
+  }, [user]);
 
   if (!user) return null;
 
   const { plan_limits } = user;
-
-  // TODO: Fetch actual usage from API
-  const usage = {
-    alerts: 2, // TODO: Get from user's active alerts count
-    devices: 1, // TODO: Get from user's active sessions count
-  };
 
   const items = [
     {
@@ -26,7 +46,7 @@ const UsageSection = () => {
     {
       label: "Active Devices",
       description: "Devices logged into your account",
-      used: usage.devices,
+      used: usage.sessions,
       total: plan_limits.max_sessions,
     },
   ];
@@ -62,14 +82,23 @@ const UsageSection = () => {
                     </p>
                   </div>
                   <p className="text-sm font-semibold text-neutral-900 dark:text-white">
-                    {item.used}
-                    {isUnlimited ? (
-                      <span className="font-normal text-neutral-500"> / ∞</span>
+                    {isLoading ? (
+                      <span className="text-neutral-400">...</span>
                     ) : (
-                      <span className="font-normal text-neutral-500">
-                        {" "}
-                        / {item.total}
-                      </span>
+                      <>
+                        {item.used}
+                        {isUnlimited ? (
+                          <span className="font-normal text-neutral-500">
+                            {" "}
+                            / ∞
+                          </span>
+                        ) : (
+                          <span className="font-normal text-neutral-500">
+                            {" "}
+                            / {item.total}
+                          </span>
+                        )}
+                      </>
                     )}
                   </p>
                 </div>
@@ -77,7 +106,11 @@ const UsageSection = () => {
                   <div
                     className="h-full rounded-full transition-all"
                     style={{
-                      width: isUnlimited ? "5%" : `${Math.min(percent, 100)}%`,
+                      width: isLoading
+                        ? "0%"
+                        : isUnlimited
+                        ? "5%"
+                        : `${Math.min(percent, 100)}%`,
                       backgroundColor: isAtLimit
                         ? "#ef4444"
                         : isNearLimit
@@ -95,7 +128,9 @@ const UsageSection = () => {
                       : "text-neutral-500"
                   }`}
                 >
-                  {isUnlimited
+                  {isLoading
+                    ? "Loading..."
+                    : isUnlimited
                     ? "Unlimited"
                     : isAtLimit
                     ? "Limit reached"

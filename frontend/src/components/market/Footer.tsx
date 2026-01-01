@@ -124,7 +124,9 @@ const Footer = () => {
 
         {/* Bottom bar */}
         <div className="mt-10 flex flex-col gap-4 border-t border-neutral-200 pt-6 text-sm text-neutral-600 dark:border-neutral-800 dark:text-neutral-400 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Nordict. All rights reserved.</p>
+          <p>
+            © 2025 – {new Date().getFullYear()} Nordict. All rights reserved.
+          </p>
 
           <p className="text-xs leading-relaxed">
             Nordict is provided for informational purposes only and does not

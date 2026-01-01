@@ -5,12 +5,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { NAV_ITEMS } from "@/config/navigation";
 import { ThemeToggle } from "../layout";
+import { useAuth } from "@/context/auth/AuthProvider";
+import { LoadingSpinner } from "../app";
 
 const Header = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileOpenIndex, setMobileOpenIndex] = useState<number | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const { user, isLoading } = useAuth();
 
   // Track scroll for header background
   useEffect(() => {
@@ -46,6 +49,15 @@ const Header = () => {
     };
   }, [mobileOpen]);
 
+  if (isLoading) {
+    return (
+      <header className="sticky top-0 z-50 border-b border-transparent bg-white/80 backdrop-blur dark:bg-neutral-950/80">
+        <div className="mx-auto flex max-w-7xl items-center justify-center px-4 py-3 md:px-6 md:py-4">
+          <LoadingSpinner />
+        </div>
+      </header>
+    );
+  }
   return (
     <header
       className={`sticky top-0 z-50 border-b transition-all duration-300 ${
@@ -151,23 +163,33 @@ const Header = () => {
             )
           )}
         </nav>
-
         {/* Actions (Desktop) */}
         <div className="hidden items-center gap-3 lg:flex">
-          <Link
-            href="/login"
-            className="text-sm font-medium text-neutral-700 transition-colors duration-200 hover:text-neutral-900 dark:text-neutral-200 dark:hover:text-white"
-          >
-            Sign in
-          </Link>
-          <Link
-            href="/signup"
-            className="group relative overflow-hidden rounded-lg px-4 py-2 text-sm font-medium text-black transition-all duration-200 hover:shadow-md hover:shadow-[var(--brand)]/20 active:scale-[0.98]"
-            style={{ backgroundColor: "var(--brand)" }}
-          >
-            <span className="relative z-10">Get started</span>
-            <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
-          </Link>
+          {!user ? (
+            <>
+              <Link
+                href="/login"
+                className="text-sm font-medium text-neutral-700 transition-colors duration-200 hover:text-neutral-900 dark:text-neutral-200 dark:hover:text-white"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/signup"
+                className="group relative overflow-hidden rounded-lg px-4 py-2 text-sm font-medium text-black transition-all duration-200 hover:shadow-md hover:shadow-[var(--brand)]/20 active:scale-[0.98]"
+                style={{ backgroundColor: "var(--brand)" }}
+              >
+                <span className="relative z-10">Get started</span>
+                <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
+              </Link>
+            </>
+          ) : (
+            <Link
+              href="/app/dashboard"
+              className="text-sm font-medium text-neutral-700 transition-colors duration-200 hover:text-neutral-900 dark:text-neutral-200 dark:hover:text-white"
+            >
+              Dashboard
+            </Link>
+          )}
           <ThemeToggle />
         </div>
 
@@ -328,31 +350,44 @@ const Header = () => {
                 transform: mobileOpen ? "translateY(0)" : "translateY(-8px)",
               }}
             >
-              {/* Sign in & Get started - side by side */}
-              <div className="flex gap-2">
-                <Link
-                  href="/login"
-                  className="flex-1 rounded-xl border border-neutral-200 px-4 py-3 text-center text-sm font-medium text-neutral-800 transition-all duration-200 hover:border-[var(--brand)] hover:text-[var(--brand)] dark:border-neutral-700 dark:text-neutral-100 dark:hover:border-[var(--brand)] dark:hover:text-[var(--brand)]"
-                  onClick={() => {
-                    setMobileOpen(false);
-                    setMobileOpenIndex(null);
-                  }}
-                >
-                  Sign in
-                </Link>
+              {!user ? (
+                <div className="flex gap-2">
+                  <Link
+                    href="/login"
+                    className="flex-1 rounded-xl border border-neutral-200 px-4 py-3 text-center text-sm font-medium text-neutral-800 transition-all duration-200 hover:border-[var(--brand)] hover:text-[var(--brand)] dark:border-neutral-700 dark:text-neutral-100 dark:hover:border-[var(--brand)] dark:hover:text-[var(--brand)]"
+                    onClick={() => {
+                      setMobileOpen(false);
+                      setMobileOpenIndex(null);
+                    }}
+                  >
+                    Sign in
+                  </Link>
 
+                  <Link
+                    href="/signup"
+                    className="flex-1 rounded-xl px-4 py-3 text-center text-sm font-medium text-black transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
+                    style={{ backgroundColor: "var(--brand)" }}
+                    onClick={() => {
+                      setMobileOpen(false);
+                      setMobileOpenIndex(null);
+                    }}
+                  >
+                    Get started
+                  </Link>
+                </div>
+              ) : (
                 <Link
-                  href="/signup"
-                  className="flex-1 rounded-xl px-4 py-3 text-center text-sm font-medium text-black transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
+                  href="/app/dashboard"
+                  className="rounded-xl px-4 py-3 text-center text-sm font-medium text-black transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
                   style={{ backgroundColor: "var(--brand)" }}
                   onClick={() => {
                     setMobileOpen(false);
                     setMobileOpenIndex(null);
                   }}
                 >
-                  Get started
+                  Dashboard
                 </Link>
-              </div>
+              )}
 
               {/* Theme toggle - compact with both icons */}
               <div className="flex justify-center">
@@ -366,7 +401,6 @@ const Header = () => {
                     className="p-2.5 text-neutral-500 transition-all duration-200 hover:bg-[rgba(4,236,58,0.1)] hover:text-[var(--brand)] dark:text-neutral-400 dark:hover:bg-[rgba(4,236,58,0.1)] dark:hover:text-[var(--brand)]"
                     aria-label="Light mode"
                   >
-                    {/* Sun icon */}
                     <svg
                       width="18"
                       height="18"
@@ -398,7 +432,6 @@ const Header = () => {
                     className="p-2.5 text-neutral-500 transition-all duration-200 hover:bg-[rgba(4,236,58,0.1)] hover:text-[var(--brand)] dark:text-neutral-400 dark:hover:bg-[rgba(4,236,58,0.1)] dark:hover:text-[var(--brand)]"
                     aria-label="Dark mode"
                   >
-                    {/* Moon icon */}
                     <svg
                       width="18"
                       height="18"
