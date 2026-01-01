@@ -7,10 +7,35 @@ from .models import Alert, AlertHistory
 from .serializers import AlertSerializer, AlertCreateSerializer, AlertHistorySerializer
 
 
+# =============================================================================
+# Helper Functions
+# =============================================================================
+
+def get_user_limits(user):
+    """Get subscription limits for user."""
+    subscription = getattr(user, 'subscription_data', None)
+    if subscription:
+        return {
+            'max_alerts': subscription.plan_limits.get('max_alerts'),
+            'horizons': subscription.available_horizons,
+            'plan': subscription.effective_plan,
+        }
+    return {
+        'max_alerts': 0,
+        'horizons': [],
+        'plan': 'free',
+    }
+
+
+# =============================================================================
+# Endpoints
+# =============================================================================
+
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def alerts_list(request):
     """List user's alerts or create a new one."""
+    limits = get_user_limits(request.user)
     
     if request.method == 'GET':
         alerts = Alert.objects.filter(user=request.user).select_related('market')
@@ -22,7 +47,7 @@ def alerts_list(request):
         
         if market:
             alerts = alerts.filter(market__symbol=market)
-        if status_filter:
+        if status_filter and status_filter != 'all':
             alerts = alerts.filter(status=status_filter)
         if horizon:
             alerts = alerts.filter(horizon=horizon)
@@ -31,6 +56,34 @@ def alerts_list(request):
         return Response(serializer.data)
     
     elif request.method == 'POST':
+        # Check alert limit
+        max_alerts = limits['max_alerts']
+        current_count = Alert.objects.filter(user=request.user).count()
+        
+        if max_alerts is not None and current_count >= max_alerts:
+            return Response(
+                {
+                    'error': f'Alert limit reached ({max_alerts}). Upgrade to create more.',
+                    'upgrade_required': True,
+                    'current_count': current_count,
+                    'max_alerts': max_alerts,
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Check horizon access
+        horizon = request.data.get('horizon', 'ANY')
+        available_horizons = limits['horizons']
+        
+        if horizon != 'ANY' and horizon not in available_horizons:
+            return Response(
+                {
+                    'error': f'Upgrade to create alerts for {horizon} horizon.',
+                    'upgrade_required': True,
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
         serializer = AlertCreateSerializer(data=request.data)
         if serializer.is_valid():
             alert = serializer.save(user=request.user)
@@ -62,6 +115,20 @@ def alert_detail(request, alert_id):
         return Response(serializer.data)
     
     elif request.method == 'PATCH':
+        # Check horizon access if updating horizon
+        if 'horizon' in request.data:
+            limits = get_user_limits(request.user)
+            new_horizon = request.data['horizon']
+            
+            if new_horizon != 'ANY' and new_horizon not in limits['horizons']:
+                return Response(
+                    {
+                        'error': f'Upgrade to use {new_horizon} horizon.',
+                        'upgrade_required': True,
+                    },
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        
         serializer = AlertSerializer(alert, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -119,8 +186,7 @@ def alert_history(request):
 def unread_alert_count(request):
     """Get count of unread triggered alerts."""
     
-    # Get alerts triggered after user last viewed (or last 24 hours if never viewed)
-    last_viewed = request.user.last_alerts_viewed_at if hasattr(request.user, 'last_alerts_viewed_at') else None
+    last_viewed = getattr(request.user, 'last_alerts_viewed_at', None)
     
     if last_viewed:
         count = AlertHistory.objects.filter(
@@ -144,7 +210,6 @@ def unread_alert_count(request):
 def mark_alerts_viewed(request):
     """Mark all alerts as viewed."""
     
-    # Update user's last viewed timestamp
     request.user.last_alerts_viewed_at = timezone.now()
     request.user.save(update_fields=['last_alerts_viewed_at'])
     

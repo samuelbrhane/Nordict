@@ -233,15 +233,17 @@ FORECAST_HORIZONS = {
     '12M': {'steps': 12, 'step_size': '1M', 'update_frequency': '24H'},
 }
 
-# Subscription plan limits
+
 SUBSCRIPTION_PLANS = {
     'free': {
-        'max_markets': 0,  # No access after trial ends
+        'max_markets': 0,
         'max_alerts': 0,
         'max_sessions': 1,
         'horizons': [],
         'api_access': False,
         'backtest_days': 0,
+        'price_monthly': 0,
+        'price_yearly': 0,
     },
     'pro': {
         'max_markets': 10,
@@ -250,14 +252,18 @@ SUBSCRIPTION_PLANS = {
         'horizons': ['24H', '30D'],
         'api_access': False,
         'backtest_days': 30,
+        'price_monthly': 9,
+        'price_yearly': 86.40,  # $7.20/month
     },
     'premium': {
-        'max_markets': None,  # Unlimited
+        'max_markets': None,
         'max_alerts': None,
         'max_sessions': 5,
         'horizons': ['24H', '30D', '12W', '12M'],
-        'api_access': True,
+        'api_access': False,
         'backtest_days': None,
+        'price_monthly': 19,
+        'price_yearly': 182.40,  # $15.20/month
     },
     'teams': {
         'max_markets': None,
@@ -267,6 +273,9 @@ SUBSCRIPTION_PLANS = {
         'api_access': True,
         'backtest_days': None,
         'team_features': True,
+        'max_team_members': 10,
+        'price_monthly': 49,  # Per team, not per seat
+        'price_yearly': 470.40,  # $39.20/month
     },
 }
 

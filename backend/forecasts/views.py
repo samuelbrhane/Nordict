@@ -1,5 +1,3 @@
-# forecasts/views.py
-
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -20,6 +18,55 @@ from .serializers import (
 # Helper Functions
 # =============================================================================
 
+def get_user_limits(user):
+    """Get subscription limits for user."""
+    subscription = getattr(user, 'subscription_data', None)
+    if subscription:
+        return {
+            'max_markets': subscription.max_markets,
+            'max_alerts': subscription.plan_limits.get('max_alerts'),
+            'horizons': subscription.available_horizons,
+            'plan': subscription.effective_plan,
+        }
+    return {
+        'max_markets': 0,
+        'max_alerts': 0,
+        'horizons': [],
+        'plan': 'free',
+    }
+
+
+def check_horizon_access(user, horizon):
+    """Check if user has access to a horizon."""
+    limits = get_user_limits(user)
+    if horizon not in limits['horizons']:
+        return False, Response(
+            {'error': f'Upgrade to access {horizon} forecasts', 'upgrade_required': True},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    return True, None
+
+
+def get_allowed_market_ids(user, limits):
+    """Get list of market IDs user can access."""
+    from markets.models import Market
+    
+    max_markets = limits['max_markets']
+    
+    if max_markets is None:
+        # Unlimited
+        return None
+    
+    if max_markets == 0:
+        return []
+    
+    # Get top markets by featured first, then by id
+    return list(
+        Market.objects.filter(status='active')
+        .order_by('-is_featured', 'id')[:max_markets]
+        .values_list('id', flat=True)
+    )
+    
 def get_time_ago(dt):
     """Convert datetime to human readable 'X ago' format."""
     if not dt:
@@ -138,26 +185,39 @@ def calculate_24h_change(market):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def dashboard_kpi(request):
-    """
-    Get KPI data for dashboard tiles.
-    
-    Returns:
-        - total_markets: Number of markets with forecasts
-        - avg_confidence: Average confidence score (0-100)
-        - up_count: Number of bullish forecasts
-        - down_count: Number of bearish forecasts
-        - neutral_count: Number of neutral forecasts
-        - last_updated: When forecasts were last generated
-        - last_updated_ago: Human readable time ago
-        - next_update: Next scheduled update time
-        - next_update_in: Human readable time until next update
-    """
+    """Get KPI data for dashboard tiles."""
     horizon = request.query_params.get("horizon", "24H")
     
+    # Check horizon access
+    allowed, error_response = check_horizon_access(request.user, horizon)
+    if not allowed:
+        return error_response
+    
+    # Get user limits
+    limits = get_user_limits(request.user)
+    allowed_market_ids = get_allowed_market_ids(request.user, limits)
+    
+    # Base query
     forecasts = Forecast.objects.filter(
         horizon=horizon,
         is_latest=True,
     )
+    
+    # Apply market limit
+    if allowed_market_ids is not None:
+        if len(allowed_market_ids) == 0:
+            return Response({
+                "total_markets": 0,
+                "avg_confidence": 0,
+                "up_count": 0,
+                "down_count": 0,
+                "neutral_count": 0,
+                "last_updated": None,
+                "last_updated_ago": "Never",
+                "next_update": None,
+                "next_update_in": "Unknown",
+            })
+        forecasts = forecasts.filter(market_id__in=allowed_market_ids)
     
     total_markets = forecasts.count()
     
@@ -197,8 +257,7 @@ def dashboard_kpi(request):
         "next_update": next_update,
         "next_update_in": get_time_until(next_update),
     })
-
-
+    
 # =============================================================================
 # Chart Endpoint
 # =============================================================================
@@ -228,13 +287,18 @@ def dashboard_kpi(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def forecast_chart(request):
-    """
-    Get forecast data for chart display.
-    
-    Returns complete forecast with all prediction points for charting.
-    """
+    """Get forecast data for chart display."""
     market_symbol = request.query_params.get("market", "BTC-USD")
     horizon = request.query_params.get("horizon", "24H")
+    
+    # Check horizon access
+    allowed, error_response = check_horizon_access(request.user, horizon)
+    if not allowed:
+        return error_response
+    
+    # Check market access
+    limits = get_user_limits(request.user)
+    allowed_market_ids = get_allowed_market_ids(request.user, limits)
     
     forecast = Forecast.objects.filter(
         market__symbol=market_symbol,
@@ -246,6 +310,13 @@ def forecast_chart(request):
         return Response(
             {"error": f"No forecast found for {market_symbol} {horizon}"},
             status=status.HTTP_404_NOT_FOUND
+        )
+    
+    # Check if market is allowed
+    if allowed_market_ids is not None and forecast.market_id not in allowed_market_ids:
+        return Response(
+            {"error": "Upgrade to access this market", "upgrade_required": True},
+            status=status.HTTP_403_FORBIDDEN
         )
     
     serializer = ForecastChartSerializer(forecast)
@@ -306,13 +377,9 @@ def forecast_chart(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def list_markets_with_forecasts(request):
-    """
-    Get paginated list of markets with their forecast data.
-    Used for the Forecasts page grid/table view.
-    """
+    """Get paginated list of markets with their forecast data."""
     from markets.models import UserMarket
     
-    # Get query params
     horizon = request.query_params.get("horizon", "24H")
     search = request.query_params.get("search", "").strip()
     category = request.query_params.get("category", "all")
@@ -320,12 +387,37 @@ def list_markets_with_forecasts(request):
     page = int(request.query_params.get("page", 1))
     page_size = min(int(request.query_params.get("page_size", 12)), 50)
     
+    # Check horizon access
+    allowed, error_response = check_horizon_access(request.user, horizon)
+    if not allowed:
+        return error_response
+    
+    # Get user limits
+    limits = get_user_limits(request.user)
+    allowed_market_ids = get_allowed_market_ids(request.user, limits)
+    
     # Base queryset
     forecasts = Forecast.objects.filter(
         horizon=horizon,
         is_latest=True,
         market__status="active",
     ).select_related("market")
+    
+    # Apply market limit
+    if allowed_market_ids is not None:
+        if len(allowed_market_ids) == 0:
+            return Response({
+                "results": [],
+                "pagination": {
+                    "page": 1,
+                    "page_size": page_size,
+                    "total_count": 0,
+                    "total_pages": 0,
+                    "has_next": False,
+                    "has_previous": False,
+                },
+            })
+        forecasts = forecasts.filter(market_id__in=allowed_market_ids)
     
     # Search filter
     if search:
@@ -476,10 +568,7 @@ def toggle_favorite(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def forecast_by_market(request):
-    """
-    Get all horizon forecasts for a specific market.
-    Returns forecasts for 24H, 30D, 12W, 12M horizons.
-    """
+    """Get all horizon forecasts for a specific market."""
     market_symbol = request.query_params.get("market")
     
     if not market_symbol:
@@ -488,14 +577,36 @@ def forecast_by_market(request):
             status=status.HTTP_400_BAD_REQUEST
         )
     
+    # Get user limits
+    limits = get_user_limits(request.user)
+    allowed_market_ids = get_allowed_market_ids(request.user, limits)
+    available_horizons = limits['horizons']
+    
+    # Check market access
+    from markets.models import Market
+    try:
+        market = Market.objects.get(symbol=market_symbol)
+    except Market.DoesNotExist:
+        return Response(
+            {"error": f"Market {market_symbol} not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    if allowed_market_ids is not None and market.id not in allowed_market_ids:
+        return Response(
+            {"error": "Upgrade to access this market", "upgrade_required": True},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    # Get forecasts only for allowed horizons
     forecasts = Forecast.objects.filter(
         market__symbol=market_symbol,
         is_latest=True,
+        horizon__in=available_horizons,
     ).select_related("market").order_by("horizon")
     
     serializer = ForecastSummarySerializer(forecasts, many=True)
     return Response(serializer.data)
-
 
 # =============================================================================
 # List Forecasts Endpoint
@@ -544,24 +655,52 @@ def forecast_by_market(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def list_forecasts(request):
-    """
-    Get paginated list of forecasts with optional filters.
-    """
-    # Get query params
+    """Get paginated list of forecasts with optional filters."""
     horizon = request.query_params.get("horizon")
     market = request.query_params.get("market")
     direction = request.query_params.get("direction")
     page = int(request.query_params.get("page", 1))
     page_size = min(int(request.query_params.get("page_size", 20)), 50)
     
+    # Get user limits
+    limits = get_user_limits(request.user)
+    allowed_market_ids = get_allowed_market_ids(request.user, limits)
+    available_horizons = limits['horizons']
+    
     # Base queryset
     queryset = Forecast.objects.filter(is_latest=True)
     
-    # Apply filters
+    # Apply horizon filter
     if horizon:
+        if horizon not in available_horizons:
+            return Response(
+                {"error": f"Upgrade to access {horizon} forecasts", "upgrade_required": True},
+                status=status.HTTP_403_FORBIDDEN
+            )
         queryset = queryset.filter(horizon=horizon)
+    else:
+        queryset = queryset.filter(horizon__in=available_horizons)
+    
+    # Apply market limit
+    if allowed_market_ids is not None:
+        if len(allowed_market_ids) == 0:
+            return Response({
+                "results": [],
+                "pagination": {
+                    "page": 1,
+                    "page_size": page_size,
+                    "total_count": 0,
+                    "total_pages": 0,
+                    "has_next": False,
+                    "has_previous": False,
+                },
+            })
+        queryset = queryset.filter(market_id__in=allowed_market_ids)
+    
+    # Apply market filter
     if market:
         queryset = queryset.filter(market__symbol=market)
+    
     if direction:
         queryset = queryset.filter(direction=direction)
     
@@ -596,7 +735,6 @@ def list_forecasts(request):
     
     
     
-    
 @extend_schema(
     summary="Forecast performance data",
     description="Get predicted vs actual data for performance chart",
@@ -609,18 +747,35 @@ def list_forecasts(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def forecast_performance(request):
-    """
-    Get predicted vs actual data for performance chart.
-    Returns historical forecast points with actual prices filled.
-    """
+    """Get predicted vs actual data for performance chart."""
     market_symbol = request.query_params.get("market", "BTC-USD")
     horizon = request.query_params.get("horizon", "24H")
     
-    print(f"\n{'='*50}")
-    print(f"Performance API called: market={market_symbol}, horizon={horizon}")
-    print(f"{'='*50}")
+    # Check horizon access
+    allowed, error_response = check_horizon_access(request.user, horizon)
+    if not allowed:
+        return error_response
     
-    # Determine how far back to look based on horizon
+    # Check market access
+    limits = get_user_limits(request.user)
+    allowed_market_ids = get_allowed_market_ids(request.user, limits)
+    
+    from markets.models import Market
+    try:
+        market = Market.objects.get(symbol=market_symbol)
+    except Market.DoesNotExist:
+        return Response(
+            {"error": f"Market {market_symbol} not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    if allowed_market_ids is not None and market.id not in allowed_market_ids:
+        return Response(
+            {"error": "Upgrade to access this market", "upgrade_required": True},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    # Rest of the function remains the same...
     days_map = {
         "24H": 7,
         "30D": 60,
@@ -630,58 +785,6 @@ def forecast_performance(request):
     days = days_map.get(horizon, 7)
     cutoff = timezone.now() - timedelta(days=days)
     
-    print(f"Cutoff: {cutoff}")
-    print(f"Now: {timezone.now()}")
-    
-    # Debug: Check total forecast points for this market/horizon
-    total_points = ForecastPoint.objects.filter(
-        forecast__market__symbol=market_symbol,
-        forecast__horizon=horizon,
-    ).count()
-    print(f"Total ForecastPoints for {market_symbol} {horizon}: {total_points}")
-    
-    # Debug: Check points in time range (without actual_price filter)
-    points_in_range = ForecastPoint.objects.filter(
-        forecast__market__symbol=market_symbol,
-        forecast__horizon=horizon,
-        timestamp__gte=cutoff,
-        timestamp__lte=timezone.now(),
-    ).count()
-    print(f"Points in time range (past): {points_in_range}")
-    
-    # Debug: Check points with actual prices
-    points_with_actual = ForecastPoint.objects.filter(
-        forecast__market__symbol=market_symbol,
-        forecast__horizon=horizon,
-        actual_price__isnull=False,
-    ).count()
-    print(f"Points with actual_price filled: {points_with_actual}")
-    
-    # Debug: Show some sample points
-    sample_points = ForecastPoint.objects.filter(
-        forecast__market__symbol=market_symbol,
-        forecast__horizon=horizon,
-    ).order_by('timestamp')[:5]
-    
-    print(f"\nSample points (first 5):")
-    for p in sample_points:
-        print(f"  - timestamp: {p.timestamp}, predicted: {p.predicted_price}, actual: {p.actual_price}")
-    
-    # Debug: Check if timestamps are in past
-    past_points = ForecastPoint.objects.filter(
-        forecast__market__symbol=market_symbol,
-        forecast__horizon=horizon,
-        timestamp__lt=timezone.now(),
-    )
-    print(f"\nPoints with timestamp in past: {past_points.count()}")
-    
-    if past_points.exists():
-        first_past = past_points.order_by('timestamp').first()
-        last_past = past_points.order_by('-timestamp').first()
-        print(f"  Earliest past point: {first_past.timestamp}")
-        print(f"  Latest past point: {last_past.timestamp}")
-    
-    # Get forecast points with actual prices filled
     points = ForecastPoint.objects.filter(
         forecast__market__symbol=market_symbol,
         forecast__horizon=horizon,
@@ -690,10 +793,6 @@ def forecast_performance(request):
         actual_price__isnull=False,
     ).select_related("forecast").order_by("timestamp")
     
-    print(f"\nFinal query result: {points.count()} points")
-    print(f"{'='*50}\n")
-    
-    # Build response
     results = []
     for i, point in enumerate(points):
         predicted = float(point.predicted_price)
@@ -701,14 +800,13 @@ def forecast_performance(request):
         error = actual - predicted
         error_percent = round((error / predicted) * 100, 2) if predicted > 0 else 0
         
-        # Format label based on horizon
         if horizon == "24H":
             label = point.timestamp.strftime("%H:%M")
         elif horizon == "30D":
             label = point.timestamp.strftime("%b %d")
         elif horizon == "12W":
             label = point.timestamp.strftime("W%W")
-        else:  # 12M
+        else:
             label = point.timestamp.strftime("%b %y")
         
         results.append({
@@ -721,12 +819,10 @@ def forecast_performance(request):
             "errorPercent": error_percent,
         })
     
-    # Calculate stats
     if results:
         errors = [abs(r["errorPercent"]) for r in results]
         avg_error = round(sum(errors) / len(errors), 2)
         
-        # Direction accuracy
         correct_direction = 0
         for i in range(1, len(results)):
             actual_dir = results[i]["actual"] > results[i-1]["actual"]
@@ -764,34 +860,48 @@ def forecast_performance(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def top_signals(request):
-    """
-    Get top forecast signals ranked by confidence.
-    Used for the dashboard TopSignalsTable.
-    """
+    """Get top forecast signals ranked by confidence."""
     horizon = request.query_params.get("horizon", "24H")
     limit = min(int(request.query_params.get("limit", 5)), 20)
     
-    # Get latest forecasts for this horizon, ordered by confidence
+    # Check horizon access
+    allowed, error_response = check_horizon_access(request.user, horizon)
+    if not allowed:
+        return error_response
+    
+    # Get user limits
+    limits = get_user_limits(request.user)
+    allowed_market_ids = get_allowed_market_ids(request.user, limits)
+    
+    # Base query
     forecasts = Forecast.objects.filter(
         horizon=horizon,
         is_latest=True,
         market__status="active",
-    ).select_related("market").order_by("-confidence_score")[:limit]
+    ).select_related("market")
+    
+    # Apply market limit
+    if allowed_market_ids is not None:
+        if len(allowed_market_ids) == 0:
+            return Response({
+                "horizon": horizon,
+                "signals": [],
+            })
+        forecasts = forecasts.filter(market_id__in=allowed_market_ids)
+    
+    forecasts = forecasts.order_by("-confidence_score")[:limit]
     
     results = []
     for forecast in forecasts:
-        # Calculate expected move percentage
         current = float(forecast.current_price)
         predicted = float(forecast.predicted_mid)
         expected_move = ((predicted - current) / current) * 100 if current > 0 else 0
         
-        # Format expected move
         if expected_move >= 0:
             expected_move_str = f"+{expected_move:.1f}%"
         else:
             expected_move_str = f"{expected_move:.1f}%"
         
-        # Calculate time ago
         updated_ago = get_time_ago(forecast.generated_at)
         
         results.append({
@@ -810,6 +920,8 @@ def top_signals(request):
         "horizon": horizon,
         "signals": results,
     })
+    
+    
     
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
