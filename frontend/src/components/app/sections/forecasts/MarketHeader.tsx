@@ -7,20 +7,33 @@ interface MarketHeaderProps {
   symbol: string;
   name: string;
   category: string;
-  currentPrice: string;
-  change24h: string;
-  changeDirection: "up" | "down";
-  lastUpdated: string;
+  currentPrice: number;
+  lastUpdatedAgo: string;
 }
+
+const formatPrice = (price: number | string): string => {
+  const numPrice = typeof price === "string" ? parseFloat(price) : price;
+
+  if (isNaN(numPrice)) return "$0.00";
+
+  if (numPrice >= 1000) {
+    return `$${numPrice.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+  }
+  if (numPrice >= 1) {
+    return `$${numPrice.toFixed(2)}`;
+  }
+  return `$${numPrice.toFixed(4)}`;
+};
 
 const MarketHeader = ({
   symbol,
   name,
   category,
   currentPrice,
-  change24h,
-  changeDirection,
-  lastUpdated,
+  lastUpdatedAgo,
 }: MarketHeaderProps) => {
   return (
     <AnimatedCard delay={0}>
@@ -35,20 +48,14 @@ const MarketHeader = ({
           <div>
             <div className="flex items-center gap-3">
               <h2 className="text-xl font-semibold text-neutral-900 dark:text-white sm:text-2xl">
-                {currentPrice}
+                {formatPrice(currentPrice)}
               </h2>
-              <span
-                className={`rounded-full px-2 py-0.5 text-sm font-medium ${
-                  changeDirection === "up"
-                    ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                    : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                }`}
-              >
-                {change24h}
+              <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                Price at forecast
               </span>
             </div>
             <p className="mt-0.5 text-sm text-neutral-500 dark:text-neutral-400">
-              {name} · {category} · Updated {lastUpdated}
+              Updated {lastUpdatedAgo}
             </p>
           </div>
         </div>
@@ -73,7 +80,7 @@ const MarketHeader = ({
             Create Alert
           </Link>
           <Link
-            href={`/app/forecasts/compare?markets=${symbol}`}
+            href={`/app/forecast/compare?markets=${symbol}`}
             className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-black transition-all hover:opacity-90"
             style={{ backgroundColor: "var(--brand)" }}
           >
