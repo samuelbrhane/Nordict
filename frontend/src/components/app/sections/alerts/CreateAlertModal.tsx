@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { useAuth } from "@/context/AuthContext";
 import MarketSelectorModal from "../dashboard/forecastchart/MarketSelectorModal";
 import { Horizon } from "@/lib/hooks/useDashboardKpi";
 import { CreateAlertData } from "@/lib/hooks/useAlerts";
@@ -84,6 +85,7 @@ const CreateAlertModal = ({
   onCreate,
   initialMarket,
 }: CreateAlertModalProps) => {
+  const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [isMarketModalOpen, setIsMarketModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -99,6 +101,13 @@ const CreateAlertModal = ({
   const [conditionValue, setConditionValue] = useState<number>(50);
   const [isRecurring, setIsRecurring] = useState(true);
 
+  const availableHorizons = user?.plan_limits?.horizons || [
+    "24H",
+    "30D",
+    "12W",
+    "12M",
+  ];
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -112,6 +121,17 @@ const CreateAlertModal = ({
   const selectedCondition = CONDITION_TYPES.find(
     (c) => c.value === conditionType
   );
+
+  const isHorizonAvailable = (h: Horizon | "ANY") => {
+    if (h === "ANY") return true;
+    return availableHorizons.includes(h);
+  };
+
+  const handleHorizonSelect = (h: Horizon | "ANY") => {
+    if (isHorizonAvailable(h)) {
+      setHorizon(h);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!selectedMarket || !selectedMarket.id) {
@@ -266,24 +286,48 @@ const CreateAlertModal = ({
                 Forecast Horizon
               </label>
               <div className="mt-1.5 flex flex-wrap gap-2">
-                {HORIZONS.map((h) => (
-                  <button
-                    key={h.value}
-                    onClick={() => setHorizon(h.value)}
-                    className={`rounded-lg px-3 py-2 text-sm font-medium transition-all ${
-                      horizon === h.value
-                        ? "text-black"
-                        : "border border-neutral-200 bg-neutral-50 text-neutral-600 hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400"
-                    }`}
-                    style={
-                      horizon === h.value
-                        ? { backgroundColor: "var(--brand)" }
-                        : {}
-                    }
-                  >
-                    {h.label}
-                  </button>
-                ))}
+                {HORIZONS.map((h) => {
+                  const isAvailable = isHorizonAvailable(h.value);
+                  const isActive = horizon === h.value;
+
+                  return (
+                    <button
+                      key={h.value}
+                      onClick={() => handleHorizonSelect(h.value)}
+                      disabled={!isAvailable}
+                      title={
+                        !isAvailable
+                          ? "Upgrade to Premium to access this horizon"
+                          : undefined
+                      }
+                      className={`relative rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                        isActive
+                          ? "text-black"
+                          : isAvailable
+                          ? "border border-neutral-200 bg-neutral-50 text-neutral-600 hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400"
+                          : "cursor-not-allowed border border-neutral-100 bg-neutral-50 text-neutral-300 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-600"
+                      }`}
+                      style={
+                        isActive ? { backgroundColor: "var(--brand)" } : {}
+                      }
+                    >
+                      {h.label}
+                      {!isAvailable && (
+                        <svg
+                          className="absolute -right-1 -top-1 h-3 w-3 text-amber-500"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 

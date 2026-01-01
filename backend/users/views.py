@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.utils import timezone
 
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -135,7 +136,6 @@ class LoginView(APIView):
         if existing_session:
             # Blacklist old refresh token
             try:
-                from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
                 outstanding = OutstandingToken.objects.get(jti=existing_session.refresh_token_jti)
                 BlacklistedToken.objects.get_or_create(token=outstanding)
             except:
@@ -151,20 +151,24 @@ class LoginView(APIView):
             existing_session.last_active = timezone.now()
             existing_session.save()
         else:
-            # Check session limit for new device
-            max_sessions = user.max_sessions
+            # Get session limit from subscription
+            subscription = getattr(user, 'subscription_data', None)
+            if subscription:
+                max_sessions = subscription.max_sessions
+            else:
+                max_sessions = 1
+            
             if max_sessions is not None:
                 active_sessions = UserSession.objects.filter(user=user, is_active=True)
                 active_count = active_sessions.count()
                 
                 if active_count >= max_sessions:
-                    # Remove oldest session
+                    # Remove oldest session(s)
                     sessions_to_remove = active_count - max_sessions + 1
                     oldest_sessions = active_sessions.order_by('last_active')[:sessions_to_remove]
                     
                     for session in oldest_sessions:
                         try:
-                            from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
                             outstanding = OutstandingToken.objects.get(jti=session.refresh_token_jti)
                             BlacklistedToken.objects.get_or_create(token=outstanding)
                         except:
@@ -195,7 +199,8 @@ class LoginView(APIView):
                 'access': str(access_token),
             }
         })
-          
+        
+             
 class LogoutView(APIView):
     """Logout and blacklist refresh token."""
     
@@ -606,3 +611,21 @@ class NotificationSettingsView(generics.RetrieveUpdateAPIView):
     @extend_schema(tags=['Auth'], summary="Update notification settings")
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
+    
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_usage(request):
+    """Get user's current usage stats."""
+    from alerts.models import Alert
+    
+    user = request.user
+    
+    # Get actual counts
+    alerts_count = Alert.objects.filter(user=user).count()
+    sessions_count = UserSession.objects.filter(user=user, is_active=True).count()
+    
+    return Response({
+        'alerts': alerts_count,
+        'sessions': sessions_count,
+    })
