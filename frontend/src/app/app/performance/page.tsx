@@ -4,57 +4,52 @@ import { useState } from "react";
 import { AppLayout } from "@/components/app";
 import {
   PerformanceHeader,
+  ModelInfo,
   MetricsGrid,
-  ValidationNote,
-  RegimeBreakdown,
   BacktestTable,
   TransparencyNote,
-  ModelInfo,
 } from "@/components/app/sections/performance";
-
-import {
-  MARKETS,
-  MODEL_VERSIONS,
-  HORIZONS,
-  METRICS_BY_HORIZON,
-  BACKTEST_RUNS,
-  REGIME_BREAKDOWN,
-} from "@/config/performanceData";
+import { Horizon } from "@/lib/hooks/useDashboardKpi";
+import { useModelInfo } from "@/lib/hooks/useModelInfo";
+import { useBacktestRuns } from "@/lib/hooks/useBacktestRuns";
 
 const PerformancePage = () => {
-  const [selectedMarket, setSelectedMarket] = useState(MARKETS[0]);
-  const [selectedVersion, setSelectedVersion] = useState(MODEL_VERSIONS[0]);
-  const [selectedHorizon, setSelectedHorizon] = useState(HORIZONS[1]); // 7D default
+  const [selectedHorizon, setSelectedHorizon] = useState<Horizon>("24H");
+  const [backtestPage, setBacktestPage] = useState(1);
 
-  // Get metrics for selected horizon
-  const metricsData = METRICS_BY_HORIZON[selectedHorizon.id];
+  const { data: modelInfo, isLoading: modelLoading } =
+    useModelInfo(selectedHorizon);
+  const {
+    data: backtestRuns,
+    total,
+    totalPages,
+    isLoading: backtestLoading,
+  } = useBacktestRuns(selectedHorizon, backtestPage);
+
+  // Reset page when horizon changes
+  const handleHorizonChange = (horizon: Horizon) => {
+    setSelectedHorizon(horizon);
+    setBacktestPage(1);
+  };
 
   return (
     <AppLayout title="" subtitle="">
       <div className="space-y-6">
         <PerformanceHeader
-          markets={MARKETS}
-          selectedMarket={selectedMarket}
-          onMarketChange={setSelectedMarket}
-          versions={MODEL_VERSIONS}
-          selectedVersion={selectedVersion}
-          onVersionChange={setSelectedVersion}
-          horizons={HORIZONS}
           selectedHorizon={selectedHorizon}
-          onHorizonChange={setSelectedHorizon}
+          onHorizonChange={handleHorizonChange}
         />
 
-        <ModelInfo version={selectedVersion} />
+        <ModelInfo model={modelInfo} isLoading={modelLoading} />
 
-        <MetricsGrid metricsData={metricsData} />
-
-        <ValidationNote />
-
-        <div className="grid gap-6 lg:grid-cols-2">
-          <RegimeBreakdown regimes={REGIME_BREAKDOWN} />
-          <BacktestTable runs={BACKTEST_RUNS} />
-        </div>
-
+        <BacktestTable
+          runs={backtestRuns}
+          isLoading={backtestLoading}
+          page={backtestPage}
+          totalPages={totalPages}
+          total={total}
+          onPageChange={setBacktestPage}
+        />
         <TransparencyNote />
       </div>
     </AppLayout>
@@ -62,3 +57,13 @@ const PerformancePage = () => {
 };
 
 export default PerformancePage;
+
+{
+  /* <RegimeBreakdown /> */
+}
+{
+  /* <BacktestTable /> */
+}
+{
+  /* <TransparencyNote /> */
+}

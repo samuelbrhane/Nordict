@@ -36,7 +36,7 @@ const AppHeader = ({
       {/* Right side - Actions */}
       <div className="flex items-center gap-2">
         <ThemeToggle />
-        {/* <NotificationButton hasUnread /> */}
+        <NotificationButton />
         <UserMenu />
       </div>
     </header>
