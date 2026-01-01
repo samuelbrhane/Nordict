@@ -51,10 +51,10 @@ export const MODEL_VERSIONS: ModelVersion[] = [
 ];
 
 export const HORIZONS: Horizon[] = [
-  { id: "1D", label: "1D" },
-  { id: "7D", label: "7D" },
+  { id: "24H", label: "24H" },
   { id: "30D", label: "30D" },
-  { id: "90D", label: "90D" },
+  { id: "12W", label: "12W" },
+  { id: "12M", label: "12M" },
 ];
 
 // Metrics data per horizon

@@ -186,14 +186,14 @@ export const NAV_ITEMS: NavItem[] = [
     icon: <CompareIcon />,
   },
   {
-    label: "Performance",
-    href: "/app/performance",
-    icon: <PerformanceIcon />,
-  },
-  {
     label: "Alerts",
     href: "/app/alerts",
     icon: <AlertsIcon />,
+  },
+  {
+    label: "Performance",
+    href: "/app/performance",
+    icon: <PerformanceIcon />,
   },
 ];
 
