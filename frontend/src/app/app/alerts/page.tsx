@@ -1,112 +1,164 @@
 "use client";
 
-import { useState } from "react";
-import { AppLayout } from "@/components/app";
+import { useState, useEffect } from "react";
+import { AppLayout, LoadingSpinner } from "@/components/app";
+import { useAuth } from "@/context/AuthContext";
 import {
   AlertsHeader,
   AlertsList,
   AlertHistory,
-  NoiseControls,
   CreateAlertModal,
 } from "@/components/app/sections/alerts";
+import { AlertChannels } from "@/components/app/sections/settings/notifications";
+import { useAlerts, useAlertHistory } from "@/lib/hooks/useAlerts";
 import {
-  MARKETS,
-  INITIAL_ALERTS,
-  ALERT_HISTORY,
-  CONDITION_TYPES,
-  Alert,
-} from "@/config/alertsData";
+  getNotificationSettingsApi,
+  updateNotificationSettingsApi,
+  NotificationSettings,
+} from "@/context/auth/api";
 
 const AlertsPage = () => {
-  const [alerts, setAlerts] = useState<Alert[]>(INITIAL_ALERTS);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [filterMarket, setFilterMarket] = useState<string | null>(null);
+  const { tokens } = useAuth();
+  const [filterMarket, setFilterMarket] = useState<{
+    symbol: string;
+    name: string;
+  } | null>(null);
   const [filterStatus, setFilterStatus] = useState<"all" | "active" | "paused">(
     "all"
   );
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  const filteredAlerts = alerts.filter((alert) => {
-    if (filterMarket && alert.market !== filterMarket) return false;
-    if (filterStatus !== "all" && alert.status !== filterStatus) return false;
-    return true;
+  // Notification settings
+  const [notificationSettings, setNotificationSettings] =
+    useState<NotificationSettings>({
+      notify_alerts_email: true,
+      notify_alerts_push: false,
+      notify_forecast_daily: true,
+      notify_forecast_significant: true,
+    });
+  const [isSettingsLoading, setIsSettingsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const {
+    data: alerts,
+    isLoading: alertsLoading,
+    createAlert,
+    toggleAlert,
+    deleteAlert,
+  } = useAlerts({
+    market: filterMarket?.symbol,
+    status: filterStatus,
   });
 
-  const toggleAlertStatus = (alertId: number) => {
-    setAlerts((prev) =>
-      prev.map((alert) =>
-        alert.id === alertId
-          ? {
-              ...alert,
-              status: alert.status === "active" ? "paused" : "active",
-            }
-          : alert
-      )
-    );
-  };
+  const { data: alertHistory, isLoading: historyLoading } = useAlertHistory();
 
-  const deleteAlert = (alertId: number) => {
-    setAlerts((prev) => prev.filter((alert) => alert.id !== alertId));
-  };
+  // Fetch notification settings
+  useEffect(() => {
+    const fetchSettings = async () => {
+      if (!tokens?.access) return;
 
-  const createAlert = (newAlertData: {
-    market: string;
-    horizon: string;
-    conditionType: string;
-    value: number;
-  }) => {
-    const conditionType = CONDITION_TYPES.find(
-      (c) => c.id === newAlertData.conditionType
-    );
-    const conditionLabel = conditionType?.unit
-      ? `${conditionType.label} ${newAlertData.value}${conditionType.unit}`
-      : conditionType?.label || "";
-
-    const newAlert: Alert = {
-      id: Math.max(...alerts.map((a) => a.id), 0) + 1,
-      market: newAlertData.market,
-      horizon: newAlertData.horizon,
-      condition: conditionLabel,
-      conditionType: newAlertData.conditionType,
-      value: newAlertData.value,
-      channel: "email",
-      status: "active",
-      lastTriggered: "Never",
-      triggerCount: 0,
+      try {
+        const data = await getNotificationSettingsApi(tokens.access);
+        setNotificationSettings(data);
+      } catch (err) {
+        console.error("Failed to load notification settings:", err);
+      } finally {
+        setIsSettingsLoading(false);
+      }
     };
 
-    setAlerts((prev) => [...prev, newAlert]);
-    setIsCreateModalOpen(false);
+    fetchSettings();
+  }, [tokens?.access]);
+
+  const updateNotificationSetting = async (
+    key: keyof NotificationSettings,
+    value: boolean
+  ) => {
+    if (!tokens?.access) return;
+
+    const previousValue = notificationSettings[key];
+
+    // Optimistic update
+    setNotificationSettings((prev) => ({ ...prev, [key]: value }));
+    setIsSaving(true);
+
+    try {
+      await updateNotificationSettingsApi(tokens.access, { [key]: value });
+    } catch (err) {
+      // Revert on error
+      setNotificationSettings((prev) => ({ ...prev, [key]: previousValue }));
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  const handleToggleStatus = async (alertId: number) => {
+    try {
+      await toggleAlert(alertId);
+    } catch (err) {
+      console.error("Failed to toggle alert:", err);
+    }
+  };
+
+  const handleDelete = async (alertId: number) => {
+    if (!confirm("Are you sure you want to delete this alert?")) return;
+
+    try {
+      await deleteAlert(alertId);
+    } catch (err) {
+      console.error("Failed to delete alert:", err);
+    }
+  };
+
+  // Show loading until all data is ready
+  const isLoading = isSettingsLoading || alertsLoading || historyLoading;
+
+  if (isLoading) {
+    return (
+      <AppLayout title="" subtitle="">
+        <LoadingSpinner text="Loading alerts..." />
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout title="" subtitle="">
       <div className="space-y-6">
         <AlertsHeader
-          markets={MARKETS}
           filterMarket={filterMarket}
           onFilterMarketChange={setFilterMarket}
           filterStatus={filterStatus}
           onFilterStatusChange={setFilterStatus}
           onCreateClick={() => setIsCreateModalOpen(true)}
+          alertCount={alerts.length}
+        />
+
+        <AlertChannels
+          emailEnabled={notificationSettings.notify_alerts_email}
+          pushEnabled={notificationSettings.notify_alerts_push}
+          onEmailChange={(v) =>
+            updateNotificationSetting("notify_alerts_email", v)
+          }
+          onPushChange={(v) =>
+            updateNotificationSetting("notify_alerts_push", v)
+          }
+          disabled={isSaving}
         />
 
         <AlertsList
-          alerts={filteredAlerts}
-          onToggleStatus={toggleAlertStatus}
-          onDelete={deleteAlert}
+          alerts={alerts}
+          isLoading={false}
+          onToggleStatus={handleToggleStatus}
+          onDelete={handleDelete}
         />
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <AlertHistory history={ALERT_HISTORY} />
-          <NoiseControls />
-        </div>
+        <AlertHistory history={alertHistory} isLoading={false} />
       </div>
 
       <CreateAlertModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onCreate={createAlert}
-        markets={MARKETS}
       />
     </AppLayout>
   );

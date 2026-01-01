@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { AppLayout } from "@/components/app";
+import { AppLayout, LoadingSpinner } from "@/components/app";
 import { AnimatedCard } from "@/components/app/sections/dashboard";
 import {
   CompareHeader,
@@ -11,154 +11,67 @@ import {
   CompareCards,
   CompareTable,
 } from "@/components/app/sections/compare";
-
-const AVAILABLE_MARKETS = [
-  { symbol: "BTC-USD", name: "Bitcoin" },
-  { symbol: "ETH-USD", name: "Ethereum" },
-  { symbol: "SOL-USD", name: "Solana" },
-  { symbol: "AVAX-USD", name: "Avalanche" },
-  { symbol: "LINK-USD", name: "Chainlink" },
-  { symbol: "DOT-USD", name: "Polkadot" },
-  { symbol: "MATIC-USD", name: "Polygon" },
-  { symbol: "UNI-USD", name: "Uniswap" },
-];
-
-const MARKET_NAMES: Record<string, string> = {
-  "BTC-USD": "Bitcoin",
-  "ETH-USD": "Ethereum",
-  "SOL-USD": "Solana",
-  "AVAX-USD": "Avalanche",
-  "LINK-USD": "Chainlink",
-  "DOT-USD": "Polkadot",
-  "MATIC-USD": "Polygon",
-  "UNI-USD": "Uniswap",
-};
-
-const MARKET_DATA: Record<
-  string,
-  {
-    currentPrice: string;
-    forecasts: Record<
-      string,
-      {
-        direction: "up" | "down" | "neutral";
-        change: string;
-        confidence: number;
-      }
-    >;
-  }
-> = {
-  "BTC-USD": {
-    currentPrice: "$95,420",
-    forecasts: {
-      "1D": { direction: "up", change: "+1.2%", confidence: 68 },
-      "7D": { direction: "up", change: "+4.2%", confidence: 78 },
-      "30D": { direction: "up", change: "+8.5%", confidence: 65 },
-    },
-  },
-  "ETH-USD": {
-    currentPrice: "$3,450",
-    forecasts: {
-      "1D": { direction: "up", change: "+0.8%", confidence: 62 },
-      "7D": { direction: "up", change: "+3.1%", confidence: 72 },
-      "30D": { direction: "up", change: "+6.8%", confidence: 58 },
-    },
-  },
-  "SOL-USD": {
-    currentPrice: "$142.30",
-    forecasts: {
-      "1D": { direction: "down", change: "-0.5%", confidence: 55 },
-      "7D": { direction: "down", change: "-2.8%", confidence: 68 },
-      "30D": { direction: "up", change: "+5.2%", confidence: 52 },
-    },
-  },
-  "AVAX-USD": {
-    currentPrice: "$38.50",
-    forecasts: {
-      "1D": { direction: "up", change: "+1.8%", confidence: 61 },
-      "7D": { direction: "up", change: "+5.5%", confidence: 70 },
-      "30D": { direction: "up", change: "+12.1%", confidence: 55 },
-    },
-  },
-  "LINK-USD": {
-    currentPrice: "$14.20",
-    forecasts: {
-      "1D": { direction: "down", change: "-0.8%", confidence: 58 },
-      "7D": { direction: "up", change: "+1.9%", confidence: 62 },
-      "30D": { direction: "up", change: "+7.3%", confidence: 54 },
-    },
-  },
-  "DOT-USD": {
-    currentPrice: "$7.85",
-    forecasts: {
-      "1D": { direction: "up", change: "+0.6%", confidence: 54 },
-      "7D": { direction: "up", change: "+2.4%", confidence: 61 },
-      "30D": { direction: "up", change: "+9.1%", confidence: 48 },
-    },
-  },
-  "MATIC-USD": {
-    currentPrice: "$0.89",
-    forecasts: {
-      "1D": { direction: "up", change: "+0.3%", confidence: 52 },
-      "7D": { direction: "up", change: "+2.1%", confidence: 58 },
-      "30D": { direction: "up", change: "+4.5%", confidence: 48 },
-    },
-  },
-  "UNI-USD": {
-    currentPrice: "$12.40",
-    forecasts: {
-      "1D": { direction: "up", change: "+1.1%", confidence: 56 },
-      "7D": { direction: "up", change: "+3.8%", confidence: 63 },
-      "30D": { direction: "up", change: "+8.2%", confidence: 51 },
-    },
-  },
-};
-
-const HORIZONS = ["1D", "7D", "30D"];
+import { Horizon } from "@/lib/hooks/useDashboardKpi";
+import { useCompareForecasts } from "@/lib/hooks/useCompareForecasts";
 
 const ForecastsComparePage = () => {
   const searchParams = useSearchParams();
   const marketsParam = searchParams.get("markets");
 
-  const [selectedMarkets, setSelectedMarkets] = useState<string[]>([
-    "BTC-USD",
-    "ETH-USD",
+  const [selectedMarkets, setSelectedMarkets] = useState<
+    { symbol: string; name: string }[]
+  >([
+    { symbol: "BTC-USD", name: "Bitcoin" },
+    { symbol: "ETH-USD", name: "Ethereum" },
   ]);
-  const [selectedHorizon, setSelectedHorizon] = useState("7D");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedHorizon, setSelectedHorizon] = useState<Horizon>("24H");
 
+  // Fetch compare data
+  const {
+    data: compareData,
+    allHorizonsData,
+    isLoading,
+  } = useCompareForecasts(
+    selectedMarkets.map((m) => m.symbol),
+    selectedHorizon
+  );
+
+  // Handle URL params
   useEffect(() => {
     if (marketsParam) {
-      const markets = marketsParam.split(",").filter((m) => MARKET_DATA[m]);
-      if (markets.length > 0) {
-        const uniqueMarkets = [...new Set(markets)].slice(0, 5);
-        if (uniqueMarkets.length === 1) {
-          const otherMarket =
-            uniqueMarkets[0] === "BTC-USD" ? "ETH-USD" : "BTC-USD";
-          setSelectedMarkets([uniqueMarkets[0], otherMarket]);
-        } else {
-          setSelectedMarkets(uniqueMarkets);
-        }
+      const symbols = marketsParam.split(",");
+      if (symbols.length > 0) {
+        const markets = symbols.slice(0, 5).map((symbol) => ({
+          symbol,
+          name: symbol.replace("-USD", ""),
+        }));
+        setSelectedMarkets(markets);
       }
     }
   }, [marketsParam]);
 
-  const toggleMarket = (symbol: string) => {
-    if (selectedMarkets.includes(symbol)) {
-      if (selectedMarkets.length > 1) {
-        setSelectedMarkets(selectedMarkets.filter((m) => m !== symbol));
-      }
-    } else if (selectedMarkets.length < 5) {
-      setSelectedMarkets([...selectedMarkets, symbol]);
+  const handleAddMarket = (market: { symbol: string; name: string }) => {
+    if (
+      selectedMarkets.length < 5 &&
+      !selectedMarkets.some((m) => m.symbol === market.symbol)
+    ) {
+      setSelectedMarkets([...selectedMarkets, market]);
     }
-    setIsDropdownOpen(false);
   };
 
-  const removeMarket = (symbol: string) => {
+  const handleRemoveMarket = (symbol: string) => {
     if (selectedMarkets.length > 1) {
-      setSelectedMarkets(selectedMarkets.filter((m) => m !== symbol));
+      setSelectedMarkets(selectedMarkets.filter((m) => m.symbol !== symbol));
     }
   };
+
+  if (isLoading) {
+    return (
+      <AppLayout title="" subtitle="">
+        <LoadingSpinner text="Loading comparison..." />
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout title="" subtitle="">
@@ -200,33 +113,24 @@ const ForecastsComparePage = () => {
         </AnimatedCard>
 
         <CompareHeader
-          availableMarkets={AVAILABLE_MARKETS}
-          selectedMarkets={selectedMarkets}
-          onToggleMarket={toggleMarket}
+          selectedMarkets={selectedMarkets.map((m) => m.symbol)}
+          onAddMarket={handleAddMarket}
           selectedHorizon={selectedHorizon}
           onHorizonChange={setSelectedHorizon}
-          horizons={HORIZONS}
-          isDropdownOpen={isDropdownOpen}
-          onToggleDropdown={() => setIsDropdownOpen(!isDropdownOpen)}
         />
 
         <MarketChips
           selectedMarkets={selectedMarkets}
-          onRemoveMarket={removeMarket}
+          onRemoveMarket={handleRemoveMarket}
         />
 
         <CompareCards
-          selectedMarkets={selectedMarkets}
-          marketData={MARKET_DATA}
-          marketNames={MARKET_NAMES}
+          markets={compareData}
           selectedHorizon={selectedHorizon}
+          isLoading={false}
         />
 
-        <CompareTable
-          selectedMarkets={selectedMarkets}
-          marketData={MARKET_DATA}
-          horizons={HORIZONS}
-        />
+        <CompareTable markets={allHorizonsData} isLoading={false} />
       </div>
     </AppLayout>
   );

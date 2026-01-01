@@ -2,17 +2,16 @@
 
 import { use, useState } from "react";
 import Link from "next/link";
-import { AppLayout } from "@/components/app";
+import { AppLayout, LoadingSpinner } from "@/components/app";
 import { AnimatedCard } from "@/components/app/sections/dashboard";
 import {
   MarketHeader,
   ForecastSummary,
-  MarketForecastChart,
   HorizonTable,
-  HistoricalAccuracy,
   RelatedAlerts,
 } from "@/components/app/sections/forecasts";
 import { useMarketDetail } from "@/lib/hooks/useMarketDetail";
+import { useMarketAlerts } from "@/lib/hooks/useAlerts";
 import { Horizon } from "@/lib/hooks/useDashboardKpi";
 import { ForecastChart } from "@/components/app/sections/dashboard/forecastchart";
 
@@ -25,6 +24,7 @@ const MarketDetailPage = ({
   const [selectedHorizon, setSelectedHorizon] = useState<Horizon>("24H");
 
   const { data, isLoading, error } = useMarketDetail(symbol);
+  const { data: alerts, isLoading: alertsLoading } = useMarketAlerts(symbol);
 
   // Get current forecast for selected horizon
   const currentForecast = data?.forecasts.find(
@@ -56,9 +56,7 @@ const MarketDetailPage = ({
   if (isLoading) {
     return (
       <AppLayout title="" subtitle="">
-        <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-neutral-200 border-t-emerald-500" />
-        </div>
+        <LoadingSpinner text="Loading market..." />
       </AppLayout>
     );
   }
@@ -166,7 +164,11 @@ const MarketDetailPage = ({
           fixedMarket={{ symbol: symbol, name: data.name }}
         />
 
-        <RelatedAlerts alerts={[]} symbol={symbol} />
+        <RelatedAlerts
+          alerts={alerts}
+          symbol={symbol}
+          isLoading={alertsLoading}
+        />
       </div>
     </AppLayout>
   );
