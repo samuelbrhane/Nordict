@@ -85,20 +85,70 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
     directionAccuracy: 0,
     totalPoints: 0,
   };
-
   // If no data
   if (data.length === 0) {
     return (
-      <AnimatedCard delay={400}>
-        <div className="flex h-[400px] items-center justify-center rounded-2xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
-          <p className="text-neutral-500 dark:text-neutral-400">
-            No performance data available yet
-          </p>
-        </div>
-      </AnimatedCard>
+      <>
+        <MarketSelectorModal
+          selected={selectedMarket}
+          onSelect={handleMarketSelect}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+
+        <AnimatedCard delay={400}>
+          <div className="rounded-2xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+            {/* Header with market selector */}
+            <div className="flex items-center gap-4 border-b border-neutral-100 p-4 dark:border-neutral-800 sm:p-6">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-2.5 transition-all hover:border-neutral-300 hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:border-neutral-600 dark:hover:bg-neutral-700"
+              >
+                <div
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-white"
+                  style={{ backgroundColor: "#3b82f6" }}
+                >
+                  {selectedMarket.symbol.slice(0, 2)}
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-semibold text-neutral-900 dark:text-white">
+                    {selectedMarket.symbol}
+                  </p>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    {selectedMarket.name}
+                  </p>
+                </div>
+                <svg
+                  className="ml-1 h-4 w-4 text-neutral-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M8 9l4-4 4 4m0 6l-4 4-4-4"
+                  />
+                </svg>
+              </button>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                Prediction vs Actual
+              </p>
+            </div>
+
+            {/* Empty state message */}
+            <div className="flex h-[300px] items-center justify-center">
+              <p className="text-neutral-500 dark:text-neutral-400">
+                No performance data available yet for {selectedMarket.symbol} (
+                {horizon})
+              </p>
+            </div>
+          </div>
+        </AnimatedCard>
+      </>
     );
   }
-
   // Calculate chart bounds
   const allValues = data.flatMap((d) => [d.predicted, d.actual]);
   const maxValue = Math.max(...allValues);

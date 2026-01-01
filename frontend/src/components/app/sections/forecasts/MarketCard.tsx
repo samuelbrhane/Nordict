@@ -13,11 +13,17 @@ interface MarketCardProps {
 }
 
 const MarketCard = ({ market, horizon, onToggleFavorite }: MarketCardProps) => {
+  // Calculate expected move for selected horizon
+  const expectedMove =
+    ((market.forecast.predicted_mid - market.current_price) /
+      market.current_price) *
+    100;
+
   return (
     <div className="group rounded-2xl border border-neutral-200 bg-white p-4 transition-all duration-200 hover:border-neutral-300 hover:shadow-lg dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700">
       <div className="flex items-start justify-between">
         <Link
-          href={`/app/forecasts/${market.symbol}`}
+          href={`/app/forecast/${market.symbol}`}
           className="flex items-center gap-3"
         >
           <div
@@ -55,21 +61,24 @@ const MarketCard = ({ market, horizon, onToggleFavorite }: MarketCardProps) => {
           </svg>
         </button>
       </div>
-      <Link href={`/app/forecasts/${market.symbol}`}>
+      <Link href={`/app/forecast/${market.symbol}`}>
         <div className="mt-4 flex items-end justify-between">
           <div>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              Price at forecast
+            </p>
             <p className="text-lg font-semibold text-neutral-900 dark:text-white">
               {market.price_formatted}
             </p>
             <span
               className={`text-sm font-medium ${
-                market.change_direction === "up"
+                expectedMove >= 0
                   ? "text-emerald-600 dark:text-emerald-400"
                   : "text-red-600 dark:text-red-400"
               }`}
             >
-              {market.change_24h >= 0 ? "+" : ""}
-              {market.change_24h}%
+              {expectedMove >= 0 ? "+" : ""}
+              {expectedMove.toFixed(2)}% ({horizon})
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -104,7 +113,7 @@ const MarketCard = ({ market, horizon, onToggleFavorite }: MarketCardProps) => {
             </div>
             <div className="text-right">
               <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                {horizon} Conf
+                Confidence
               </p>
               <p className="text-sm font-medium text-neutral-900 dark:text-white">
                 {market.forecast.confidence}%
