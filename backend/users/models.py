@@ -36,7 +36,7 @@ class User(AbstractUser):
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+    last_alerts_viewed_at = models.DateTimeField(null=True, blank=True)
     objects = CustomUserManager()
     
     USERNAME_FIELD = 'email'

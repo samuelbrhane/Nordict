@@ -14,7 +14,7 @@ import pickle
 from ml.storage.model_store import load_model
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
-
+from alerts.services import process_alerts_for_forecast
 import django
 django.setup()
 
@@ -334,7 +334,7 @@ def generate_forecast(
             ))
         
         ForecastPoint.objects.bulk_create(points)
-    
+    process_alerts_for_forecast(forecast)
     return forecast
 
 
