@@ -20,7 +20,7 @@ urlpatterns = [
     path('me/preferences/', UserPreferencesView.as_view(), name='user-preferences'),
     path('me/delete/', DeleteAccountView.as_view(), name='delete-account'),
     path('me/notifications/', NotificationSettingsView.as_view(), name='notification-settings'),
-
+    path('me/usage/', get_usage, name='user-usage'),
     
     # API keys
     path('api-keys/', APIKeyView.as_view(), name='api-keys'),
@@ -31,7 +31,7 @@ urlpatterns = [
     path('sessions/revoke-all/', SessionRevokeAllView.as_view(), name='session-revoke-all'),
     
     # Billing
-     path('billing/create-checkout/', stripe_views.CreateCheckoutSessionView.as_view(), name='create-checkout'),
+    path('billing/create-checkout/', stripe_views.CreateCheckoutSessionView.as_view(), name='create-checkout'),
     path('billing/create-portal/', stripe_views.CreatePortalSessionView.as_view(), name='create-portal'),
     path('billing/change-plan/', stripe_views.ChangePlanView.as_view(), name='change-plan'),
     path('billing/cancel/', stripe_views.CancelSubscriptionView.as_view(), name='cancel-subscription'),
