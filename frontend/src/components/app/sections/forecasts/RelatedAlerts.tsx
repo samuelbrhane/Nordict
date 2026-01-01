@@ -2,21 +2,45 @@
 
 import Link from "next/link";
 import AnimatedCard from "../dashboard/AnimatedCard";
-
-interface Alert {
-  id: number;
-  condition: string;
-  horizon: string;
-  status: "active" | "paused";
-  lastTriggered: string;
-}
+import { Alert } from "@/lib/hooks/useAlerts";
 
 interface RelatedAlertsProps {
   alerts: Alert[];
   symbol: string;
+  isLoading?: boolean;
 }
 
-const RelatedAlerts = ({ alerts, symbol }: RelatedAlertsProps) => {
+const getConditionLabel = (alert: Alert): string => {
+  const labels: Record<string, string> = {
+    direction_change: "Direction Changes",
+    direction_up: "Direction is Up",
+    direction_down: "Direction is Down",
+    confidence_above: `Confidence > ${alert.condition_value}%`,
+    confidence_below: `Confidence < ${alert.condition_value}%`,
+    expected_move_above: `Expected Move > ${alert.condition_value}%`,
+    expected_move_below: `Expected Move < ${alert.condition_value}%`,
+  };
+  return labels[alert.condition_type] || alert.condition_type;
+};
+
+const formatDate = (dateString: string | null): string => {
+  if (!dateString) return "Never";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+};
+
+const RelatedAlerts = ({ alerts, symbol, isLoading }: RelatedAlertsProps) => {
+  if (isLoading) {
+    return (
+      <AnimatedCard delay={450}>
+        <div className="h-48 animate-pulse rounded-2xl border border-neutral-200 bg-neutral-100 dark:border-neutral-800 dark:bg-neutral-800" />
+      </AnimatedCard>
+    );
+  }
+
   return (
     <AnimatedCard delay={450}>
       <div className="rounded-2xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900 sm:p-6">
@@ -37,6 +61,7 @@ const RelatedAlerts = ({ alerts, symbol }: RelatedAlertsProps) => {
             View all
           </Link>
         </div>
+
         {alerts.length > 0 ? (
           <div className="mt-4 space-y-2">
             {alerts.map((alert) => (
@@ -46,10 +71,11 @@ const RelatedAlerts = ({ alerts, symbol }: RelatedAlertsProps) => {
               >
                 <div>
                   <p className="text-sm font-medium text-neutral-900 dark:text-white">
-                    {alert.condition}
+                    {getConditionLabel(alert)}
                   </p>
                   <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                    {alert.horizon} · Last: {alert.lastTriggered}
+                    {alert.horizon === "ANY" ? "Any horizon" : alert.horizon} ·
+                    Last: {formatDate(alert.last_triggered_at)}
                   </p>
                 </div>
                 <span
