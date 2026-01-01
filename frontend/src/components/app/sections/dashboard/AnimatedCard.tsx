@@ -23,7 +23,7 @@ const AnimatedCard = ({
   return (
     <div
       className={`transform transition-all duration-500 ease-out ${
-        isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+        isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-[0.01]"
       } ${className}`}
     >
       {children}

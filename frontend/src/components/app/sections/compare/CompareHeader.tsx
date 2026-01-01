@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import AnimatedCard from "../dashboard/AnimatedCard";
 import MarketSelectorModal from "../dashboard/forecastchart/MarketSelectorModal";
 import { Horizon } from "@/lib/hooks/useDashboardKpi";
@@ -20,11 +21,25 @@ const CompareHeader = ({
   selectedHorizon,
   onHorizonChange,
 }: CompareHeaderProps) => {
+  const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const availableHorizons = user?.plan_limits?.horizons || [
+    "24H",
+    "30D",
+    "12W",
+    "12M",
+  ];
 
   const handleMarketSelect = (market: { symbol: string; name: string }) => {
     onAddMarket(market);
     setIsModalOpen(false);
+  };
+
+  const handleHorizonClick = (horizon: Horizon) => {
+    if (availableHorizons.includes(horizon)) {
+      onHorizonChange(horizon);
+    }
   };
 
   return (
@@ -64,24 +79,46 @@ const CompareHeader = ({
           </button>
 
           <div className="flex w-fit rounded-xl border border-neutral-200 bg-neutral-50 p-1 dark:border-neutral-700 dark:bg-neutral-800">
-            {HORIZONS.map((horizon) => (
-              <button
-                key={horizon}
-                onClick={() => onHorizonChange(horizon)}
-                className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                  selectedHorizon === horizon
-                    ? "text-black shadow-sm"
-                    : "text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
-                }`}
-                style={
-                  selectedHorizon === horizon
-                    ? { backgroundColor: "var(--brand)" }
-                    : {}
-                }
-              >
-                {horizon}
-              </button>
-            ))}
+            {HORIZONS.map((horizon) => {
+              const isAvailable = availableHorizons.includes(horizon);
+              const isActive = selectedHorizon === horizon;
+
+              return (
+                <button
+                  key={horizon}
+                  onClick={() => handleHorizonClick(horizon)}
+                  disabled={!isAvailable}
+                  title={
+                    !isAvailable
+                      ? "Upgrade to Premium to access this horizon"
+                      : undefined
+                  }
+                  className={`relative rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                    isActive
+                      ? "text-black shadow-sm"
+                      : isAvailable
+                      ? "text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
+                      : "cursor-not-allowed text-neutral-300 dark:text-neutral-600"
+                  }`}
+                  style={isActive ? { backgroundColor: "var(--brand)" } : {}}
+                >
+                  {horizon}
+                  {!isAvailable && (
+                    <svg
+                      className="absolute -right-1 -top-1 h-3 w-3 text-amber-500"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       </AnimatedCard>
