@@ -1,15 +1,13 @@
-// app/app/forecasts/page.tsx
-
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/app";
 import AnimatedCard from "@/components/app/sections/dashboard/AnimatedCard";
 import ForecastsHeader from "@/components/app/sections/forecasts/ForecastsHeader";
 import MarketCard from "@/components/app/sections/forecasts/MarketCard";
 import MarketTable from "@/components/app/sections/forecasts/MarketTable";
 import Pagination from "@/components/app/sections/forecasts/Pagination";
-import { Horizon } from "@/lib/hooks/useDashboardKpi";
+import { Horizon, useDashboardKpi } from "@/lib/hooks/useDashboardKpi";
 import {
   useMarketsWithForecasts,
   useToggleFavorite,
@@ -24,7 +22,14 @@ const ForecastsPage = () => {
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data, isLoading, error, refetch } = useMarketsWithForecasts({
+  // Local favorites state for optimistic updates
+  const [localFavorites, setLocalFavorites] = useState<Set<string>>(new Set());
+  const [initialized, setInitialized] = useState(false);
+
+  // Get KPI for last_updated_ago
+  const { data: kpi } = useDashboardKpi(horizon);
+
+  const { data, isLoading, error } = useMarketsWithForecasts({
     horizon,
     search,
     category,
@@ -33,6 +38,22 @@ const ForecastsPage = () => {
   });
 
   const { toggleFavorite } = useToggleFavorite();
+
+  // Initialize local favorites from API data
+  useEffect(() => {
+    if (data && !initialized) {
+      const favorites = new Set(
+        data.results.filter((m) => m.is_favorite).map((m) => m.symbol)
+      );
+      setLocalFavorites(favorites);
+      setInitialized(true);
+    }
+  }, [data, initialized]);
+
+  // Reset initialized when filters change
+  useEffect(() => {
+    setInitialized(false);
+  }, [search, category, horizon, currentPage]);
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
@@ -45,21 +66,47 @@ const ForecastsPage = () => {
   };
 
   const handleToggleFavorite = async (symbol: string) => {
+    // Optimistic update
+    setLocalFavorites((prev) => {
+      const next = new Set(prev);
+      if (next.has(symbol)) {
+        next.delete(symbol);
+      } else {
+        next.add(symbol);
+      }
+      return next;
+    });
+
     try {
       await toggleFavorite(symbol);
-      refetch();
     } catch (error) {
       console.error("Failed to toggle favorite:", error);
+      // Revert on error
+      setLocalFavorites((prev) => {
+        const next = new Set(prev);
+        if (next.has(symbol)) {
+          next.delete(symbol);
+        } else {
+          next.add(symbol);
+        }
+        return next;
+      });
     }
   };
 
   const markets = data?.results || [];
   const pagination = data?.pagination;
 
+  // Override is_favorite with local state
+  const marketsWithLocalFavorites = markets.map((market) => ({
+    ...market,
+    is_favorite: localFavorites.has(market.symbol),
+  }));
+
   return (
     <AppLayout title="" subtitle="">
       <div className="space-y-6">
-        {/* <ForecastsHeader
+        <ForecastsHeader
           search={search}
           onSearchChange={handleSearchChange}
           category={category}
@@ -68,7 +115,8 @@ const ForecastsPage = () => {
           onHorizonChange={setHorizon}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
-        /> */}
+          lastUpdatedAgo={kpi?.last_updated_ago}
+        />
 
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
@@ -80,7 +128,7 @@ const ForecastsPage = () => {
           </div>
         ) : viewMode === "grid" ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {markets.map((market, index) => (
+            {marketsWithLocalFavorites.map((market, index) => (
               <AnimatedCard key={market.symbol} delay={50 + index * 30}>
                 <MarketCard
                   market={market}
@@ -92,7 +140,7 @@ const ForecastsPage = () => {
           </div>
         ) : (
           <MarketTable
-            markets={markets}
+            markets={marketsWithLocalFavorites}
             horizon={horizon}
             onToggleFavorite={handleToggleFavorite}
           />

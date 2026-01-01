@@ -65,7 +65,7 @@ const CompareCards = ({
                   </div>
                 </div>
                 <Link
-                  href={`/app/${symbol}`}
+                  href={`/app/forecast/${symbol}`}
                   className="rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
                 >
                   <svg
