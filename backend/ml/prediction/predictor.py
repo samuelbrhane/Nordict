@@ -159,13 +159,14 @@ def determine_direction(current_price: float, predicted_prices: list) -> str:
     avg_predicted = np.mean(predicted_prices)
     change_pct = (avg_predicted - current_price) / current_price
     
-    if change_pct > 0.02:
+    if change_pct > 0:
         return Forecast.Direction.UP
-    elif change_pct < -0.02:
+    elif change_pct < 0:
         return Forecast.Direction.DOWN
     else:
         return Forecast.Direction.NEUTRAL
-
+    
+    
 def scale_confidence_for_display(internal_confidence: float, horizon: str) -> float:
     """
     Scale confidence for better UI display.
