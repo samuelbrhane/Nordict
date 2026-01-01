@@ -1,5 +1,8 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+// Flag to prevent multiple redirects and error display
+let isRedirecting = false;
+
 class ApiClient {
   private getTokens() {
     if (typeof window === "undefined") return null;
@@ -45,6 +48,11 @@ class ApiClient {
   }
 
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    // If already redirecting, return a pending promise that never resolves
+    if (isRedirecting) {
+      return new Promise(() => {});
+    }
+
     const tokens = this.getTokens();
 
     const headers: HeadersInit = {
@@ -76,9 +84,22 @@ class ApiClient {
           headers,
         });
       } else {
+        isRedirecting = true;
         window.location.href = "/login";
-        throw new Error("Session expired");
+        return new Promise(() => {});
       }
+    }
+
+    // Handle 403 - Upgrade required
+    if (response.status === 403) {
+      const error = await response.json().catch(() => ({}));
+      if (error.upgrade_required) {
+        isRedirecting = true;
+        window.location.href = "/app/upgrade";
+        // Return a promise that never resolves to prevent error display
+        return new Promise(() => {});
+      }
+      throw new Error(error.detail || error.error || "Access denied");
     }
 
     if (!response.ok) {
@@ -89,7 +110,6 @@ class ApiClient {
     return response.json();
   }
 
-  // Convenience methods
   get<T>(endpoint: string) {
     return this.request<T>(endpoint, { method: "GET" });
   }

@@ -21,17 +21,12 @@ export const useDashboardKpi = (horizon: Horizon) => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchKpi = useCallback(async () => {
-    console.log("Fetching KPI for horizon:", horizon);
     setIsLoading(true);
     setError(null);
 
     try {
       const url = `/api/v1/forecasts/dashboard_kpi/?horizon=${horizon}`;
-      console.log("API URL:", url);
-
       const response = await api.get<DashboardKpi>(url);
-      console.log("API Response:", response);
-
       setData(response);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch KPI data");
