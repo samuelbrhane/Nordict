@@ -13,14 +13,14 @@
     "gamma": 0.2,
     "colsample_bytree": 0.6
   },
-  "cv_score_mse": 1.0894984950321729,
-  "cv_score_rmse": 1.043790445938347,
-  "test_rmse": 0.5755243347411957,
-  "test_mae": 0.4710057355921695,
+  "cv_score_mse": 1.0302473228335365,
+  "cv_score_rmse": 1.0150109964101555,
+  "test_rmse": 0.7117566026963905,
+  "test_mae": 0.5841984574600139,
   "n_iter": 50,
   "cv_splits": 5,
-  "train_samples": 668,
-  "test_samples": 168,
-  "n_features": 56,
-  "tuned_at": "2025-12-31T16:15:23.694601"
+  "train_samples": 720,
+  "test_samples": 180,
+  "n_features": 57,
+  "tuned_at": "2026-01-01T03:52:48.721515"
 }

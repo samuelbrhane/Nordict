@@ -7,4 +7,4 @@ class MarketListSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Market
-        fields = ['symbol', 'name', 'is_featured']
+        fields = ['id', 'symbol', 'name', 'category', 'is_featured']
