@@ -9,6 +9,7 @@ import { useForecastChart } from "@/lib/hooks/useForecastChart";
 
 interface ForecastChartProps {
   horizon: Horizon;
+  fixedMarket?: { symbol: string; name: string }; // Optional: if provided, hide selector
 }
 
 const getHorizonConfig = (horizon: Horizon) => {
@@ -21,18 +22,21 @@ const getHorizonConfig = (horizon: Horizon) => {
   return configs[horizon];
 };
 
-const ForecastChart = ({ horizon }: ForecastChartProps) => {
+const ForecastChart = ({ horizon, fixedMarket }: ForecastChartProps) => {
   const [selectedMarket, setSelectedMarket] = useState({
     symbol: "BTC-USD",
     name: "Bitcoin",
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Use fixed market if provided, otherwise use selected
+  const market = fixedMarket || selectedMarket;
+
   const {
     data: forecast,
     isLoading,
     error,
-  } = useForecastChart(horizon, selectedMarket.symbol);
+  } = useForecastChart(horizon, market.symbol);
 
   const config = getHorizonConfig(horizon);
 
@@ -76,53 +80,76 @@ const ForecastChart = ({ horizon }: ForecastChartProps) => {
 
   return (
     <>
-      {/* Market Selector Modal */}
-      <MarketSelectorModal
-        selected={selectedMarket}
-        onSelect={handleMarketSelect}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
+      {/* Market Selector Modal - only show if no fixedMarket */}
+      {!fixedMarket && (
+        <MarketSelectorModal
+          selected={selectedMarket}
+          onSelect={handleMarketSelect}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
 
       <AnimatedCard delay={350}>
         <div className="rounded-2xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
           {/* Header */}
           <div className="flex flex-col gap-4 border-b border-neutral-100 p-4 dark:border-neutral-800 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-            {/* Left - Market selector and title */}
+            {/* Left - Market selector/display and title */}
             <div className="flex items-center gap-4">
-              {/* Market Selector Button */}
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-2.5 transition-all hover:border-neutral-300 hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:border-neutral-600 dark:hover:bg-neutral-700"
-              >
-                <div
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-white"
-                  style={{ backgroundColor: "var(--brand)" }}
-                >
-                  {selectedMarket.symbol.slice(0, 2)}
+              {/* Market Selector Button or Fixed Display */}
+              {fixedMarket ? (
+                // Fixed market display (no button)
+                <div className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-2.5 dark:border-neutral-700 dark:bg-neutral-800">
+                  <div
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-white"
+                    style={{ backgroundColor: "var(--brand)" }}
+                  >
+                    {market.symbol.slice(0, 2)}
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-neutral-900 dark:text-white">
+                      {market.symbol}
+                    </p>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                      {market.name}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <p className="text-sm font-semibold text-neutral-900 dark:text-white">
-                    {selectedMarket.symbol}
-                  </p>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                    {selectedMarket.name}
-                  </p>
-                </div>
-                <svg
-                  className="ml-1 h-4 w-4 text-neutral-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
+              ) : (
+                // Clickable market selector
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-2.5 transition-all hover:border-neutral-300 hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:border-neutral-600 dark:hover:bg-neutral-700"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M8 9l4-4 4 4m0 6l-4 4-4-4"
-                  />
-                </svg>
-              </button>
+                  <div
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-white"
+                    style={{ backgroundColor: "var(--brand)" }}
+                  >
+                    {market.symbol.slice(0, 2)}
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-neutral-900 dark:text-white">
+                      {market.symbol}
+                    </p>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                      {market.name}
+                    </p>
+                  </div>
+                  <svg
+                    className="ml-1 h-4 w-4 text-neutral-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M8 9l4-4 4 4m0 6l-4 4-4-4"
+                    />
+                  </svg>
+                </button>
+              )}
 
               {/* Title */}
               <div className="hidden sm:block">

@@ -116,8 +116,6 @@ const MarketSelectorModal = ({
       setSearchInput("");
       setSearchQuery("");
       setPage(1);
-      setMarkets([]);
-      setPagination(null);
     }
   }, [isOpen]);
 

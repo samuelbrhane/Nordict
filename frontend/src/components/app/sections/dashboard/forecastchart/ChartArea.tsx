@@ -88,12 +88,6 @@ const ChartArea = ({ forecast, horizon }: ChartAreaProps) => {
             y={currentPrice}
             stroke="#6b7280"
             strokeDasharray="5 5"
-            label={{
-              value: `Current: ${formatPrice(currentPrice)}`,
-              position: "right",
-              fill: "#6b7280",
-              fontSize: 11,
-            }}
           />
 
           {/* Confidence band (low to high) */}
@@ -108,9 +102,10 @@ const ChartArea = ({ forecast, horizon }: ChartAreaProps) => {
             type="monotone"
             dataKey="low"
             stroke="transparent"
-            fill="#ffffff"
+            fill="var(--chart-bg, #ffffff)"
             fillOpacity={1}
-            className="dark:fill-neutral-900"
+            style={{ fill: "var(--chart-bg)" }}
+            className="[--chart-bg:#ffffff] dark:[--chart-bg:#171717]"
           />
 
           {/* Predicted price line */}
