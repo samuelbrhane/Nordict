@@ -10,4 +10,6 @@ urlpatterns = [
     path("", views.list_forecasts, name="forecast-list"),
     path("performance/", views.forecast_performance, name="forecast-performance"),
     path("top_signals/", views.top_signals, name="top-signals"),
+    path("model_info/", views.model_info, name="model-info"),
+    path("backtest_runs/", views.backtest_runs, name="backtest-runs"),
 ]

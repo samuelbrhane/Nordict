@@ -9,7 +9,7 @@ from django.db.models import Avg, Count, Q
 from datetime import timedelta
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
-from .models import Forecast, ForecastPoint
+from .models import *
 from .serializers import (
     ForecastSummarySerializer,
     ForecastChartSerializer,
@@ -809,4 +809,80 @@ def top_signals(request):
     return Response({
         "horizon": horizon,
         "signals": results,
+    })
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def model_info(request):
+    """Get production model info for a horizon."""
+    horizon = request.query_params.get('horizon', '24H')
+    
+    model = MLModel.objects.filter(
+        horizon=horizon,
+        status=MLModel.Status.PRODUCTION
+    ).first()
+    
+    if not model:
+        return Response({'error': 'No production model found'}, status=404)
+    
+    return Response({
+        'id': model.id,
+        'name': model.name,
+        'version': model.version,
+        'horizon': model.horizon,
+        'status': model.status,
+        'mae': model.mae,
+        'rmse': model.rmse,
+        'mape': model.mape,
+        'r2': model.r2,
+        'median_ae': model.median_ae,
+        'max_error': model.max_error,
+        'bias': model.bias,
+        'correlation': model.correlation,
+        'directional_accuracy': model.directional_accuracy,
+        'training_data_start': model.training_data_start.isoformat() if model.training_data_start else None,
+        'training_data_end': model.training_data_end.isoformat() if model.training_data_end else None,
+        'created_at': model.created_at.isoformat(),
+        'artifact_path': model.artifact_path,
+    })
+    
+    
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def backtest_runs(request):
+    """Get recent backtest runs for a horizon with pagination."""
+    horizon = request.query_params.get('horizon', '24H')
+    page = int(request.query_params.get('page', 1))
+    page_size = int(request.query_params.get('page_size', 10))
+    
+    queryset = BacktestRun.objects.filter(
+        horizon=horizon
+    ).select_related('model', 'market').order_by('-run_at')
+    
+    total = queryset.count()
+    start = (page - 1) * page_size
+    end = start + page_size
+    runs = queryset[start:end]
+    
+    return Response({
+        'total': total,
+        'page': page,
+        'page_size': page_size,
+        'total_pages': (total + page_size - 1) // page_size,
+        'results': [{
+            'id': run.id,
+            'market': run.market.symbol,
+            'horizon': run.horizon,
+            'model_version': run.model.version,
+            'test_start': run.test_start.isoformat(),
+            'test_end': run.test_end.isoformat(),
+            'mae': run.mae,
+            'rmse': run.rmse,
+            'mape': run.mape,
+            'directional_accuracy': run.directional_accuracy,
+            'total_predictions': run.total_predictions,
+            'correct_directions': run.correct_directions,
+            'run_at': run.run_at.isoformat(),
+        } for run in runs]
     })
