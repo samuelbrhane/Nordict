@@ -2,50 +2,94 @@
 
 import Link from "next/link";
 import AnimatedCard from "../dashboard/AnimatedCard";
+import { Horizon } from "@/lib/hooks/useDashboardKpi";
 
 interface MarketForecast {
+  symbol: string;
+  name: string;
+  current_price: number | string;
   direction: "up" | "down" | "neutral";
-  change: string;
-  confidence: number;
-}
-
-interface MarketData {
-  currentPrice: string;
-  forecasts: Record<string, MarketForecast>;
+  confidence_score: number | string;
+  predicted_mid: number | string;
 }
 
 interface CompareCardsProps {
-  selectedMarkets: string[];
-  marketData: Record<string, MarketData>;
-  marketNames: Record<string, string>;
-  selectedHorizon: string;
+  markets: MarketForecast[];
+  selectedHorizon: Horizon;
+  isLoading?: boolean;
 }
 
+const toNumber = (val: number | string): number => {
+  const num = typeof val === "string" ? parseFloat(val) : val;
+  return isNaN(num) ? 0 : num;
+};
+
+const formatPrice = (price: number | string): string => {
+  const num = toNumber(price);
+  if (num >= 1000) {
+    return `$${num.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+  }
+  if (num >= 1) {
+    return `$${num.toFixed(2)}`;
+  }
+  return `$${num.toFixed(4)}`;
+};
+
 const CompareCards = ({
-  selectedMarkets,
-  marketData,
-  marketNames,
+  markets,
   selectedHorizon,
+  isLoading,
 }: CompareCardsProps) => {
   const gridCols =
-    selectedMarkets.length === 1
+    markets.length === 1
       ? "lg:grid-cols-1"
-      : selectedMarkets.length === 2
+      : markets.length === 2
       ? "lg:grid-cols-2"
-      : selectedMarkets.length === 3
+      : markets.length === 3
       ? "lg:grid-cols-3"
-      : selectedMarkets.length === 4
+      : markets.length === 4
       ? "lg:grid-cols-2 xl:grid-cols-4"
       : "lg:grid-cols-3 xl:grid-cols-5";
 
+  if (isLoading) {
+    return (
+      <div className={`grid gap-4 ${gridCols}`}>
+        {[1, 2].map((i) => (
+          <div
+            key={i}
+            className="h-64 animate-pulse rounded-2xl border border-neutral-200 bg-neutral-100 dark:border-neutral-800 dark:bg-neutral-800"
+          />
+        ))}
+      </div>
+    );
+  }
+
+  if (markets.length === 0) {
+    return (
+      <div className="rounded-2xl border border-neutral-200 bg-white p-8 text-center dark:border-neutral-800 dark:bg-neutral-900">
+        <p className="text-neutral-500 dark:text-neutral-400">
+          No markets selected
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className={`grid gap-4 ${gridCols}`}>
-      {selectedMarkets.map((symbol, index) => {
-        const data = marketData[symbol];
-        const forecast = data?.forecasts[selectedHorizon];
+      {markets.map((market, index) => {
+        const currentPrice = toNumber(market.current_price);
+        const predictedMid = toNumber(market.predicted_mid);
+        const confidence = toNumber(market.confidence_score) * 100;
+        const expectedChange =
+          currentPrice > 0
+            ? ((predictedMid - currentPrice) / currentPrice) * 100
+            : 0;
 
         return (
-          <AnimatedCard key={symbol} delay={100 + index * 50}>
+          <AnimatedCard key={market.symbol} delay={100 + index * 50}>
             <div className="group rounded-2xl border border-neutral-200 bg-white p-5 transition-all duration-300 hover:border-neutral-300 hover:shadow-lg dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -53,19 +97,19 @@ const CompareCards = ({
                     className="flex h-10 w-10 items-center justify-center rounded-xl text-sm font-bold text-black transition-transform duration-200 group-hover:scale-110"
                     style={{ backgroundColor: "var(--brand)" }}
                   >
-                    {symbol.slice(0, 2)}
+                    {market.symbol.slice(0, 2)}
                   </div>
                   <div>
                     <p className="font-semibold text-neutral-900 dark:text-white">
-                      {symbol}
+                      {market.symbol}
                     </p>
                     <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                      {marketNames[symbol]}
+                      {market.name}
                     </p>
                   </div>
                 </div>
                 <Link
-                  href={`/app/forecast/${symbol}`}
+                  href={`/app/forecast/${market.symbol}`}
                   className="rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
                 >
                   <svg
@@ -86,10 +130,10 @@ const CompareCards = ({
 
               <div className="mt-4">
                 <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                  Current Price
+                  Price at forecast
                 </p>
                 <p className="text-lg font-semibold text-neutral-900 dark:text-white">
-                  {data?.currentPrice || "N/A"}
+                  {formatPrice(currentPrice)}
                 </p>
               </div>
 
@@ -102,18 +146,18 @@ const CompareCards = ({
                   </span>
                   <div
                     className={`flex items-center gap-1 ${
-                      forecast?.direction === "up"
+                      market.direction === "up"
                         ? "text-emerald-600 dark:text-emerald-400"
-                        : forecast?.direction === "down"
+                        : market.direction === "down"
                         ? "text-red-600 dark:text-red-400"
                         : "text-neutral-500"
                     }`}
                   >
                     <svg
                       className={`h-4 w-4 ${
-                        forecast?.direction === "down"
+                        market.direction === "down"
                           ? "rotate-180"
-                          : forecast?.direction === "neutral"
+                          : market.direction === "neutral"
                           ? "rotate-90"
                           : ""
                       }`}
@@ -129,7 +173,8 @@ const CompareCards = ({
                       />
                     </svg>
                     <span className="font-semibold">
-                      {forecast?.change || "N/A"}
+                      {expectedChange >= 0 ? "+" : ""}
+                      {expectedChange.toFixed(2)}%
                     </span>
                   </div>
                 </div>
@@ -140,14 +185,14 @@ const CompareCards = ({
                       Confidence
                     </span>
                     <span className="font-medium text-neutral-700 dark:text-neutral-300">
-                      {forecast?.confidence || 0}%
+                      {confidence.toFixed(0)}%
                     </span>
                   </div>
                   <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
                     <div
                       className="h-full rounded-full transition-all duration-500"
                       style={{
-                        width: `${forecast?.confidence || 0}%`,
+                        width: `${confidence}%`,
                         backgroundColor: "var(--brand)",
                       }}
                     />
