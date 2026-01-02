@@ -1,3 +1,4 @@
+import { FinalCTA } from "@/components/sections/home";
 import {
   AlertExamples,
   AlertNoise,
@@ -16,29 +17,8 @@ const Alerts = () => {
       <TriggerLogic />
       <DeliveryChannels />
       <AlertExamples />
-      <AlertNoise />
-      <SubPageCTA
-        title="Ready to stay"
-        highlight="informed"
-        description="Get early access and set up your first alerts with real forecast data."
-        relatedLinks={[
-          {
-            label: "Forecasting Engine",
-            href: "/product/engine",
-            description: "How predictions are made",
-          },
-          {
-            label: "Performance & Backtesting",
-            href: "/product/performance",
-            description: "Track forecast accuracy",
-          },
-          {
-            label: "For Traders",
-            href: "/solutions/traders",
-            description: "Alerts for active trading",
-          },
-        ]}
-      />
+      {/* <AlertNoise /> */}
+      <FinalCTA />
     </div>
   );
 };

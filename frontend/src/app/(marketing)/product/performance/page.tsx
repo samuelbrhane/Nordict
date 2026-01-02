@@ -1,3 +1,4 @@
+import { FinalCTA } from "@/components/sections/home";
 import {
   EvaluationMetrics,
   HistoricalPerformance,
@@ -16,31 +17,11 @@ const Performance = () => {
       <EvaluationMetrics />
       <Walkforwardvalidation />
       <HistoricalPerformance />
-      <ModelVersionComparison />
+      {/* <ModelVersionComparison /> */}
       <LiveVsBacktest />
-      <TransparencyGuarantees />
-      <SubPageCTA
-        title="Ready to verify"
-        highlight="for yourself"
-        description="Get early access and explore our full performance dashboard with historical data."
-        relatedLinks={[
-          {
-            label: "Forecasting Engine",
-            href: "/product/engine",
-            description: "How predictions are made",
-          },
-          {
-            label: "Alerts & Signals",
-            href: "/product/alerts",
-            description: "Turn forecasts into actions",
-          },
-          {
-            label: "Methodology",
-            href: "/resources/methodology",
-            description: "Our evaluation principles",
-          },
-        ]}
-      />
+      {/* <TransparencyGuarantees /> */}
+
+      <FinalCTA />
     </div>
   );
 };

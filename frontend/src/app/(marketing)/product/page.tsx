@@ -1,3 +1,4 @@
+import { FinalCTA } from "@/components/sections/home";
 import {
   ProductHero,
   ForecastingCapabilities,
@@ -18,12 +19,12 @@ const Product = () => {
       <ConfidenceUncertainty />
       <BacktestingPerformance />
       <AlertsSignals />
-      <APIIntegrations />
+      {/* <APIIntegrations /> */}
       <div className="hidden lg:block">
         <ProductArchitecture />
       </div>
       <WhyDifferent />
-      <ProductCTA />
+      <FinalCTA />
     </div>
   );
 };
