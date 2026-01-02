@@ -8,7 +8,7 @@ const FOOTER_LINKS = [
       { label: "Forecasting Engine", href: "/product/engine" },
       { label: "Performance", href: "/product/performance" },
       { label: "Alerts", href: "/product/alerts" },
-      { label: "API & Integrations", href: "/product/api" },
+      // { label: "API & Integrations", href: "/product/api" },
     ],
   },
   {
@@ -32,7 +32,7 @@ const FOOTER_LINKS = [
 const Footer = () => {
   return (
     <footer className="border-t border-neutral-200 bg-white dark:border-neutral-800 dark:bg-black">
-      <div className="mx-auto max-w-7xl px-6 py-12">
+      <div className="mx-auto max-w-screen-2xl px-6 py-12">
         <div className="grid gap-10 lg:grid-cols-12">
           {/* Brand */}
           <div className="lg:col-span-4">
@@ -57,7 +57,7 @@ const Footer = () => {
                 Crypto
               </span>
               <span className="rounded-full border border-neutral-200 bg-white px-3 py-1 text-xs text-neutral-600 dark:border-neutral-800 dark:bg-black dark:text-neutral-400">
-                Indices
+                Indices (coming)
               </span>
               <span className="rounded-full border border-neutral-200 bg-white px-3 py-1 text-xs text-neutral-600 dark:border-neutral-800 dark:bg-black dark:text-neutral-400">
                 FX (coming)

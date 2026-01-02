@@ -6,7 +6,7 @@ import { ThemeToggle } from "../layout";
 const AuthHeader = () => {
   return (
     <header className="absolute inset-x-0 top-0 z-50">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
+      <div className="mx-auto flex max-w-screen-2xl items-center justify-between px-6 py-6">
         {/* Logo - links back to landing */}
         <Link href="/" className="group flex items-center">
           <div

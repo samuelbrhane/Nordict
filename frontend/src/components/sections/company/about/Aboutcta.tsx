@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useAuth } from "@/context/auth/AuthProvider";
 
 const AboutCTA = () => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
+  const { user, isLoading } = useAuth();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -56,19 +58,39 @@ const AboutCTA = () => {
               }`}
               style={{ transitionDelay: "200ms" }}
             >
-              Join the{" "}
-              <span
-                className="inline-block"
-                style={{
-                  background:
-                    "linear-gradient(135deg, var(--brand) 0%, rgba(4,236,58,0.7) 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}
-              >
-                journey
-              </span>
+              {user ? (
+                <>
+                  Continue the{" "}
+                  <span
+                    className="inline-block"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, var(--brand) 0%, rgba(4,236,58,0.7) 100%)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                    }}
+                  >
+                    journey
+                  </span>
+                </>
+              ) : (
+                <>
+                  Join the{" "}
+                  <span
+                    className="inline-block"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, var(--brand) 0%, rgba(4,236,58,0.7) 100%)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                    }}
+                  >
+                    journey
+                  </span>
+                </>
+              )}
             </h2>
 
             {/* Description */}
@@ -80,8 +102,9 @@ const AboutCTA = () => {
               }`}
               style={{ transitionDelay: "300ms" }}
             >
-              Nordict is being built in public. Get early access, follow the
-              progress, or just say hello.
+              {user
+                ? "Thanks for being part of Nordict. Explore your forecasts and help us build something great."
+                : "Nordict is being built in public. Start your free trial, explore the methodology, or just say hello."}
             </p>
 
             {/* CTAs */}
@@ -93,41 +116,95 @@ const AboutCTA = () => {
               }`}
               style={{ transitionDelay: "400ms" }}
             >
-              <Link
-                href="/waitlist"
-                className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl px-8 py-3 text-sm font-medium text-black shadow-lg shadow-[var(--brand)]/25 transition-all duration-300 hover:shadow-xl hover:shadow-[var(--brand)]/30 hover:scale-[1.02] active:scale-[0.98]"
-                style={{ backgroundColor: "var(--brand)" }}
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  Get early access
-                  <svg
-                    className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 7l5 5m0 0l-5 5m5-5H6"
-                    />
-                  </svg>
-                </span>
-                <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-              </Link>
+              {!isLoading && (
+                <>
+                  {user ? (
+                    <>
+                      <Link
+                        href="/app/dashboard"
+                        className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl px-8 py-3 text-sm font-medium text-black shadow-lg shadow-[var(--brand)]/25 transition-all duration-300 hover:shadow-xl hover:shadow-[var(--brand)]/30 hover:scale-[1.02] active:scale-[0.98]"
+                        style={{ backgroundColor: "var(--brand)" }}
+                      >
+                        <span className="relative z-10 flex items-center gap-2">
+                          Go to Dashboard
+                          <svg
+                            className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M13 7l5 5m0 0l-5 5m5-5H6"
+                            />
+                          </svg>
+                        </span>
+                        <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+                      </Link>
 
-              <Link
-                href="/contact"
-                className="inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-8 py-3 text-sm font-medium text-neutral-900 shadow-sm transition-all duration-300 hover:bg-neutral-50 hover:border-neutral-300 active:scale-[0.98] dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
-              >
-                Get in touch
-              </Link>
+                      <Link
+                        href="/contact"
+                        className="inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-8 py-3 text-sm font-medium text-neutral-900 shadow-sm transition-all duration-300 hover:bg-neutral-50 hover:border-neutral-300 active:scale-[0.98] dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
+                      >
+                        Get in touch
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        href="/signup"
+                        className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl px-8 py-3 text-sm font-medium text-black shadow-lg shadow-[var(--brand)]/25 transition-all duration-300 hover:shadow-xl hover:shadow-[var(--brand)]/30 hover:scale-[1.02] active:scale-[0.98]"
+                        style={{ backgroundColor: "var(--brand)" }}
+                      >
+                        <span className="relative z-10 flex items-center gap-2">
+                          Start free trial
+                          <svg
+                            className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M13 7l5 5m0 0l-5 5m5-5H6"
+                            />
+                          </svg>
+                        </span>
+                        <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+                      </Link>
+
+                      <Link
+                        href="/contact"
+                        className="inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-8 py-3 text-sm font-medium text-neutral-900 shadow-sm transition-all duration-300 hover:bg-neutral-50 hover:border-neutral-300 active:scale-[0.98] dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
+                      >
+                        Get in touch
+                      </Link>
+                    </>
+                  )}
+                </>
+              )}
             </div>
+
+            {/* Trust note - only for non-logged in */}
+            {!user && !isLoading && (
+              <p
+                className={`mt-6 text-xs text-neutral-500 dark:text-neutral-400 transition-all duration-700 ease-out ${
+                  isVisible ? "opacity-100" : "opacity-0"
+                }`}
+                style={{ transitionDelay: "450ms" }}
+              >
+                No credit card required • 7-day free trial
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Follow section */}
+        {/* Follow section - commented out for now */}
+        {/*
         <div
           className={`mt-10 text-center transition-all duration-700 ease-out ${
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
@@ -138,8 +215,7 @@ const AboutCTA = () => {
             Follow the build
           </p>
           <div className="flex justify-center gap-4">
-            {/* Twitter */}
-            <a
+            
               href="https://twitter.com/nordict"
               target="_blank"
               rel="noopener noreferrer"
@@ -156,8 +232,7 @@ const AboutCTA = () => {
               @nordict
             </a>
 
-            {/* GitHub */}
-            <a
+            
               href="https://github.com/nordict"
               target="_blank"
               rel="noopener noreferrer"
@@ -178,7 +253,6 @@ const AboutCTA = () => {
               GitHub
             </a>
 
-            {/* Blog */}
             <Link
               href="/blog"
               className="flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm text-neutral-700 transition-all hover:border-neutral-300 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:border-neutral-700"
@@ -201,6 +275,7 @@ const AboutCTA = () => {
             </Link>
           </div>
         </div>
+        */}
       </div>
     </section>
   );

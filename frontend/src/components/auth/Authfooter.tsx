@@ -3,7 +3,7 @@ import Link from "next/link";
 const AuthFooter = () => {
   return (
     <footer className="absolute inset-x-0 bottom-0 z-50">
-      <div className="mx-auto max-w-7xl px-6 py-6">
+      <div className="mx-auto max-w-screen-2xl px-6 py-6">
         <div className="flex flex-col items-center justify-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left">
           {/* Copyright */}
           <p className="text-xs text-neutral-500 dark:text-neutral-500">

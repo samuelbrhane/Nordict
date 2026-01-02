@@ -52,7 +52,7 @@ const Header = () => {
   if (isLoading) {
     return (
       <header className="sticky top-0 z-50 border-b border-transparent bg-white/80 backdrop-blur dark:bg-neutral-950/80">
-        <div className="mx-auto flex max-w-7xl items-center justify-center px-4 py-3 md:px-6 md:py-4">
+        <div className="mx-auto flex max-w-screen-2xl items-center justify-center px-4 py-3 md:px-6 md:py-4">
           <LoadingSpinner />
         </div>
       </header>
@@ -66,7 +66,7 @@ const Header = () => {
           : "border-transparent bg-white/80 backdrop-blur dark:bg-neutral-950/80"
       }`}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6 md:py-4">
+      <div className="mx-auto flex max-w-screen-2xl items-center justify-between px-4 py-3 md:px-6 md:py-4">
         {/* Logo */}
         <Link
           href="/"
@@ -230,7 +230,7 @@ const Header = () => {
         }`}
       >
         <div className="bg-white dark:bg-black">
-          <div className="mx-auto max-w-7xl px-4 py-4">
+          <div className="mx-auto max-w-screen-2xl px-4 py-4">
             <div className="flex flex-col gap-2">
               {NAV_ITEMS.map((item, index) => {
                 if (item.children) {
