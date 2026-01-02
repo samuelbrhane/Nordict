@@ -1,3 +1,4 @@
+import { FinalCTA } from "@/components/sections/home";
 import SubPageCTA from "@/components/sections/shared/Subpagecta";
 import {
   TeamFeatures,
@@ -12,29 +13,8 @@ const Teams = () => {
       <TeamsHero />
       <TeamFeatures />
       <TeamUseCases />
-      <TeamTestimonial />
-      <SubPageCTA
-        title="Ready to collaborate"
-        highlight="smarter"
-        description="Request a team demo and see how Nordict helps research teams work together."
-        relatedLinks={[
-          {
-            label: "API & Integrations",
-            href: "/product/api",
-            description: "Connect your tools",
-          },
-          {
-            label: "For Traders",
-            href: "/solutions/traders",
-            description: "Individual trading",
-          },
-          {
-            label: "For Investors",
-            href: "/solutions/investors",
-            description: "Long-term strategies",
-          },
-        ]}
-      />
+      {/* <TeamTestimonial /> */}
+      <FinalCTA />
     </div>
   );
 };

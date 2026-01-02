@@ -29,10 +29,17 @@ const getHorizonConfig = (horizon: Horizon) => {
 };
 
 const formatPrice = (value: number): string => {
-  if (value >= 1000) {
-    return `$${(value / 1000).toFixed(1)}k`;
+  if (value >= 10000) {
+    return `$${(value / 1000).toFixed(2)}k`;
   }
-  return `$${value.toFixed(2)}`;
+  if (value >= 1000) {
+    return `$${(value / 1000).toFixed(3)}k`;
+  }
+  if (value >= 1) {
+    return `$${value.toFixed(2)}`;
+  }
+  // For small values (like SHIB, PEPE)
+  return `$${value.toFixed(3)}`;
 };
 
 const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
