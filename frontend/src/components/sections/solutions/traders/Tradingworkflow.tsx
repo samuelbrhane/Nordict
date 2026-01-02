@@ -171,7 +171,7 @@ const TradingWorkflow = () => {
       {/* Top divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Header */}
         <div className="max-w-2xl">
           <div
@@ -222,7 +222,7 @@ const TradingWorkflow = () => {
             }`}
             style={{ transitionDelay: "200ms" }}
           >
-            Nordict doesn't replace your strategy—it enhances it. Here's how
+            Nordict doesn't replace your strategy, it enhances it. Here's how
             active traders integrate forecasts into their decision-making.
           </p>
         </div>
@@ -397,32 +397,6 @@ const TradingWorkflow = () => {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Bottom note */}
-        <div
-          className={`mt-8 flex items-center justify-center gap-2 transition-all duration-700 ease-out ${
-            isVisible ? "opacity-100" : "opacity-0"
-          }`}
-          style={{ transitionDelay: "600ms" }}
-        >
-          <svg
-            className="h-4 w-4"
-            style={{ color: "var(--brand)" }}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400">
-            Forecasts inform your decisions—they don't make them for you.
-          </p>
         </div>
       </div>
     </section>

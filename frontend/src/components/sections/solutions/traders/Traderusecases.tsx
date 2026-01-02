@@ -16,7 +16,7 @@ const USE_CASES = [
       situation: "BTC consolidating near resistance",
       signal: "Forecast: +3.2% (24h) • Confidence: 78% • Direction: Bullish",
       action:
-        "Elevated confidence supports breakout thesis—consider entry with tighter stop",
+        "Elevated confidence supports breakout thesis, consider entry with tighter stop",
     },
     icon: (
       <svg
@@ -74,7 +74,7 @@ const USE_CASES = [
     example: {
       situation: "Long BTC +8%, forecast was bullish at entry",
       signal: "Direction flipped: Bearish • Confidence dropped: 72% → 54%",
-      action: "Weakening conviction—tighten stop or take partial profit",
+      action: "Weakening conviction, tighten stop or take partial profit",
     },
     icon: (
       <svg
@@ -103,7 +103,7 @@ const USE_CASES = [
       situation: "Morning scan across 20 assets",
       signal: "Top 3 by confidence: LINK (81%), AVAX (76%), BTC (74%)",
       action:
-        "Prioritize LINK and AVAX for detailed analysis—highest signal quality",
+        "Prioritize LINK and AVAX for detailed analysis, highest signal quality",
     },
     icon: (
       <svg
@@ -164,7 +164,7 @@ const TraderUseCases = () => {
       {/* Top divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Header */}
         <div className="max-w-2xl">
           <div
@@ -427,32 +427,6 @@ const TraderUseCases = () => {
             </div>
           </div>
         )}
-
-        {/* Bottom disclaimer */}
-        <div
-          className={`mt-8 flex items-center justify-center gap-2 transition-all duration-700 ease-out ${
-            isVisible ? "opacity-100" : "opacity-0"
-          }`}
-          style={{ transitionDelay: "600ms" }}
-        >
-          <svg
-            className="h-4 w-4 text-amber-500"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-            />
-          </svg>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400">
-            Examples are illustrative. Past performance doesn't guarantee future
-            results.
-          </p>
-        </div>
       </div>
     </section>
   );

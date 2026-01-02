@@ -5,9 +5,9 @@ import Image from "next/image";
 
 const FORECAST_TYPES = [
   {
-    id: "intraday",
-    label: "Intraday",
-    horizon: "1-24 hours",
+    id: "24H",
+    label: "24 Hours",
+    horizon: "24H",
     title: "Short-term price movements",
     description:
       "Capture near-term directional shifts with hourly forecasts. Ideal for active traders who need timely signals with explicit uncertainty.",
@@ -17,45 +17,78 @@ const FORECAST_TYPES = [
       "High-frequency signal detection",
       "Regime-aware adjustments",
     ],
-    image: "/mock/forecast-intraday.jpg",
+    image: "/images/hourly",
   },
   {
-    id: "daily",
-    label: "Daily",
-    horizon: "1-7 days",
-    title: "Multi-day directional forecasts",
+    id: "30D",
+    label: "30 Days",
+    horizon: "30D",
+    title: "Monthly directional forecasts",
     description:
-      "Project price direction over the coming days with calibrated probability bands. Balances responsiveness with noise reduction.",
+      "Project price direction over the coming month with calibrated probability bands. Balances responsiveness with noise reduction.",
     features: [
       "Daily forecast generation",
       "Medium-term trend signals",
       "Volatility-adjusted bands",
       "Cross-asset correlation awareness",
     ],
-    image: "/mock/forecast-daily.jpg",
+    image: "/images/daily",
   },
   {
-    id: "weekly",
-    label: "Weekly",
-    horizon: "1-4 weeks",
-    title: "Extended horizon outlook",
+    id: "12W",
+    label: "12 Weeks",
+    horizon: "12W",
+    title: "Quarterly outlook",
     description:
-      "Longer-term forecasts for position sizing and portfolio-level decisions. Wider confidence bands reflect increased uncertainty.",
+      "Extended forecasts for position sizing and portfolio-level decisions. Wider confidence bands reflect increased uncertainty.",
     features: [
       "Weekly forecast cycles",
       "Macro regime integration",
       "Downside risk emphasis",
       "Trend persistence scoring",
     ],
-    image: "/mock/forecast-weekly.jpg",
+    image: "/images/weekly",
+  },
+  {
+    id: "12M",
+    label: "12 Months",
+    horizon: "12M",
+    title: "Long-term projections",
+    description:
+      "Annual forecasts for strategic planning and long-term investment decisions. Maximum uncertainty reflected in wide confidence bands.",
+    features: [
+      "Monthly forecast updates",
+      "Long-term trend analysis",
+      "Structural shift detection",
+      "Multi-cycle awareness",
+    ],
+    image: "/images/monthly",
   },
 ];
 
 const ForecastingCapabilities = () => {
-  const [activeTab, setActiveTab] = useState("intraday");
+  const [activeTab, setActiveTab] = useState("24H");
   const [isVisible, setIsVisible] = useState(false);
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setIsDark(document.documentElement.classList.contains("dark"));
+
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains("dark"));
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -94,7 +127,7 @@ const ForecastingCapabilities = () => {
       {/* Top divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Header */}
         <div className="max-w-2xl">
           <div
@@ -282,83 +315,26 @@ const ForecastingCapabilities = () => {
               </div>
             )}
           </div>
-
           {/* Right: Visual */}
           <div className="relative">
-            <div className="group relative overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 shadow-lg dark:border-neutral-800 dark:bg-neutral-900">
-              {/* Mock chart visualization */}
-              <div className="aspect-[4/3] relative">
-                {/* Placeholder gradient background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-neutral-50 via-neutral-100 to-neutral-200 dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900" />
-
-                {/* Grid lines */}
-                <div
-                  className="absolute inset-0 opacity-30 dark:opacity-20"
-                  style={{
-                    backgroundImage: `linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
-                                     linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px)`,
-                    backgroundSize: "40px 40px",
-                  }}
+            <div className="group relative overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 shadow-lg dark:border-neutral-800 dark:bg-neutral-900 min-h-[200px] lg:min-h-[400px] flex items-center">
+              {mounted && activeForecast ? (
+                <Image
+                  src={`${activeForecast.image}_${
+                    isDark ? "black" : "white"
+                  }.png`}
+                  alt={activeForecast.title}
+                  width={1200}
+                  height={800}
+                  className="h-auto w-full"
                 />
+              ) : (
+                <div className="aspect-video w-full animate-pulse bg-neutral-200 dark:bg-neutral-800" />
+              )}
 
-                {/* Mock chart elements */}
-                <div className="absolute inset-0 flex items-center justify-center p-8">
-                  <div className="w-full">
-                    {/* Price line (mock) */}
-                    <svg
-                      viewBox="0 0 400 150"
-                      className="w-full h-auto"
-                      preserveAspectRatio="none"
-                    >
-                      {/* Confidence band */}
-                      <path
-                        d="M0,90 Q50,85 100,75 T200,65 T300,55 T400,70 L400,110 Q350,100 300,95 T200,105 T100,115 T0,110 Z"
-                        fill="rgba(4,236,58,0.15)"
-                        className="transition-all duration-500"
-                      />
-                      {/* Price line */}
-                      <path
-                        d="M0,100 Q50,95 100,85 T200,80 T300,70 T400,85"
-                        fill="none"
-                        stroke="var(--brand)"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        className="transition-all duration-500"
-                      />
-                      {/* Forecast dashed */}
-                      <path
-                        d="M300,70 Q350,65 400,60"
-                        fill="none"
-                        stroke="var(--brand)"
-                        strokeWidth="2"
-                        strokeDasharray="6,4"
-                        strokeLinecap="round"
-                        opacity="0.7"
-                      />
-                    </svg>
-
-                    {/* Labels */}
-                    <div className="mt-4 flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
-                      <span>Historical</span>
-                      <span className="flex items-center gap-1.5">
-                        <span
-                          className="h-2 w-2 rounded-full"
-                          style={{ backgroundColor: "var(--brand)" }}
-                        />
-                        Forecast
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <span className="h-2 w-4 rounded-sm bg-[var(--brand)]/30" />
-                        Confidence
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Horizon indicator */}
-                <div className="absolute bottom-4 left-4 rounded-lg bg-white/90 px-3 py-1.5 text-xs font-medium text-neutral-700 shadow-sm backdrop-blur dark:bg-black/60 dark:text-neutral-200">
-                  {activeForecast?.label} • {activeForecast?.horizon}
-                </div>
+              {/* Horizon indicator */}
+              <div className="absolute bottom-4 left-4 rounded-lg bg-white/90 px-3 py-1.5 text-xs font-medium text-neutral-700 shadow-sm backdrop-blur dark:bg-black/60 dark:text-neutral-200">
+                {activeForecast?.label} • {activeForecast?.horizon}
               </div>
             </div>
 

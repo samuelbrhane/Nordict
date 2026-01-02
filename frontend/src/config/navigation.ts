@@ -15,7 +15,7 @@ export const NAV_ITEMS: NavItem[] = [
       { label: "Forecasting Engine", href: "/product/engine" },
       { label: "Performance", href: "/product/performance" },
       { label: "Alerts", href: "/product/alerts" },
-      { label: "API & Integrations", href: "/product/api" },
+      // { label: "API & Integrations", href: "/product/api" },
     ],
   },
   {

@@ -19,7 +19,7 @@ const Hero = () => {
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
       </div>
 
-      <div className="mx-auto max-w-7xl px-6 pb-14 pt-5 sm:pb-20 sm:pt-10">
+      <div className="mx-auto max-w-screen-2xl px-6 pb-14 pt-5 sm:pb-20 sm:pt-10">
         <div className="max-w-3xl">
           {/* animated pill */}
           <p
@@ -114,7 +114,7 @@ const Hero = () => {
                 style={{ backgroundColor: "var(--brand)" }}
               />
             </span>{" "}
-            across multiple time horizons—tracked and evaluated with{" "}
+            across multiple time horizons, tracked and evaluated with{" "}
             <span className="relative inline-block group cursor-default">
               <span className="relative z-10 font-medium text-neutral-800 dark:text-neutral-100">
                 walk-forward backtesting
@@ -182,7 +182,7 @@ const Hero = () => {
             </Link>
 
             <p className="w-full text-xs text-neutral-500 dark:text-neutral-400 sm:w-auto sm:pl-2">
-              Supported markets: Crypto • Indices • FX (coming)
+              Supported markets: Crypto • Indices (coming) • FX (coming)
             </p>
           </div>
 
@@ -210,7 +210,7 @@ const Hero = () => {
               },
               {
                 title: "Confidence bands",
-                desc: "Uncertainty is explicit—not hidden.",
+                desc: "Uncertainty is explicit, not hidden.",
                 icon: (
                   <svg
                     className="w-5 h-5"

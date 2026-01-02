@@ -234,7 +234,7 @@ const ForecastProcess = () => {
       {/* Top divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Header */}
         <div className="max-w-2xl">
           <div
@@ -532,22 +532,6 @@ const ForecastProcess = () => {
               </div>
             </div>
           )}
-        </div>
-
-        {/* Total time */}
-        <div
-          className={`mt-8 text-center transition-all duration-700 ease-out ${
-            isVisible ? "opacity-100" : "opacity-0"
-          }`}
-          style={{ transitionDelay: "500ms" }}
-        >
-          <p className="text-sm text-neutral-500 dark:text-neutral-400">
-            Total pipeline latency:{" "}
-            <span className="font-semibold" style={{ color: "var(--brand)" }}>
-              ~10 seconds
-            </span>{" "}
-            from data to forecast
-          </p>
         </div>
       </div>
     </section>

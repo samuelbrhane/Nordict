@@ -138,7 +138,7 @@ const LiveVsBacktest = () => {
       {/* Top divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Header */}
         <div className="max-w-2xl">
           <div
@@ -189,7 +189,7 @@ const LiveVsBacktest = () => {
             }`}
             style={{ transitionDelay: "200ms" }}
           >
-            Backtest results and live performance are tracked separately—and
+            Backtest results and live performance are tracked separately, and
             clearly labeled. No mixing, no confusion about what's real.
           </p>
         </div>
@@ -497,37 +497,6 @@ const LiveVsBacktest = () => {
                 </div>
               </div>
             ))}
-
-            {/* Commitment note */}
-            <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-5 dark:border-neutral-800 dark:bg-neutral-900">
-              <div className="flex items-start gap-3">
-                <svg
-                  className="h-5 w-5 mt-0.5 shrink-0"
-                  style={{ color: "var(--brand)" }}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                  />
-                </svg>
-                <div>
-                  <p className="text-sm font-semibold text-neutral-900 dark:text-white">
-                    Our commitment
-                  </p>
-                  <p className="mt-1 text-xs leading-relaxed text-neutral-600 dark:text-neutral-300">
-                    We will always clearly label which results are from
-                    backtests and which are from live trading. If live
-                    performance significantly deviates from backtest
-                    expectations, we'll investigate and communicate openly.
-                  </p>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 

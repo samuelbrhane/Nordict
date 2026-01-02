@@ -1,17 +1,18 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 
 const FAQS = [
   {
     question: "Can I try before I buy?",
     answer:
-      "Yes! All paid plans come with a 14-day free trial. No credit card required to start. You'll have full access to all features during the trial period.",
+      "Yes! You get a 7-day free trial of Premium when you sign up. No credit card required to start. You'll have full access to all features during the trial period.",
   },
   {
-    question: "What happens when I hit my API limits?",
+    question: "What's the difference between Pro and Premium?",
     answer:
-      "We won't cut you off mid-day. You'll receive a warning at 80% usage, and if you exceed your limit, requests will be queued and processed the next day. You can upgrade anytime for immediate access.",
+      "Pro gives you access to 10 markets, 5 alerts, and 2 forecast horizons (24H and 30D) with 30 days of historical data. Premium unlocks unlimited markets and alerts, all 4 forecast horizons (24H, 30D, 12W, 12M), and unlimited historical data.",
   },
   {
     question: "Can I change plans later?",
@@ -21,7 +22,7 @@ const FAQS = [
   {
     question: "How does annual billing work?",
     answer:
-      "Annual plans are billed once per year and include a 20% discount compared to monthly billing. You can switch from monthly to annual anytime—we'll prorate your existing balance.",
+      "Annual plans are billed once per year and include a 20% discount compared to monthly billing. Pro is $86/year ($7/month) and Premium is $180/year ($15/month). You can switch from monthly to annual anytime.",
   },
   {
     question: "Do you offer refunds?",
@@ -29,19 +30,19 @@ const FAQS = [
       "We offer a full refund within the first 30 days if you're not satisfied. After that, you can cancel anytime and continue using the service until the end of your billing period.",
   },
   {
-    question: "How do team seats work?",
+    question: "When will Teams be available?",
     answer:
-      "Team plans include unlimited seats. Everyone on your team gets their own login, and you can manage permissions centrally. Each user's activity is tracked separately for audit purposes.",
-  },
-  {
-    question: "Is there a discount for startups or students?",
-    answer:
-      "Yes! We offer 50% off for verified startups (under 2 years old, under $1M raised) and students with a valid .edu email. Contact us to apply.",
+      "Teams is coming soon! It will include everything in Premium plus API access, team dashboards, role-based access, shared alerts, and audit logs for up to 10 team members at $49/month.",
   },
   {
     question: "What payment methods do you accept?",
     answer:
-      "We accept all major credit cards (Visa, Mastercard, Amex), PayPal, and wire transfers for annual Enterprise plans. All payments are processed securely through Stripe.",
+      "We accept all major credit cards (Visa, Mastercard, Amex) and PayPal. All payments are processed securely through Stripe.",
+  },
+  {
+    question: "What happens after my trial ends?",
+    answer:
+      "After your 7-day trial, you can choose to subscribe to Pro or Premium. If you don't subscribe, you'll lose access to forecasts until you choose a plan. We'll send you a reminder before your trial ends.",
   },
 ];
 
@@ -210,13 +211,13 @@ const PricingFAQ = () => {
         >
           <p className="text-sm text-neutral-600 dark:text-neutral-400">
             Still have questions?{" "}
-            <a
+            <Link
               href="/contact"
               className="font-medium transition-colors hover:opacity-80"
               style={{ color: "var(--brand)" }}
             >
               Contact our team
-            </a>
+            </Link>
           </p>
         </div>
       </div>

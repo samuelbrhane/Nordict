@@ -29,7 +29,7 @@ const CHANNELS = [
     id: "webhook",
     name: "Webhook",
     description: "JSON payloads to your endpoint for custom integrations.",
-    status: "available",
+    status: "coming",
     features: ["Full data payload", "Retry logic", "Signature verification"],
     icon: (
       <svg
@@ -51,7 +51,7 @@ const CHANNELS = [
     id: "push",
     name: "Push Notifications",
     description: "Real-time mobile and desktop push via our apps.",
-    status: "available",
+    status: "coming",
     features: ["Instant delivery", "Rich notifications", "Quick actions"],
     icon: (
       <svg
@@ -181,7 +181,7 @@ const DeliveryChannels = () => {
       {/* Top divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Header */}
         <div className="max-w-2xl">
           <div
@@ -483,46 +483,6 @@ const DeliveryChannels = () => {
             </div>
           </div>
         )}
-
-        {/* Multi-channel tip */}
-        <div
-          className={`mt-8 rounded-2xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900 transition-all duration-700 ease-out ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
-          style={{ transitionDelay: "500ms" }}
-        >
-          <div className="flex items-start gap-4">
-            <div
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-              style={{ backgroundColor: "rgba(4,236,58,0.15)" }}
-            >
-              <svg
-                className="h-5 w-5"
-                style={{ color: "var(--brand)" }}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
-              </svg>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">
-                Pro tip: Use multiple channels strategically
-              </h3>
-              <p className="mt-1 text-sm leading-relaxed text-neutral-600 dark:text-neutral-300">
-                Route high-priority alerts to push notifications for immediate
-                attention. Use email for detailed digests. Send webhooks to your
-                trading systems for automated logging.
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );

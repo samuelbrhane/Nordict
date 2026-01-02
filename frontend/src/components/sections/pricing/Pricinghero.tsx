@@ -36,7 +36,7 @@ const PricingHero = ({ billingCycle, setBillingCycle }: PricingHeroProps) => {
         }}
       />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Badge */}
         <div
           className={`flex justify-center mb-6 transition-all duration-700 ease-out ${
@@ -88,7 +88,7 @@ const PricingHero = ({ billingCycle, setBillingCycle }: PricingHeroProps) => {
             }`}
             style={{ transitionDelay: "200ms" }}
           >
-            Start free, upgrade when you're ready. No hidden fees, no surprises.
+            Try Premium free for 7 days. Upgrade anytime, cancel anytime.
           </p>
         </div>
 
@@ -127,7 +127,7 @@ const PricingHero = ({ billingCycle, setBillingCycle }: PricingHeroProps) => {
                   className="rounded-full px-2 py-0.5 text-xs font-bold text-black"
                   style={{ backgroundColor: "var(--brand)" }}
                 >
-                  -20%
+                  Save 20%
                 </span>
               </span>
             </button>
@@ -141,7 +141,7 @@ const PricingHero = ({ billingCycle, setBillingCycle }: PricingHeroProps) => {
           }`}
           style={{ transitionDelay: "400ms" }}
         >
-          <div className="flex items-center gap-4 text-xs text-neutral-500 dark:text-neutral-400">
+          <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-neutral-500 dark:text-neutral-400">
             <div className="flex items-center gap-1.5">
               <svg
                 className="h-4 w-4"
@@ -157,9 +157,9 @@ const PricingHero = ({ billingCycle, setBillingCycle }: PricingHeroProps) => {
                   d="M5 13l4 4L19 7"
                 />
               </svg>
-              <span>14-day free trial</span>
+              <span>7-day free trial</span>
             </div>
-            <div className="h-3 w-px bg-neutral-300 dark:bg-neutral-700" />
+            <div className="hidden sm:block h-3 w-px bg-neutral-300 dark:bg-neutral-700" />
             <div className="flex items-center gap-1.5">
               <svg
                 className="h-4 w-4"
@@ -177,7 +177,7 @@ const PricingHero = ({ billingCycle, setBillingCycle }: PricingHeroProps) => {
               </svg>
               <span>No credit card required</span>
             </div>
-            <div className="h-3 w-px bg-neutral-300 dark:bg-neutral-700" />
+            <div className="hidden sm:block h-3 w-px bg-neutral-300 dark:bg-neutral-700" />
             <div className="flex items-center gap-1.5">
               <svg
                 className="h-4 w-4"

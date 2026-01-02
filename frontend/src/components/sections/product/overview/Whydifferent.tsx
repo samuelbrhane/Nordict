@@ -188,7 +188,7 @@ const WhyDifferent = () => {
       {/* Top divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Header */}
         <div className="max-w-2xl">
           <div
@@ -241,9 +241,9 @@ const WhyDifferent = () => {
           >
             Most forecasting tools optimize for confidence. We optimize for{" "}
             <span className="font-medium text-neutral-900 dark:text-white">
-              honesty
+              honesty,{" "}
             </span>
-            —showing you what we know, what we don't, and how we measure both.
+            showing you what we know, what we don't, and how we measure both.
           </p>
         </div>
 
@@ -476,17 +476,6 @@ const WhyDifferent = () => {
             ))}
           </div>
         </div>
-
-        {/* Bottom note */}
-        <p
-          className={`mt-6 text-center text-sm text-neutral-500 dark:text-neutral-400 transition-all duration-700 ease-out ${
-            isVisible ? "opacity-100" : "opacity-0"
-          }`}
-          style={{ transitionDelay: "900ms" }}
-        >
-          We're not claiming to predict the future perfectly—we're claiming to
-          be honest about how well we can.
-        </p>
       </div>
     </section>
   );

@@ -74,7 +74,7 @@ const UseCases = () => {
       </div>
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-screen-2xl px-6">
         {/* header */}
         <div className="max-w-2xl">
           <div
@@ -126,7 +126,7 @@ const UseCases = () => {
             style={{ transitionDelay: "200ms" }}
           >
             The same forecasting engine adapts to how individuals and teams make
-            decisions—without changing the underlying rigor.
+            decisions without changing the underlying rigor.
           </p>
         </div>
 

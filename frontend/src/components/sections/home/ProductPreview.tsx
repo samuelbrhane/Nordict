@@ -10,7 +10,24 @@ const ProductPreview = () => {
     "forecast" | "performance" | null
   >(null);
   const sectionRef = useRef<HTMLElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const [isDark, setIsDark] = useState(false);
 
+  useEffect(() => {
+    setMounted(true);
+    setIsDark(document.documentElement.classList.contains("dark"));
+
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains("dark"));
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -44,7 +61,7 @@ const ProductPreview = () => {
       {/* background divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-screen-2xl px-6">
         {/* header */}
         <div className="max-w-2xl">
           <div
@@ -96,7 +113,7 @@ const ProductPreview = () => {
             style={{ transitionDelay: "200ms" }}
           >
             Interactive panels let you switch horizons, inspect uncertainty, and
-            track how models perform over time. Screens below use mock data.
+            track how models perform over time.
           </p>
         </div>
 
@@ -104,7 +121,7 @@ const ProductPreview = () => {
         <div className="mt-12 grid gap-8 lg:grid-cols-2">
           {/* Forecast panel */}
           <div
-            className={`group relative overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-sm transition-all duration-500 ease-out hover:shadow-lg dark:border-neutral-800 dark:bg-black ${
+            className={`group relative min-h-[400px] lg:min-h-[500px] overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-sm transition-all duration-500 ease-out hover:shadow-lg dark:border-neutral-800 dark:bg-black ${
               isVisible
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-8"
@@ -113,13 +130,16 @@ const ProductPreview = () => {
             onMouseEnter={() => setHoveredPanel("forecast")}
             onMouseLeave={() => setHoveredPanel(null)}
           >
-            <Image
-              src="/mock/mock6.jpeg"
-              alt="Forecast panel preview (mock)"
-              width={1200}
-              height={900}
-              className="h-auto w-full transition duration-700 ease-out group-hover:scale-[1.02]"
-            />
+            {mounted ? (
+              <Image
+                src={`/images/2_${isDark ? "black" : "white"}.png`}
+                alt="Forecast panel preview"
+                fill
+                className="object-cover transition duration-700 ease-out group-hover:scale-[1.02]"
+              />
+            ) : (
+              <div className="absolute inset-0 animate-pulse bg-neutral-200 dark:bg-neutral-800" />
+            )}
 
             {/* slide overlay */}
             <div className="pointer-events-none absolute inset-0 translate-x-full bg-gradient-to-l from-black/10 via-transparent to-transparent transition-transform duration-700 group-hover:translate-x-0 dark:from-white/10" />
@@ -153,7 +173,7 @@ const ProductPreview = () => {
 
           {/* Performance panel */}
           <div
-            className={`group relative overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-sm transition-all duration-500 ease-out hover:shadow-lg dark:border-neutral-800 dark:bg-black ${
+            className={`group relative min-h-[400px] lg:min-h-[500px] overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-sm transition-all duration-500 ease-out hover:shadow-lg dark:border-neutral-800 dark:bg-black ${
               isVisible
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-8"
@@ -162,13 +182,16 @@ const ProductPreview = () => {
             onMouseEnter={() => setHoveredPanel("performance")}
             onMouseLeave={() => setHoveredPanel(null)}
           >
-            <Image
-              src="/mock/mock5.jpeg"
-              alt="Performance panel preview (mock)"
-              width={1200}
-              height={900}
-              className="h-auto w-full transition duration-700 ease-out group-hover:scale-[1.02]"
-            />
+            {mounted ? (
+              <Image
+                src={`/images/3_${isDark ? "black" : "white"}.png`}
+                alt="Performance panel preview"
+                fill
+                className="object-cover transition duration-700 ease-out group-hover:scale-[1.02]"
+              />
+            ) : (
+              <div className="absolute inset-0 animate-pulse bg-neutral-200 dark:bg-neutral-800" />
+            )}
 
             {/* slide overlay */}
             <div className="pointer-events-none absolute inset-0 translate-x-full bg-gradient-to-l from-black/10 via-transparent to-transparent transition-transform duration-700 group-hover:translate-x-0 dark:from-white/10" />
@@ -200,7 +223,6 @@ const ProductPreview = () => {
             />
           </div>
         </div>
-
         {/* footer actions */}
         <div
           className={`mt-10 flex flex-wrap items-center gap-3 transition-all duration-700 ease-out ${

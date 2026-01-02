@@ -4,9 +4,11 @@ import { useState, useEffect, useRef } from "react";
 
 const UPDATE_SCHEDULES = [
   {
-    horizon: "Intraday",
-    frequency: "Hourly",
-    description: "Updated every hour to capture short-term market movements.",
+    horizon: "24 Hours",
+    range: "24H",
+    frequency: "Every 6 hours",
+    description:
+      "Refreshed four times daily to capture short-term market movements.",
     dataLag: "< 5 min",
     icon: (
       <svg
@@ -25,11 +27,12 @@ const UPDATE_SCHEDULES = [
     ),
   },
   {
-    horizon: "Daily",
-    frequency: "Every 6 hours",
+    horizon: "30 Days",
+    range: "30D",
+    frequency: "Daily",
     description:
-      "Refreshed four times daily to balance responsiveness with stability.",
-    dataLag: "< 15 min",
+      "Updated once per day to balance responsiveness with stability.",
+    dataLag: "< 1 hour",
     icon: (
       <svg
         className="h-5 w-5"
@@ -47,10 +50,11 @@ const UPDATE_SCHEDULES = [
     ),
   },
   {
-    horizon: "Weekly",
+    horizon: "12 Weeks",
+    range: "12W",
     frequency: "Daily",
     description:
-      "Updated once per day. Longer horizons don't benefit from more frequent updates.",
+      "Updated once per day. Longer horizons benefit from stable daily updates.",
     dataLag: "< 1 hour",
     icon: (
       <svg
@@ -64,6 +68,29 @@ const UPDATE_SCHEDULES = [
           strokeLinecap="round"
           strokeLinejoin="round"
           d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"
+        />
+      </svg>
+    ),
+  },
+  {
+    horizon: "12 Months",
+    range: "12M",
+    frequency: "Daily",
+    description:
+      "Updated once per day for long-term strategic forecasts with maximum stability.",
+    dataLag: "< 1 hour",
+    icon: (
+      <svg
+        className="h-5 w-5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={1.5}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"
         />
       </svg>
     ),
@@ -145,7 +172,7 @@ const UpdateFrequency = () => {
       {/* Top divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Header */}
         <div className="max-w-2xl">
           <div
@@ -197,7 +224,7 @@ const UpdateFrequency = () => {
             style={{ transitionDelay: "200ms" }}
           >
             Different horizons need different update frequencies. More frequent
-            isn't always better—it's about matching cadence to decision
+            isn't always better. It's about matching cadence to decision
             timescale.
           </p>
         </div>
@@ -247,45 +274,46 @@ const UpdateFrequency = () => {
                     onMouseEnter={() => setHoveredSchedule(i)}
                     onMouseLeave={() => setHoveredSchedule(null)}
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-3">
-                        <div
-                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors duration-200 ${
-                            hoveredSchedule === i
-                              ? "bg-[var(--brand)]/15 text-[var(--brand)]"
-                              : "bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400"
-                          }`}
-                        >
-                          {schedule.icon}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="text-sm font-semibold text-neutral-900 dark:text-white">
-                              {schedule.horizon}
-                            </h4>
-                            <span
-                              className="rounded-full px-2 py-0.5 text-xs font-medium text-black"
-                              style={{ backgroundColor: "var(--brand)" }}
-                            >
-                              {schedule.frequency}
-                            </span>
-                          </div>
-                          <p className="mt-1 text-xs text-neutral-600 dark:text-neutral-400">
-                            {schedule.description}
-                          </p>
-                        </div>
+                    {/* Top row: Icon + Title + Frequency */}
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors duration-200 ${
+                          hoveredSchedule === i
+                            ? "bg-[var(--brand)]/15 text-[var(--brand)]"
+                            : "bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400"
+                        }`}
+                      >
+                        {schedule.icon}
                       </div>
-                      <div className="text-right">
-                        <p className="text-xs text-neutral-500 dark:text-neutral-500">
-                          Data lag
-                        </p>
-                        <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                          {schedule.dataLag}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h4 className="text-sm font-semibold text-neutral-900 dark:text-white">
+                            {schedule.horizon}
+                          </h4>
+                          <span
+                            className="rounded-full px-2 py-0.5 text-xs font-medium text-black"
+                            style={{ backgroundColor: "var(--brand)" }}
+                          >
+                            {schedule.frequency}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs text-neutral-600 dark:text-neutral-400">
+                          {schedule.description}
                         </p>
                       </div>
                     </div>
 
-                    {/* Progress bar (mock) */}
+                    {/* Data lag - separate row on mobile */}
+                    <div className="mt-3 flex items-center justify-between rounded-lg bg-neutral-100 px-3 py-2 dark:bg-neutral-800">
+                      <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                        Data lag
+                      </span>
+                      <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                        {schedule.dataLag}
+                      </span>
+                    </div>
+
+                    {/* Progress bar */}
                     <div className="mt-3">
                       <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-500">
                         <span>Last update</span>
@@ -296,7 +324,7 @@ const UpdateFrequency = () => {
                           className="h-full rounded-full transition-all duration-1000"
                           style={{
                             backgroundColor: "var(--brand)",
-                            width: `${((i + 1) * 25) % 100}%`,
+                            width: `${((i + 1) * 20) % 100}%`,
                           }}
                         />
                       </div>

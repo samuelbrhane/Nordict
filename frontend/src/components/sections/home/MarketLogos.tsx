@@ -3,12 +3,64 @@
 import { useEffect, useState, useRef } from "react";
 
 const MARKETS = [
+  // Crypto - Active (Top coins)
   { name: "Bitcoin", symbol: "BTC", icon: "₿", active: true },
   { name: "Ethereum", symbol: "ETH", icon: "Ξ", active: true },
+  { name: "BNB", symbol: "BNB", icon: "BNB", active: true },
   { name: "Solana", symbol: "SOL", icon: "◎", active: true },
-  { name: "S&P 500", symbol: "SPX", icon: "S&P", active: true },
-  { name: "NASDAQ", symbol: "NDX", icon: "NDX", active: true },
-  { name: "Dow Jones", symbol: "DJI", icon: "DJI", active: true },
+  { name: "XRP", symbol: "XRP", icon: "XRP", active: true },
+  { name: "Cardano", symbol: "ADA", icon: "ADA", active: true },
+  { name: "Dogecoin", symbol: "DOGE", icon: "Ð", active: true },
+  { name: "Avalanche", symbol: "AVAX", icon: "AVAX", active: true },
+  { name: "Polkadot", symbol: "DOT", icon: "DOT", active: true },
+  { name: "Chainlink", symbol: "LINK", icon: "LINK", active: true },
+  { name: "Shiba Inu", symbol: "SHIB", icon: "SHIB", active: true },
+  { name: "Litecoin", symbol: "LTC", icon: "Ł", active: true },
+  { name: "Uniswap", symbol: "UNI", icon: "UNI", active: true },
+  { name: "Cosmos", symbol: "ATOM", icon: "ATOM", active: true },
+  { name: "Stellar", symbol: "XLM", icon: "XLM", active: true },
+  { name: "Ethereum Classic", symbol: "ETC", icon: "ETC", active: true },
+  { name: "Filecoin", symbol: "FIL", icon: "FIL", active: true },
+  { name: "NEAR Protocol", symbol: "NEAR", icon: "NEAR", active: true },
+  { name: "Aptos", symbol: "APT", icon: "APT", active: true },
+  { name: "Arbitrum", symbol: "ARB", icon: "ARB", active: true },
+  { name: "Optimism", symbol: "OP", icon: "OP", active: true },
+  { name: "Injective", symbol: "INJ", icon: "INJ", active: true },
+  { name: "Sui", symbol: "SUI", icon: "SUI", active: true },
+  { name: "Sei", symbol: "SEI", icon: "SEI", active: true },
+  { name: "Celestia", symbol: "TIA", icon: "TIA", active: true },
+  { name: "Render", symbol: "RENDER", icon: "RNDR", active: true },
+  { name: "Fetch.ai", symbol: "FET", icon: "FET", active: true },
+  { name: "Bittensor", symbol: "TAO", icon: "TAO", active: true },
+  { name: "dogwifhat", symbol: "WIF", icon: "WIF", active: true },
+  { name: "Pepe", symbol: "PEPE", icon: "PEPE", active: true },
+  { name: "Immutable", symbol: "IMX", icon: "IMX", active: true },
+  { name: "Stacks", symbol: "STX", icon: "STX", active: true },
+  { name: "Maker", symbol: "MKR", icon: "MKR", active: true },
+  { name: "Aave", symbol: "AAVE", icon: "AAVE", active: true },
+  { name: "The Graph", symbol: "GRT", icon: "GRT", active: true },
+  { name: "Synthetix", symbol: "SNX", icon: "SNX", active: true },
+  { name: "Lido DAO", symbol: "LDO", icon: "LDO", active: true },
+  { name: "Curve", symbol: "CRV", icon: "CRV", active: true },
+  { name: "THORChain", symbol: "RUNE", icon: "RUNE", active: true },
+  { name: "ENS", symbol: "ENS", icon: "ENS", active: true },
+  { name: "The Sandbox", symbol: "SAND", icon: "SAND", active: true },
+  { name: "Decentraland", symbol: "MANA", icon: "MANA", active: true },
+  { name: "Axie Infinity", symbol: "AXS", icon: "AXS", active: true },
+  { name: "Gala", symbol: "GALA", icon: "GALA", active: true },
+  { name: "Flow", symbol: "FLOW", icon: "FLOW", active: true },
+  { name: "Chiliz", symbol: "CHZ", icon: "CHZ", active: true },
+  { name: "Enjin Coin", symbol: "ENJ", icon: "ENJ", active: true },
+  { name: "STEPN", symbol: "GMT", icon: "GMT", active: true },
+  { name: "ApeCoin", symbol: "APE", icon: "APE", active: true },
+  { name: "Algorand", symbol: "ALGO", icon: "ALGO", active: true },
+
+  // Indices - Coming soon
+  { name: "S&P 500", symbol: "SPX", icon: "S&P", active: false },
+  { name: "NASDAQ", symbol: "NDX", icon: "NDX", active: false },
+  { name: "Dow Jones", symbol: "DJI", icon: "DJI", active: false },
+
+  // Forex - Coming soon
   { name: "EUR/USD", symbol: "EURUSD", icon: "€/$", active: false },
   { name: "GBP/USD", symbol: "GBPUSD", icon: "£/$", active: false },
   { name: "USD/JPY", symbol: "USDJPY", icon: "$/¥", active: false },
@@ -38,7 +90,7 @@ const MarketLogos = () => {
   }, []);
 
   // Duplicate array for seamless loop
-  const duplicatedMarkets = [...MARKETS, ...MARKETS];
+  const duplicatedMarkets = [...MARKETS];
 
   return (
     <section
@@ -55,7 +107,7 @@ const MarketLogos = () => {
         />
       </div>
 
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-screen-2xl px-6">
         {/* Label */}
         <div
           className={`mb-6 flex items-center justify-center gap-2 transition-all duration-700 ease-out ${
@@ -157,25 +209,13 @@ const MarketLogos = () => {
 
       {/* Bottom note */}
       <div
-        className={`mx-auto mt-6 max-w-7xl px-6 transition-all duration-700 ease-out ${
+        className={`mx-auto mt-6 max-w-screen-2xl px-6 transition-all duration-700 ease-out ${
           isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
         }`}
         style={{ transitionDelay: "400ms" }}
       >
         <p className="text-center text-xs text-neutral-400 dark:text-neutral-500">
           More assets and FX pairs coming soon.{" "}
-          <span
-            className="inline-block"
-            style={{
-              background:
-                "linear-gradient(135deg, var(--brand) 0%, rgba(4,236,58,0.7) 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}
-          >
-            Request an asset →
-          </span>
         </p>
       </div>
 

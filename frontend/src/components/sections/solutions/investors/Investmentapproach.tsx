@@ -32,7 +32,7 @@ const APPROACH_PILLARS = [
     id: "frequency",
     title: "Lower Alert Frequency",
     description:
-      "Only get notified on significant shifts. No constant pings—just meaningful updates when your attention is actually needed.",
+      "Only get notified on significant shifts. No constant pings, just meaningful updates when your attention is actually needed.",
     comparison: {
       trader: "Real-time, every shift",
       investor: "Daily digest, major changes only",
@@ -147,7 +147,7 @@ const InvestmentApproach = () => {
       {/* Top divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Header */}
         <div className="max-w-2xl">
           <div
@@ -364,47 +364,6 @@ const InvestmentApproach = () => {
                 </div>
               </div>
             )}
-          </div>
-        </div>
-
-        {/* Bottom callout */}
-        <div
-          className={`mt-10 rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900 transition-all duration-700 ease-out ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
-          style={{ transitionDelay: "600ms" }}
-        >
-          <div className="flex items-start gap-4">
-            <div
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-              style={{ backgroundColor: "rgba(4,236,58,0.15)" }}
-            >
-              <svg
-                className="h-5 w-5"
-                style={{ color: "var(--brand)" }}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                />
-              </svg>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">
-                Same engine, different lens
-              </h3>
-              <p className="mt-1 text-sm leading-relaxed text-neutral-600 dark:text-neutral-300">
-                The underlying forecasting engine is identical. What changes is
-                how you consume the signals—longer timeframes, aggregated views,
-                and patience-optimized alerts designed for investors who check
-                in weekly, not hourly.
-              </p>
-            </div>
           </div>
         </div>
       </div>

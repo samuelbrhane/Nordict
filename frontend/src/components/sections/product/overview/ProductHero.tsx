@@ -7,7 +7,24 @@ const ProductHero = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const [isDark, setIsDark] = useState(false);
 
+  useEffect(() => {
+    setMounted(true);
+    setIsDark(document.documentElement.classList.contains("dark"));
+
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains("dark"));
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
   useEffect(() => {
     setIsVisible(true);
   }, []);
@@ -50,7 +67,7 @@ const ProductHero = () => {
           }}
         />
 
-        <div className="relative z-10 mx-auto max-w-7xl px-6">
+        <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
           {/* Breadcrumb */}
           <div
             className={`mb-6 flex items-center gap-3 transition-all duration-700 ease-out ${
@@ -147,7 +164,7 @@ const ProductHero = () => {
             <span className="font-medium text-neutral-900 dark:text-white">
               walk-forward backtesting
             </span>{" "}
-            into a single platform—so every signal is auditable and every
+            into a single platform, so every signal is auditable and every
             prediction comes with context.
           </p>
 
@@ -192,30 +209,6 @@ const ProductHero = () => {
             style={{ transitionDelay: "500ms" }}
           >
             <Link
-              href="/contact"
-              className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl px-6 py-3.5 text-sm font-medium text-black shadow-lg shadow-[var(--brand)]/25 transition-all duration-300 hover:shadow-xl hover:shadow-[var(--brand)]/30 hover:scale-[1.02] active:scale-[0.98]"
-              style={{ backgroundColor: "var(--brand)" }}
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                Request early access
-                <svg
-                  className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 7l5 5m0 0l-5 5m5-5H6"
-                  />
-                </svg>
-              </span>
-              <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-            </Link>
-
-            <Link
               href="#demo-video"
               className="group inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-6 py-3.5 text-sm font-medium text-neutral-900 shadow-sm transition-all duration-300 hover:bg-neutral-50 hover:border-neutral-300 active:scale-[0.98] dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800 dark:hover:border-neutral-700"
             >
@@ -259,7 +252,7 @@ const ProductHero = () => {
           />
         </div>
 
-        <div className="relative z-10 mx-auto max-w-7xl px-6">
+        <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
           {/* Section header */}
           <div
             className={`mb-8 text-center transition-all duration-700 ease-out ${
@@ -279,90 +272,26 @@ const ProductHero = () => {
 
           {/* Video container */}
           <div
-            className={`relative mx-auto max-w-5xl overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-900 shadow-2xl shadow-neutral-900/10 dark:border-neutral-800 dark:shadow-black/30 transition-all duration-700 ease-out ${
+            className={`relative mx-auto max-w-screen-2xl overflow-hidden rounded-3xl border border-neutral-200 shadow-2xl shadow-neutral-900/10 dark:border-neutral-800 dark:shadow-black/30 transition-all duration-700 ease-out ${
               isVisible
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-6"
             }`}
             style={{ transitionDelay: "700ms" }}
           >
-            {/* Aspect ratio container - using aspect-video (16:9) for responsive height */}
-            <div className="relative aspect-video">
-              {/* Video element */}
+            {mounted ? (
               <video
-                ref={videoRef}
-                className="absolute inset-0 h-full w-full object-cover"
-                onEnded={handleVideoEnd}
-                poster="/mock/mock3.jpeg"
+                key={isDark ? "dark" : "light"}
+                src={`/videos/product_${isDark ? "black" : "white"}.mp4`}
+                className="h-auto w-full"
+                autoPlay
+                loop
                 muted
-              >
-                {/* Replace with your actual video path */}
-                <source src="/videos/product_demo.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-
-              {/* Play button overlay */}
-              {!isPlaying && (
-                <div
-                  className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/40 transition-all duration-300 hover:bg-black/30"
-                  onClick={handlePlayClick}
-                >
-                  {/* Play button */}
-                  <button
-                    className="group relative flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:border-[var(--brand)]/50 hover:bg-[var(--brand)]/20 sm:h-20 sm:w-20 md:h-24 md:w-24"
-                    aria-label="Play video"
-                  >
-                    {/* Pulsing ring */}
-                    <span
-                      className="absolute inset-0 rounded-full animate-ping opacity-20"
-                      style={{ backgroundColor: "var(--brand)" }}
-                    />
-
-                    {/* Play icon */}
-                    <svg
-                      className="relative z-10 ml-1 h-6 w-6 text-white transition-transform duration-300 group-hover:scale-110 sm:h-8 sm:w-8 md:h-10 md:w-10"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  </button>
-                </div>
-              )}
-
-              {/* Video controls overlay when playing */}
-              {isPlaying && (
-                <div
-                  className="absolute inset-0 cursor-pointer"
-                  onClick={() => {
-                    if (videoRef.current) {
-                      if (videoRef.current.paused) {
-                        videoRef.current.play();
-                      } else {
-                        videoRef.current.pause();
-                        setIsPlaying(false);
-                      }
-                    }
-                  }}
-                />
-              )}
-            </div>
-
-            {/* Bottom bar */}
-            <div className="flex items-center justify-between border-t border-neutral-800 bg-neutral-900 px-3 py-2 sm:px-4 sm:py-3 md:px-6">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <span
-                  className="h-1.5 w-1.5 rounded-full animate-pulse sm:h-2 sm:w-2"
-                  style={{ backgroundColor: "var(--brand)" }}
-                />
-                <span className="text-xs text-neutral-300 sm:text-sm">
-                  Product walkthrough
-                </span>
-              </div>
-              <span className="text-[10px] text-neutral-500 sm:text-xs">
-                Recorded Dec 2024
-              </span>
-            </div>
+                playsInline
+              />
+            ) : (
+              <div className="aspect-video w-full animate-pulse bg-neutral-800" />
+            )}
           </div>
 
           {/* Caption */}

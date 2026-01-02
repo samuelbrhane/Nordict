@@ -14,7 +14,7 @@ const ARTICLES = [
     excerpt:
       "What does a 73% confidence score actually mean? Learn how to interpret and act on our confidence metrics effectively.",
     category: "guides",
-    date: "Dec 20, 2024",
+    date: "Dec 20, 2025",
     readTime: "8 min read",
     featured: true,
     author: {
@@ -29,7 +29,7 @@ const ARTICLES = [
     excerpt:
       "A transparent look at our validation process, from walk-forward analysis to regime testing. No cherry-picking allowed.",
     category: "research",
-    date: "Dec 15, 2024",
+    date: "Dec 15, 2025",
     readTime: "12 min read",
     featured: true,
     author: {
@@ -39,12 +39,12 @@ const ARTICLES = [
     },
   },
   {
-    id: "q4-2024-performance",
-    title: "Q4 2024 Performance Review",
+    id: "q4-2025-performance",
+    title: "Q4 2025 Performance Review",
     excerpt:
       "Quarterly transparency report: what we got right, what we got wrong, and what we learned. Full accuracy breakdown by asset and horizon.",
     category: "performance",
-    date: "Dec 10, 2024",
+    date: "Dec 10, 2025",
     readTime: "10 min read",
     featured: false,
     author: {
@@ -59,7 +59,7 @@ const ARTICLES = [
     excerpt:
       "Real workflows from real users. From entry confirmation to position sizing, see how traders integrate forecasts into their process.",
     category: "guides",
-    date: "Dec 5, 2024",
+    date: "Dec 5, 2025",
     readTime: "6 min read",
     featured: false,
     author: {
@@ -74,7 +74,7 @@ const ARTICLES = [
     excerpt:
       "New feature: visualize forecast uncertainty with 50%, 75%, and 95% confidence intervals. Here's how they work.",
     category: "product",
-    date: "Nov 28, 2024",
+    date: "Nov 28, 2025",
     readTime: "5 min read",
     featured: false,
     author: {
@@ -89,7 +89,7 @@ const ARTICLES = [
     excerpt:
       "Bull, bear, or sideways? Our models adapt to market conditions. Here's the volatility clustering approach behind regime detection.",
     category: "research",
-    date: "Nov 20, 2024",
+    date: "Nov 20, 2025",
     readTime: "15 min read",
     featured: false,
     author: {
@@ -104,7 +104,7 @@ const ARTICLES = [
     excerpt:
       "Should you DCA on a fixed schedule or wait for signals? A data-driven look at timing your regular investments.",
     category: "guides",
-    date: "Nov 15, 2024",
+    date: "Nov 15, 2025",
     readTime: "7 min read",
     featured: false,
     author: {
@@ -119,7 +119,7 @@ const ARTICLES = [
     excerpt:
       "Faster endpoints, webhook improvements, and new SDK support. Everything you need to know about our API update.",
     category: "product",
-    date: "Nov 10, 2024",
+    date: "Nov 10, 2025",
     readTime: "4 min read",
     featured: false,
     author: {
@@ -184,7 +184,7 @@ const BlogGrid = ({ activeCategory }: BlogGridProps) => {
       ref={sectionRef}
       className="relative overflow-hidden bg-white pb-20 dark:bg-black"
     >
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Featured articles */}
         {featuredArticles.length > 0 && (
           <div

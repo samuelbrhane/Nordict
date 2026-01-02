@@ -8,12 +8,7 @@ const FEATURES = [
     title: "Weekly & Monthly Forecasts",
     description:
       "Extended horizon forecasts designed for position building and strategic allocation, not day-to-day noise.",
-    highlight: "7d, 14d, 30d horizons",
-    details: [
-      "Updated daily for consistency",
-      "Less noise, more signal",
-      "Aligned with rebalancing cycles",
-    ],
+    highlight: "30D, 12W, 12M horizons",
     icon: (
       <svg
         className="h-6 w-6"
@@ -36,11 +31,6 @@ const FEATURES = [
     description:
       "Weighted aggregate of forecast confidence across your holdings. One number to understand overall sentiment.",
     highlight: "Allocation-weighted",
-    details: [
-      "Considers position sizes",
-      "Historical conviction tracking",
-      "Alerts when portfolio score shifts",
-    ],
     icon: (
       <svg
         className="h-6 w-6"
@@ -61,6 +51,7 @@ const FEATURES = [
         />
       </svg>
     ),
+    comingSoon: true,
   },
   {
     id: "dca",
@@ -68,11 +59,6 @@ const FEATURES = [
     description:
       "Optimize your regular purchases. Know when forecasts suggest better or worse entry points for scheduled buys.",
     highlight: "Timing optimization",
-    details: [
-      "Favorable vs unfavorable windows",
-      "Integrates with your DCA schedule",
-      "Weekly timing suggestions",
-    ],
     icon: (
       <svg
         className="h-6 w-6"
@@ -88,18 +74,14 @@ const FEATURES = [
         />
       </svg>
     ),
+    comingSoon: true,
   },
   {
     id: "digest",
     title: "Weekly Digest Reports",
     description:
       "One email per week with everything you need. Portfolio outlook, major shifts, and suggested actions—no spam.",
-    highlight: "Sunday delivery",
-    details: [
-      "Portfolio summary",
-      "Key forecast changes",
-      "Week-ahead outlook",
-    ],
+    highlight: "Coming soon",
     icon: (
       <svg
         className="h-6 w-6"
@@ -115,18 +97,14 @@ const FEATURES = [
         />
       </svg>
     ),
+    comingSoon: true,
   },
   {
     id: "rebalance",
     title: "Rebalancing Signals",
     description:
       "Know when conviction diverges from allocation. Spot when overweight positions have weakening forecasts.",
-    highlight: "Allocation vs conviction",
-    details: [
-      "Overweight/underweight alerts",
-      "Conviction-to-allocation ratio",
-      "Suggested rebalance actions",
-    ],
+    highlight: "Coming soon",
     icon: (
       <svg
         className="h-6 w-6"
@@ -142,6 +120,7 @@ const FEATURES = [
         />
       </svg>
     ),
+    comingSoon: true,
   },
   {
     id: "history",
@@ -149,11 +128,6 @@ const FEATURES = [
     description:
       "Track how forecasts performed over months and quarters. Understand accuracy across different market regimes.",
     highlight: "Quarterly reports",
-    details: [
-      "Monthly accuracy trends",
-      "Regime-specific performance",
-      "Confidence calibration history",
-    ],
     icon: (
       <svg
         className="h-6 w-6"
@@ -174,9 +148,6 @@ const FEATURES = [
 
 const InvestorFeatures = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const [selectedFeature, setSelectedFeature] = useState<string | null>(
-    "weekly"
-  );
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -198,8 +169,6 @@ const InvestorFeatures = () => {
     return () => observer.disconnect();
   }, []);
 
-  const activeFeature = FEATURES.find((f) => f.id === selectedFeature);
-
   return (
     <section
       ref={sectionRef}
@@ -216,7 +185,7 @@ const InvestorFeatures = () => {
       {/* Top divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Header */}
         <div className="max-w-2xl">
           <div
@@ -280,16 +249,13 @@ const InvestorFeatures = () => {
           style={{ transitionDelay: "300ms" }}
         >
           {FEATURES.map((feature, i) => (
-            <button
+            <div
               key={feature.id}
-              onClick={() =>
-                setSelectedFeature(
-                  selectedFeature === feature.id ? null : feature.id
-                )
-              }
-              className={`group relative overflow-hidden rounded-2xl border p-5 text-left transition-all duration-300 ${
-                selectedFeature === feature.id
-                  ? "border-[var(--brand)]/50 bg-[var(--brand)]/5 shadow-lg ring-1 ring-[var(--brand)]/20"
+              className={`group relative overflow-hidden rounded-2xl border p-5 transition-all duration-300 cursor-default ${
+                feature.comingSoon
+                  ? "border-neutral-200 bg-neutral-50 opacity-75 dark:border-neutral-800 dark:bg-neutral-900/50"
+                  : hoveredFeature === i
+                  ? "border-[var(--brand)]/50 bg-[var(--brand)]/5 shadow-lg"
                   : "border-neutral-200 bg-white hover:border-neutral-300 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700"
               }`}
               onMouseEnter={() => setHoveredFeature(i)}
@@ -298,7 +264,9 @@ const InvestorFeatures = () => {
               <div className="flex items-start justify-between">
                 <div
                   className={`flex h-12 w-12 items-center justify-center rounded-xl transition-colors duration-200 ${
-                    selectedFeature === feature.id || hoveredFeature === i
+                    feature.comingSoon
+                      ? "bg-neutral-100 text-neutral-400 dark:bg-neutral-800 dark:text-neutral-500"
+                      : hoveredFeature === i
                       ? "bg-[var(--brand)]/15 text-[var(--brand)]"
                       : "bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400"
                   }`}
@@ -308,112 +276,48 @@ const InvestorFeatures = () => {
 
                 {/* Highlight badge */}
                 <span
-                  className={`rounded-full px-2 py-0.5 text-xs font-medium transition-colors duration-200 ${
-                    selectedFeature === feature.id
-                      ? "bg-[var(--brand)] text-black"
-                      : "bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400"
+                  className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                    feature.comingSoon
+                      ? "bg-neutral-200 text-neutral-500 dark:bg-neutral-700 dark:text-neutral-400"
+                      : "bg-[var(--brand)] text-black"
                   }`}
                 >
-                  {feature.highlight}
+                  {feature.comingSoon ? "Coming soon" : feature.highlight}
                 </span>
               </div>
 
-              <h3 className="mt-4 text-sm font-semibold text-neutral-900 dark:text-white">
+              <h3
+                className={`mt-4 text-sm font-semibold ${
+                  feature.comingSoon
+                    ? "text-neutral-500 dark:text-neutral-400"
+                    : "text-neutral-900 dark:text-white"
+                }`}
+              >
                 {feature.title}
               </h3>
 
-              <p className="mt-1 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
+              <p
+                className={`mt-1 text-xs leading-relaxed ${
+                  feature.comingSoon
+                    ? "text-neutral-400 dark:text-neutral-500"
+                    : "text-neutral-600 dark:text-neutral-400"
+                }`}
+              >
                 {feature.description}
               </p>
 
-              {/* Hover accent */}
-              <div
-                className={`pointer-events-none absolute inset-x-0 bottom-0 h-0.5 transition-all duration-500 ${
-                  selectedFeature === feature.id || hoveredFeature === i
-                    ? "w-full"
-                    : "w-0"
-                }`}
-                style={{ backgroundColor: "var(--brand)" }}
-              />
-            </button>
+              {/* Hover accent - not for coming soon */}
+              {!feature.comingSoon && (
+                <div
+                  className={`pointer-events-none absolute inset-x-0 bottom-0 h-0.5 transition-all duration-500 ${
+                    hoveredFeature === i ? "w-full" : "w-0"
+                  }`}
+                  style={{ backgroundColor: "var(--brand)" }}
+                />
+              )}
+            </div>
           ))}
         </div>
-
-        {/* Expanded detail panel */}
-        {activeFeature && (
-          <div
-            className={`mt-6 animate-in fade-in slide-in-from-top-2 duration-300 rounded-3xl border border-neutral-200 bg-neutral-50 p-6 shadow-lg dark:border-neutral-800 dark:bg-neutral-900 sm:p-8`}
-          >
-            <div className="grid gap-6 lg:grid-cols-2">
-              {/* Left: Feature details */}
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div
-                    className="flex h-12 w-12 items-center justify-center rounded-xl"
-                    style={{ backgroundColor: "rgba(4,236,58,0.15)" }}
-                  >
-                    <div style={{ color: "var(--brand)" }}>
-                      {activeFeature.icon}
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
-                      {activeFeature.title}
-                    </h3>
-                    <span
-                      className="text-xs font-medium"
-                      style={{ color: "var(--brand)" }}
-                    >
-                      {activeFeature.highlight}
-                    </span>
-                  </div>
-                </div>
-
-                <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
-                  {activeFeature.description}
-                </p>
-              </div>
-
-              {/* Right: Details list */}
-              <div>
-                <h4 className="mb-3 text-sm font-medium text-neutral-500 dark:text-neutral-400">
-                  What's included
-                </h4>
-                <div className="space-y-2">
-                  {activeFeature.details.map((detail) => (
-                    <div
-                      key={detail}
-                      className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-800"
-                    >
-                      <span
-                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md"
-                        style={{ backgroundColor: "rgba(4,236,58,0.15)" }}
-                      >
-                        <svg
-                          className="h-3.5 w-3.5"
-                          style={{ color: "var(--brand)" }}
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2.5}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                      </span>
-                      <span className="text-sm text-neutral-700 dark:text-neutral-300">
-                        {detail}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Bottom stats */}
         <div
@@ -423,10 +327,10 @@ const InvestorFeatures = () => {
           style={{ transitionDelay: "500ms" }}
         >
           {[
-            { value: "3", label: "Extended horizons" },
-            { value: "1x", label: "Weekly digest" },
+            { value: "4", label: "Forecast horizons" },
+            { value: "Daily", label: "Updates" },
             { value: "90d", label: "Historical data" },
-            { value: "∞", label: "Portfolio assets" },
+            { value: "50+", label: "Assets tracked" },
           ].map((stat) => (
             <div
               key={stat.label}

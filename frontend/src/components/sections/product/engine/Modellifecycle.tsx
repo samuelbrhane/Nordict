@@ -180,7 +180,7 @@ const ModelLifecycle = () => {
       {/* Top divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Header */}
         <div className="max-w-2xl">
           <div
@@ -220,7 +220,7 @@ const ModelLifecycle = () => {
             >
               live monitoring
             </span>
-            —every step tracked.
+            , every step tracked.
           </h2>
 
           <p

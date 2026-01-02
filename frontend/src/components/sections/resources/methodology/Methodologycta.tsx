@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useAuth } from "@/context/auth/AuthProvider";
 
 const MethodologyCTA = () => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
+  const { user, isLoading } = useAuth();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -106,9 +108,9 @@ const MethodologyCTA = () => {
               }`}
               style={{ transitionDelay: "400ms" }}
             >
-              Now that you understand how it works, try it yourself. Get early
-              access and see live forecasts, confidence scores, and performance
-              data.
+              {user
+                ? "You understand how it works. Now explore your forecasts, confidence scores, and performance data."
+                : "Now that you understand how it works, try it yourself. Start with a 7-day free trial of Premium."}
             </p>
 
             {/* CTAs */}
@@ -120,37 +122,81 @@ const MethodologyCTA = () => {
               }`}
               style={{ transitionDelay: "500ms" }}
             >
-              <Link
-                href="/waitlist"
-                className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl px-8 py-3 text-sm font-medium text-black shadow-lg shadow-[var(--brand)]/25 transition-all duration-300 hover:shadow-xl hover:shadow-[var(--brand)]/30 hover:scale-[1.02] active:scale-[0.98]"
-                style={{ backgroundColor: "var(--brand)" }}
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  Get early access
-                  <svg
-                    className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 7l5 5m0 0l-5 5m5-5H6"
-                    />
-                  </svg>
-                </span>
-                <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-              </Link>
+              {!isLoading && (
+                <>
+                  {user ? (
+                    <Link
+                      href="/app/dashboard"
+                      className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl px-8 py-3 text-sm font-medium text-black shadow-lg shadow-[var(--brand)]/25 transition-all duration-300 hover:shadow-xl hover:shadow-[var(--brand)]/30 hover:scale-[1.02] active:scale-[0.98]"
+                      style={{ backgroundColor: "var(--brand)" }}
+                    >
+                      <span className="relative z-10 flex items-center gap-2">
+                        Go to Dashboard
+                        <svg
+                          className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13 7l5 5m0 0l-5 5m5-5H6"
+                          />
+                        </svg>
+                      </span>
+                      <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+                    </Link>
+                  ) : (
+                    <>
+                      <Link
+                        href="/signup"
+                        className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl px-8 py-3 text-sm font-medium text-black shadow-lg shadow-[var(--brand)]/25 transition-all duration-300 hover:shadow-xl hover:shadow-[var(--brand)]/30 hover:scale-[1.02] active:scale-[0.98]"
+                        style={{ backgroundColor: "var(--brand)" }}
+                      >
+                        <span className="relative z-10 flex items-center gap-2">
+                          Start free trial
+                          <svg
+                            className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M13 7l5 5m0 0l-5 5m5-5H6"
+                            />
+                          </svg>
+                        </span>
+                        <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+                      </Link>
 
-              <Link
-                href="/product/performance"
-                className="inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-8 py-3 text-sm font-medium text-neutral-900 shadow-sm transition-all duration-300 hover:bg-neutral-50 hover:border-neutral-300 active:scale-[0.98] dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
-              >
-                View live performance
-              </Link>
+                      <Link
+                        href="/pricing"
+                        className="inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-8 py-3 text-sm font-medium text-neutral-900 shadow-sm transition-all duration-300 hover:bg-neutral-50 hover:border-neutral-300 active:scale-[0.98] dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
+                      >
+                        View pricing
+                      </Link>
+                    </>
+                  )}
+                </>
+              )}
             </div>
+
+            {/* Trust note - only for non-logged in */}
+            {!user && !isLoading && (
+              <p
+                className={`mt-6 text-xs text-neutral-500 dark:text-neutral-400 transition-all duration-700 ease-out ${
+                  isVisible ? "opacity-100" : "opacity-0"
+                }`}
+                style={{ transitionDelay: "550ms" }}
+              >
+                No credit card required • 7-day free trial
+              </p>
+            )}
           </div>
         </div>
 
@@ -164,12 +210,12 @@ const MethodologyCTA = () => {
           <p className="text-center text-sm text-neutral-500 dark:text-neutral-400 mb-4">
             Continue exploring
           </p>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             {[
               {
                 title: "Forecasting Engine",
                 description: "How predictions are generated",
-                href: "/product/forecasting-engine",
+                href: "/product/engine",
                 icon: (
                   <svg
                     className="h-5 w-5"
@@ -186,10 +232,11 @@ const MethodologyCTA = () => {
                   </svg>
                 ),
               },
+
               {
-                title: "Performance Data",
-                description: "Live accuracy metrics",
-                href: "/product/performance",
+                title: "Pricing",
+                description: "Pro & Premium plans",
+                href: "/pricing",
                 icon: (
                   <svg
                     className="h-5 w-5"
@@ -201,27 +248,7 @@ const MethodologyCTA = () => {
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"
-                    />
-                  </svg>
-                ),
-              },
-              {
-                title: "API Documentation",
-                description: "Integrate with your tools",
-                href: "/product/api",
-                icon: (
-                  <svg
-                    className="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={1.5}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"
+                      d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"
                     />
                   </svg>
                 ),

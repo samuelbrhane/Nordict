@@ -51,7 +51,7 @@ const ProblemSolution = () => {
           style={{ backgroundColor: "var(--brand)" }}
         />
       </div>
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-screen-2xl px-6">
         {/* Section label */}
         <div
           className={`mb-10 flex items-center gap-2 transition-all duration-700 ease-out ${

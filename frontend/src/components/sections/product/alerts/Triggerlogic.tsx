@@ -108,7 +108,7 @@ const TriggerLogic = () => {
       {/* Top divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Header */}
         <div className="max-w-2xl">
           <div
@@ -159,7 +159,7 @@ const TriggerLogic = () => {
             }`}
             style={{ transitionDelay: "200ms" }}
           >
-            From condition definition to delivery—here's how the alert system
+            From condition definition to delivery, here's how the alert system
             evaluates and fires notifications.
           </p>
         </div>
@@ -358,41 +358,6 @@ const TriggerLogic = () => {
                   />
                 </div>
               ))}
-            </div>
-
-            {/* Debounce info */}
-            <div className="mt-6 rounded-2xl border border-neutral-200 bg-neutral-50 p-4 dark:border-neutral-800 dark:bg-neutral-900">
-              <div className="flex items-start gap-3">
-                <div
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
-                  style={{ backgroundColor: "rgba(4,236,58,0.15)" }}
-                >
-                  <svg
-                    className="h-4 w-4"
-                    style={{ color: "var(--brand)" }}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold text-neutral-900 dark:text-white">
-                    Built-in debouncing
-                  </h4>
-                  <p className="mt-1 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
-                    Configure minimum time between alerts and require conditions
-                    to hold for a duration before triggering. No accidental spam
-                    from brief fluctuations.
-                  </p>
-                </div>
-              </div>
             </div>
           </div>
         </div>

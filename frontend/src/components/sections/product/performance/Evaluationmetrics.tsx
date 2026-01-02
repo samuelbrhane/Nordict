@@ -198,7 +198,7 @@ const EvaluationMetrics = () => {
       {/* Top divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Header */}
         <div className="max-w-2xl">
           <div
@@ -404,17 +404,6 @@ const EvaluationMetrics = () => {
             </div>
           </div>
         )}
-
-        {/* Bottom note */}
-        <p
-          className={`mt-6 text-center text-sm text-neutral-500 dark:text-neutral-400 transition-all duration-700 ease-out ${
-            isVisible ? "opacity-100" : "opacity-0"
-          }`}
-          style={{ transitionDelay: "600ms" }}
-        >
-          All values shown are illustrative. Actual metrics are updated in
-          real-time in the dashboard.
-        </p>
       </div>
     </section>
   );

@@ -44,7 +44,7 @@ const BlogHero = ({ activeCategory, setActiveCategory }: BlogHeroProps) => {
         }}
       />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Badge */}
         <div
           className={`flex justify-center mb-6 transition-all duration-700 ease-out ${

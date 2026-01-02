@@ -15,6 +15,8 @@ const TrustStrip = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -34,6 +36,27 @@ const TrustStrip = () => {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    setMounted(true);
+
+    // Check initial theme
+    setIsDark(document.documentElement.classList.contains("dark"));
+
+    // Watch for theme changes
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains("dark"));
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const imageSrc = `/images/1_${isDark ? "black" : "white"}.png`;
+
   return (
     <section
       ref={sectionRef}
@@ -50,22 +73,25 @@ const TrustStrip = () => {
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
       </div>
 
-      <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-6 py-10 lg:grid-cols-12">
+      <div className="relative mx-auto grid max-w-screen-2xl items-stretch gap-8 px-6 py-10 lg:grid-cols-12">
         {/* Left: "interactive" image card */}
         <div
           className={`lg:col-span-5 transition-all duration-700 ease-out ${
             isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-6"
           }`}
         >
-          <div className="group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white/70 shadow-sm backdrop-blur transition-shadow duration-300 hover:shadow-lg dark:border-neutral-800 dark:bg-black/40">
-            <Image
-              src="/mock/mock2.jpeg"
-              alt="Forecast preview"
-              width={900}
-              height={650}
-              className="h-auto w-full opacity-95 transition duration-500 group-hover:scale-[1.02] group-hover:opacity-100"
-              priority={false}
-            />
+          <div className="group relative h-full overflow-hidden rounded-2xl border border-neutral-200 bg-white/70 shadow-sm backdrop-blur transition-shadow duration-300 hover:shadow-lg dark:border-neutral-800 dark:bg-black/40">
+            {mounted ? (
+              <Image
+                src={imageSrc}
+                alt="Forecast preview"
+                fill
+                className="object-cover opacity-95 transition duration-500 group-hover:scale-[1.02] group-hover:opacity-100"
+                priority={false}
+              />
+            ) : (
+              <div className="h-full w-full animate-pulse bg-neutral-200 dark:bg-neutral-800" />
+            )}
 
             {/* Sliding overlay (hover) */}
             <div className="pointer-events-none absolute inset-0 translate-x-full bg-gradient-to-l from-black/10 via-transparent to-transparent transition-transform duration-500 group-hover:translate-x-0 dark:from-white/10" />
@@ -79,7 +105,7 @@ const TrustStrip = () => {
               }`}
               style={{ transitionDelay: "300ms" }}
             >
-              Forecast + confidence bands (mock)
+              Forecast + confidence bands
             </div>
           </div>
         </div>
@@ -154,7 +180,7 @@ const TrustStrip = () => {
             <span className="font-medium text-neutral-800 dark:text-neutral-100">
               traceability
             </span>{" "}
-            so you can interpret signals with context—and audit results over
+            so you can interpret signals with context, and audit results over
             time.
           </p>
 

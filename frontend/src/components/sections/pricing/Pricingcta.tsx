@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useAuth } from "@/context/auth/AuthProvider";
 
 const PricingCTA = () => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
+  const { user, isLoading } = useAuth();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -67,7 +69,7 @@ const PricingCTA = () => {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z"
+                  d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
                 />
               </svg>
             </div>
@@ -81,7 +83,7 @@ const PricingCTA = () => {
               }`}
               style={{ transitionDelay: "300ms" }}
             >
-              Need a{" "}
+              Ready to{" "}
               <span
                 className="inline-block"
                 style={{
@@ -92,7 +94,7 @@ const PricingCTA = () => {
                   backgroundClip: "text",
                 }}
               >
-                custom solution
+                get started
               </span>
               ?
             </h2>
@@ -106,14 +108,13 @@ const PricingCTA = () => {
               }`}
               style={{ transitionDelay: "400ms" }}
             >
-              Enterprise plans include custom integrations, dedicated support,
-              volume discounts, and flexible deployment options. Let's talk
-              about what your team needs.
+              Start with a 7-day free trial of Premium. No credit card required.
+              Experience all features before you decide.
             </p>
 
             {/* Features */}
             <div
-              className={`mt-8 flex flex-wrap justify-center gap-4 transition-all duration-700 ease-out ${
+              className={`mt-8 flex flex-wrap justify-center gap-3 transition-all duration-700 ease-out ${
                 isVisible
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-3"
@@ -121,10 +122,10 @@ const PricingCTA = () => {
               style={{ transitionDelay: "500ms" }}
             >
               {[
-                "Custom API limits",
-                "SSO / SAML",
-                "Dedicated support",
-                "On-premise option",
+                "All 4 horizons",
+                "Unlimited markets",
+                "Unlimited alerts",
+                "Full historical data",
               ].map((feature) => (
                 <div
                   key={feature}
@@ -160,37 +161,79 @@ const PricingCTA = () => {
               }`}
               style={{ transitionDelay: "600ms" }}
             >
-              <Link
-                href="/contact"
-                className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl px-8 py-3 text-sm font-medium text-black shadow-lg shadow-[var(--brand)]/25 transition-all duration-300 hover:shadow-xl hover:shadow-[var(--brand)]/30 hover:scale-[1.02] active:scale-[0.98]"
-                style={{ backgroundColor: "var(--brand)" }}
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  Talk to sales
-                  <svg
-                    className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 7l5 5m0 0l-5 5m5-5H6"
-                    />
-                  </svg>
-                </span>
-                <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-              </Link>
+              {!isLoading && (
+                <>
+                  {user ? (
+                    <Link
+                      href="/app/dashboard"
+                      className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl px-8 py-3 text-sm font-medium text-black shadow-lg shadow-[var(--brand)]/25 transition-all duration-300 hover:shadow-xl hover:shadow-[var(--brand)]/30 hover:scale-[1.02] active:scale-[0.98]"
+                      style={{ backgroundColor: "var(--brand)" }}
+                    >
+                      <span className="relative z-10 flex items-center gap-2">
+                        Go to Dashboard
+                        <svg
+                          className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13 7l5 5m0 0l-5 5m5-5H6"
+                          />
+                        </svg>
+                      </span>
+                      <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+                    </Link>
+                  ) : (
+                    <>
+                      <Link
+                        href="/signup"
+                        className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl px-8 py-3 text-sm font-medium text-black shadow-lg shadow-[var(--brand)]/25 transition-all duration-300 hover:shadow-xl hover:shadow-[var(--brand)]/30 hover:scale-[1.02] active:scale-[0.98]"
+                        style={{ backgroundColor: "var(--brand)" }}
+                      >
+                        <span className="relative z-10 flex items-center gap-2">
+                          Start free trial
+                          <svg
+                            className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M13 7l5 5m0 0l-5 5m5-5H6"
+                            />
+                          </svg>
+                        </span>
+                        <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+                      </Link>
 
-              <Link
-                href="/product"
-                className="inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-8 py-3 text-sm font-medium text-neutral-900 shadow-sm transition-all duration-300 hover:bg-neutral-50 hover:border-neutral-300 active:scale-[0.98] dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
-              >
-                Explore features
-              </Link>
+                      <Link
+                        href="/login"
+                        className="inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-8 py-3 text-sm font-medium text-neutral-900 shadow-sm transition-all duration-300 hover:bg-neutral-50 hover:border-neutral-300 active:scale-[0.98] dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
+                      >
+                        Sign in
+                      </Link>
+                    </>
+                  )}
+                </>
+              )}
             </div>
+
+            {/* Trust note */}
+            <p
+              className={`mt-6 text-xs text-neutral-500 dark:text-neutral-400 transition-all duration-700 ease-out ${
+                isVisible ? "opacity-100" : "opacity-0"
+              }`}
+              style={{ transitionDelay: "700ms" }}
+            >
+              No credit card required • Cancel anytime
+            </p>
           </div>
         </div>
 
@@ -199,13 +242,13 @@ const PricingCTA = () => {
           className={`mt-10 flex flex-wrap justify-center gap-6 transition-all duration-700 ease-out ${
             isVisible ? "opacity-100" : "opacity-0"
           }`}
-          style={{ transitionDelay: "700ms" }}
+          style={{ transitionDelay: "800ms" }}
         >
           {[
             { label: "For Traders", href: "/solutions/traders" },
             { label: "For Investors", href: "/solutions/investors" },
-            { label: "For Teams", href: "/solutions/teams" },
-            { label: "API Docs", href: "/product/api" },
+            { label: "Methodology", href: "/resources/methodology" },
+            { label: "Contact", href: "/contact" },
           ].map((link) => (
             <Link
               key={link.label}

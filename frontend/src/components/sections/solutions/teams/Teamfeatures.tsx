@@ -9,11 +9,6 @@ const FEATURES = [
     description:
       "Create team views with custom layouts. Everyone sees the same forecasts, confidence scores, and alerts in real-time.",
     highlight: "Real-time sync",
-    details: [
-      "Customizable widget layouts",
-      "Save and share views",
-      "Role-based dashboard access",
-    ],
     icon: (
       <svg
         className="h-6 w-6"
@@ -36,11 +31,6 @@ const FEATURES = [
     description:
       "Create alerts that notify the whole team or specific channels. No more 'did you see that?' messages.",
     highlight: "Slack & Teams",
-    details: [
-      "Shared alert configurations",
-      "Channel-based notifications",
-      "Alert ownership & history",
-    ],
     icon: (
       <svg
         className="h-6 w-6"
@@ -63,11 +53,6 @@ const FEATURES = [
     description:
       "Control who sees what. Admins, analysts, and viewers each get appropriate access levels.",
     highlight: "Granular control",
-    details: [
-      "Admin, Editor, Viewer roles",
-      "Custom permission sets",
-      "Invite management",
-    ],
     icon: (
       <svg
         className="h-6 w-6"
@@ -90,11 +75,6 @@ const FEATURES = [
     description:
       "Add comments and annotations to forecasts. Capture team insights and hypotheses in context.",
     highlight: "Threaded discussions",
-    details: [
-      "Comment on any forecast",
-      "Tag team members",
-      "Searchable history",
-    ],
     icon: (
       <svg
         className="h-6 w-6"
@@ -117,7 +97,6 @@ const FEATURES = [
     description:
       "Enterprise-grade authentication. SAML SSO, 2FA, and IP allowlisting for secure access.",
     highlight: "Enterprise ready",
-    details: ["SAML/OIDC SSO", "Mandatory 2FA option", "IP allowlisting"],
     icon: (
       <svg
         className="h-6 w-6"
@@ -140,11 +119,6 @@ const FEATURES = [
     description:
       "Full activity history for compliance. Track who accessed what, when, and what actions they took.",
     highlight: "Compliance ready",
-    details: [
-      "Complete activity trail",
-      "Exportable reports",
-      "Retention controls",
-    ],
     icon: (
       <svg
         className="h-6 w-6"
@@ -165,9 +139,6 @@ const FEATURES = [
 
 const TeamFeatures = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const [selectedFeature, setSelectedFeature] = useState<string | null>(
-    "dashboards"
-  );
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -189,8 +160,6 @@ const TeamFeatures = () => {
     return () => observer.disconnect();
   }, []);
 
-  const activeFeature = FEATURES.find((f) => f.id === selectedFeature);
-
   return (
     <section
       ref={sectionRef}
@@ -208,7 +177,7 @@ const TeamFeatures = () => {
       {/* Top divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Header */}
         <div className="max-w-2xl">
           <div
@@ -262,6 +231,33 @@ const TeamFeatures = () => {
             Everything your team needs to share insights, coordinate decisions,
             and stay compliant.
           </p>
+
+          {/* Coming soon banner */}
+          <div
+            className={`mt-4 inline-flex items-center gap-2 rounded-full border border-neutral-300 bg-neutral-100 px-4 py-2 dark:border-neutral-700 dark:bg-neutral-800 transition-all duration-700 ease-out ${
+              isVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-3"
+            }`}
+            style={{ transitionDelay: "250ms" }}
+          >
+            <svg
+              className="h-4 w-4 text-neutral-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+              Team features coming soon
+            </span>
+          </div>
         </div>
 
         {/* Features grid */}
@@ -272,140 +268,33 @@ const TeamFeatures = () => {
           style={{ transitionDelay: "300ms" }}
         >
           {FEATURES.map((feature, i) => (
-            <button
+            <div
               key={feature.id}
-              onClick={() =>
-                setSelectedFeature(
-                  selectedFeature === feature.id ? null : feature.id
-                )
-              }
-              className={`group relative overflow-hidden rounded-2xl border p-5 text-left transition-all duration-300 ${
-                selectedFeature === feature.id
-                  ? "border-[var(--brand)]/50 bg-[var(--brand)]/5 shadow-lg ring-1 ring-[var(--brand)]/20"
-                  : "border-neutral-200 bg-white hover:border-neutral-300 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700"
-              }`}
+              className="group relative overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-50 p-5 opacity-75 dark:border-neutral-800 dark:bg-neutral-900/50 cursor-default"
               onMouseEnter={() => setHoveredFeature(i)}
               onMouseLeave={() => setHoveredFeature(null)}
             >
               <div className="flex items-start justify-between">
-                <div
-                  className={`flex h-12 w-12 items-center justify-center rounded-xl transition-colors duration-200 ${
-                    selectedFeature === feature.id || hoveredFeature === i
-                      ? "bg-[var(--brand)]/15 text-[var(--brand)]"
-                      : "bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400"
-                  }`}
-                >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-100 text-neutral-400 dark:bg-neutral-800 dark:text-neutral-500">
                   {feature.icon}
                 </div>
 
-                {/* Highlight badge */}
-                <span
-                  className={`rounded-full px-2 py-0.5 text-xs font-medium transition-colors duration-200 ${
-                    selectedFeature === feature.id
-                      ? "bg-[var(--brand)] text-black"
-                      : "bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400"
-                  }`}
-                >
-                  {feature.highlight}
+                {/* Coming soon badge */}
+                <span className="rounded-full bg-neutral-200 px-2 py-0.5 text-xs font-medium text-neutral-500 dark:bg-neutral-700 dark:text-neutral-400">
+                  Coming soon
                 </span>
               </div>
 
-              <h3 className="mt-4 text-sm font-semibold text-neutral-900 dark:text-white">
+              <h3 className="mt-4 text-sm font-semibold text-neutral-500 dark:text-neutral-400">
                 {feature.title}
               </h3>
 
-              <p className="mt-1 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
+              <p className="mt-1 text-xs leading-relaxed text-neutral-400 dark:text-neutral-500">
                 {feature.description}
               </p>
-
-              {/* Hover accent */}
-              <div
-                className={`pointer-events-none absolute inset-x-0 bottom-0 h-0.5 transition-all duration-500 ${
-                  selectedFeature === feature.id || hoveredFeature === i
-                    ? "w-full"
-                    : "w-0"
-                }`}
-                style={{ backgroundColor: "var(--brand)" }}
-              />
-            </button>
+            </div>
           ))}
         </div>
-
-        {/* Expanded detail panel */}
-        {activeFeature && (
-          <div
-            className={`mt-6 animate-in fade-in slide-in-from-top-2 duration-300 rounded-3xl border border-neutral-200 bg-white p-6 shadow-lg dark:border-neutral-800 dark:bg-neutral-900 sm:p-8`}
-          >
-            <div className="grid gap-6 lg:grid-cols-2">
-              {/* Left: Feature details */}
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div
-                    className="flex h-12 w-12 items-center justify-center rounded-xl"
-                    style={{ backgroundColor: "rgba(4,236,58,0.15)" }}
-                  >
-                    <div style={{ color: "var(--brand)" }}>
-                      {activeFeature.icon}
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
-                      {activeFeature.title}
-                    </h3>
-                    <span
-                      className="text-xs font-medium"
-                      style={{ color: "var(--brand)" }}
-                    >
-                      {activeFeature.highlight}
-                    </span>
-                  </div>
-                </div>
-
-                <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
-                  {activeFeature.description}
-                </p>
-              </div>
-
-              {/* Right: Details list */}
-              <div>
-                <h4 className="mb-3 text-sm font-medium text-neutral-500 dark:text-neutral-400">
-                  Capabilities
-                </h4>
-                <div className="space-y-2">
-                  {activeFeature.details.map((detail) => (
-                    <div
-                      key={detail}
-                      className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 p-3 dark:border-neutral-700 dark:bg-neutral-800"
-                    >
-                      <span
-                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md"
-                        style={{ backgroundColor: "rgba(4,236,58,0.15)" }}
-                      >
-                        <svg
-                          className="h-3.5 w-3.5"
-                          style={{ color: "var(--brand)" }}
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2.5}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                      </span>
-                      <span className="text-sm text-neutral-700 dark:text-neutral-300">
-                        {detail}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Bottom stats */}
         <div
@@ -417,20 +306,17 @@ const TeamFeatures = () => {
           {[
             { value: "∞", label: "Team members" },
             { value: "3", label: "Role types" },
-            { value: "SOC 2", label: "Compliant" },
-            { value: "99.9%", label: "Uptime SLA" },
+            { value: "SOC 2", label: "Planned" },
+            { value: "99.9%", label: "Uptime target" },
           ].map((stat) => (
             <div
               key={stat.label}
-              className="rounded-xl border border-neutral-200 bg-white p-4 text-center dark:border-neutral-800 dark:bg-neutral-900"
+              className="rounded-xl border border-neutral-200 bg-white p-4 text-center opacity-75 dark:border-neutral-800 dark:bg-neutral-900"
             >
-              <p
-                className="text-2xl font-semibold"
-                style={{ color: "var(--brand)" }}
-              >
+              <p className="text-2xl font-semibold text-neutral-400 dark:text-neutral-500">
                 {stat.value}
               </p>
-              <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+              <p className="mt-1 text-xs text-neutral-400 dark:text-neutral-500">
                 {stat.label}
               </p>
             </div>

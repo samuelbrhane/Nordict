@@ -30,7 +30,7 @@ const MODEL_CONCEPTS = [
     id: "probabilistic",
     title: "Probabilistic Forecasting",
     description:
-      "Every forecast comes with a confidence score. We don't just predict direction—we quantify how certain we are, so you can size decisions accordingly.",
+      "Every forecast comes with a confidence score. We don't just predict direction, we quantify how certain we are, so you can size decisions accordingly.",
     analogy:
       "Like a weather forecast that says '70% chance of rain' rather than just 'it will rain.'",
     icon: (
@@ -139,7 +139,7 @@ const ModelOverview = () => {
       {/* Top divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Header */}
         <div className="max-w-2xl">
           <div
@@ -191,7 +191,7 @@ const ModelOverview = () => {
             style={{ transitionDelay: "200ms" }}
           >
             You don't need a PhD to understand how we work. Here are the key
-            concepts that power our forecasting engine—explained simply.
+            concepts that power our forecasting engine, explained simply.
           </p>
         </div>
 
@@ -349,9 +349,9 @@ const ModelOverview = () => {
               <p className="mt-1 text-sm leading-relaxed text-neutral-600 dark:text-neutral-300">
                 Our models are sophisticated, but they're not magic. They
                 identify statistical patterns and quantify probabilities.
-                Markets are inherently uncertain, and no model—ours included—can
-                predict the future with certainty. That's why confidence scores
-                matter.
+                Markets are inherently uncertain, and no model, ours included
+                can predict the future with certainty. That's why confidence
+                scores matter.
               </p>
             </div>
           </div>

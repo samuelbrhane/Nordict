@@ -26,7 +26,7 @@ const TIMELINE_STEPS = [
   {
     step: "02",
     title: "Validate on held-out period",
-    desc: "Performance is tested on data the model has never seen—no peeking allowed.",
+    desc: "Performance is tested on data the model has never seen, no peeking allowed.",
     icon: (
       <svg
         className="h-5 w-5"
@@ -46,7 +46,7 @@ const TIMELINE_STEPS = [
   {
     step: "03",
     title: "Roll forward and repeat",
-    desc: "The window advances, and the process repeats—simulating real deployment.",
+    desc: "The window advances, and the process repeats, simulating real deployment.",
     icon: (
       <svg
         className="h-5 w-5"
@@ -163,7 +163,7 @@ const BacktestingPerformance = () => {
       {/* Top divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Header */}
         <div className="max-w-2xl">
           <div
@@ -216,9 +216,9 @@ const BacktestingPerformance = () => {
           >
             Walk-forward validation ensures models are tested on{" "}
             <span className="font-medium text-neutral-900 dark:text-white">
-              unseen data
+              unseen data,{" "}
             </span>
-            —mimicking live conditions. No lookahead bias, no overfitting to
+            mimicking live conditions. No lookahead bias, no overfitting to
             history.
           </p>
         </div>
@@ -373,120 +373,6 @@ const BacktestingPerformance = () => {
         </div>
 
         {/* Metrics */}
-        <div
-          className={`mt-12 transition-all duration-700 ease-out ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
-          }`}
-          style={{ transitionDelay: "500ms" }}
-        >
-          <div className="rounded-3xl border border-neutral-200 bg-neutral-50 p-6 dark:border-neutral-800 dark:bg-neutral-900 sm:p-8">
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
-                  Sample performance metrics
-                </h3>
-                <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-                  Illustrative data from backtesting
-                </p>
-              </div>
-              <div className="hidden sm:flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1.5 dark:border-neutral-700 dark:bg-neutral-800">
-                <span
-                  className="h-2 w-2 rounded-full animate-pulse"
-                  style={{ backgroundColor: "var(--brand)" }}
-                />
-                <span className="text-xs font-medium text-neutral-600 dark:text-neutral-300">
-                  Mock data
-                </span>
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {METRICS.map((metric, i) => (
-                <div
-                  key={metric.label}
-                  className={`group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-neutral-800 dark:bg-black cursor-default ${
-                    isVisible
-                      ? "opacity-100 translate-y-0"
-                      : "opacity-0 translate-y-4"
-                  }`}
-                  style={{ transitionDelay: `${600 + i * 100}ms` }}
-                  onMouseEnter={() => setHoveredMetric(i)}
-                  onMouseLeave={() => setHoveredMetric(null)}
-                >
-                  <div className="flex items-start justify-between">
-                    <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-                      {metric.label}
-                    </p>
-                    {metric.trend === "up" && (
-                      <svg
-                        className="h-4 w-4 text-green-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 10l7-7m0 0l7 7m-7-7v18"
-                        />
-                      </svg>
-                    )}
-                    {metric.trend === "down" && (
-                      <svg
-                        className="h-4 w-4 text-red-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                        />
-                      </svg>
-                    )}
-                    {metric.trend === "neutral" && (
-                      <svg
-                        className="h-4 w-4 text-neutral-400"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 12h14"
-                        />
-                      </svg>
-                    )}
-                  </div>
-
-                  <p
-                    className="mt-2 text-2xl font-semibold tracking-tight"
-                    style={{ color: "var(--brand)" }}
-                  >
-                    {metric.value}
-                  </p>
-
-                  <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-                    {metric.desc}
-                  </p>
-
-                  {/* Hover accent */}
-                  <div
-                    className={`pointer-events-none absolute inset-x-0 bottom-0 h-0.5 transition-all duration-500 ${
-                      hoveredMetric === i ? "w-full" : "w-0"
-                    }`}
-                    style={{ backgroundColor: "var(--brand)" }}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );

@@ -26,7 +26,7 @@ const KEY_PRINCIPLES = [
   {
     title: "Multiple test periods",
     description:
-      "Instead of one backtest, we run many across different market conditions—bull, bear, sideways, volatile.",
+      "Instead of one backtest, we run many across different market conditions bull, bear, sideways, volatile.",
     icon: (
       <svg
         className="h-5 w-5"
@@ -136,7 +136,7 @@ const WalkForwardValidation = () => {
       {/* Top divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Header */}
         <div className="max-w-2xl">
           <div
@@ -189,7 +189,7 @@ const WalkForwardValidation = () => {
           >
             Walk-forward validation is the gold standard for evaluating
             time-series forecasts. It simulates how the model would have
-            performed if deployed in the past—without cheating.
+            performed if deployed in the past.
           </p>
         </div>
 
@@ -205,15 +205,6 @@ const WalkForwardValidation = () => {
               <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
                 Walk-Forward Process
               </h3>
-              <div className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1 dark:border-neutral-700 dark:bg-neutral-800">
-                <span
-                  className="h-2 w-2 rounded-full animate-pulse"
-                  style={{ backgroundColor: "var(--brand)" }}
-                />
-                <span className="text-xs font-medium text-neutral-600 dark:text-neutral-300">
-                  Animated
-                </span>
-              </div>
             </div>
 
             {/* Timeline visualization */}
@@ -388,47 +379,6 @@ const WalkForwardValidation = () => {
               />
             </div>
           ))}
-        </div>
-
-        {/* Comparison note */}
-        <div
-          className={`mt-8 rounded-2xl border border-neutral-200 bg-neutral-50 p-6 dark:border-neutral-800 dark:bg-neutral-900 transition-all duration-700 ease-out ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
-          style={{ transitionDelay: "700ms" }}
-        >
-          <div className="flex items-start gap-4">
-            <div
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-              style={{ backgroundColor: "rgba(4,236,58,0.15)" }}
-            >
-              <svg
-                className="h-5 w-5"
-                style={{ color: "var(--brand)" }}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                />
-              </svg>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">
-                Why this matters more than typical backtests
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-neutral-600 dark:text-neutral-300">
-                Standard backtests often train on all data and test on the same
-                period—or use a single train/test split. This inflates results
-                and doesn't reflect real performance. Walk-forward validation is
-                harder to pass but far more honest.
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </section>

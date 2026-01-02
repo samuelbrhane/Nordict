@@ -145,7 +145,7 @@ const HistoricalPerformance = () => {
       {/* Top divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Header */}
         <div className="max-w-2xl">
           <div
@@ -446,36 +446,6 @@ const HistoricalPerformance = () => {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Bottom stats */}
-        <div
-          className={`mt-8 grid gap-4 sm:grid-cols-4 transition-all duration-700 ease-out ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
-          style={{ transitionDelay: "600ms" }}
-        >
-          {[
-            { label: "Total forecasts tracked", value: "48,291" },
-            { label: "Tracking period", value: "18 months" },
-            { label: "Assets covered", value: "12" },
-            { label: "Data points analyzed", value: "2.4M" },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-2xl border border-neutral-200 bg-white p-4 text-center dark:border-neutral-800 dark:bg-neutral-900"
-            >
-              <p
-                className="text-2xl font-semibold"
-                style={{ color: "var(--brand)" }}
-              >
-                {stat.value}
-              </p>
-              <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-                {stat.label}
-              </p>
-            </div>
-          ))}
         </div>
       </div>
     </section>

@@ -9,9 +9,9 @@ const VALIDATION_METHODS = [
     description:
       "We test our models against years of historical data, simulating how forecasts would have performed in real market conditions.",
     methodology:
-      "Walk-forward analysis with expanding training windows. No future data leakage—models only see data available at forecast time.",
+      "Walk-forward analysis with expanding training windows. No future data leakage, models only see data available at forecast time.",
     metrics: [
-      { label: "Test period", value: "2019–2024" },
+      { label: "Test period", value: "2019–2025" },
       { label: "Data points", value: "2M+" },
       { label: "Assets tested", value: "50+" },
     ],
@@ -186,7 +186,7 @@ const Validation = () => {
       {/* Top divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Header */}
         <div className="max-w-2xl">
           <div

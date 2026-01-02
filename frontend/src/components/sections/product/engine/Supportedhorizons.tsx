@@ -4,9 +4,9 @@ import { useState, useEffect, useRef } from "react";
 
 const HORIZONS = [
   {
-    id: "intraday",
-    name: "Intraday",
-    range: "1–24 hours",
+    id: "24H",
+    name: "24 Hours",
+    range: "24H",
     icon: (
       <svg
         className="h-6 w-6"
@@ -35,11 +35,12 @@ const HORIZONS = [
       { label: "Confidence precision", value: "High" },
       { label: "Signal volatility", value: "Higher" },
     ],
+    barWidth: "20%",
   },
   {
-    id: "daily",
-    name: "Daily",
-    range: "1–7 days",
+    id: "30D",
+    name: "30 Days",
+    range: "30D",
     icon: (
       <svg
         className="h-6 w-6"
@@ -56,23 +57,24 @@ const HORIZONS = [
       </svg>
     ),
     description:
-      "Multi-day directional forecasts balancing responsiveness with noise reduction. Ideal for swing trading.",
+      "Monthly directional forecasts balancing responsiveness with noise reduction. Ideal for swing trading and position management.",
     bestFor: [
       "Swing traders",
       "Position sizing",
       "Risk management",
-      "Weekly planning",
+      "Monthly planning",
     ],
     characteristics: [
       { label: "Update frequency", value: "Daily" },
       { label: "Confidence precision", value: "Medium" },
       { label: "Signal volatility", value: "Moderate" },
     ],
+    barWidth: "40%",
   },
   {
-    id: "weekly",
-    name: "Weekly",
-    range: "1–4 weeks",
+    id: "12W",
+    name: "12 Weeks",
+    range: "12W",
     icon: (
       <svg
         className="h-6 w-6"
@@ -89,24 +91,59 @@ const HORIZONS = [
       </svg>
     ),
     description:
-      "Extended outlook for portfolio-level decisions. Wider confidence bands reflect longer-term uncertainty.",
+      "Quarterly outlook for portfolio-level decisions. Wider confidence bands reflect longer-term uncertainty.",
     bestFor: [
       "Investors",
       "Portfolio allocation",
-      "Macro trend analysis",
-      "Long-term positioning",
+      "Quarterly planning",
+      "Trend analysis",
     ],
     characteristics: [
       { label: "Update frequency", value: "Weekly" },
       { label: "Confidence precision", value: "Wider bands" },
       { label: "Signal volatility", value: "Lower" },
     ],
+    barWidth: "70%",
+  },
+  {
+    id: "12M",
+    name: "12 Months",
+    range: "12M",
+    icon: (
+      <svg
+        className="h-6 w-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={1.5}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"
+        />
+      </svg>
+    ),
+    description:
+      "Annual forecasts for strategic planning and long-term investment decisions. Maximum uncertainty reflected in wide confidence bands.",
+    bestFor: [
+      "Long-term investors",
+      "Strategic planning",
+      "Annual allocation",
+      "Macro positioning",
+    ],
+    characteristics: [
+      { label: "Update frequency", value: "Monthly" },
+      { label: "Confidence precision", value: "Widest bands" },
+      { label: "Signal volatility", value: "Lowest" },
+    ],
+    barWidth: "100%",
   },
 ];
 
 const SupportedHorizons = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const [activeHorizon, setActiveHorizon] = useState("daily");
+  const [activeHorizon, setActiveHorizon] = useState("24H");
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -147,7 +184,7 @@ const SupportedHorizons = () => {
       {/* Top divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Header */}
         <div className="max-w-2xl">
           <div
@@ -205,7 +242,7 @@ const SupportedHorizons = () => {
 
         {/* Horizon selector */}
         <div
-          className={`mt-10 flex flex-wrap gap-3 transition-all duration-700 ease-out ${
+          className={`mt-10 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap transition-all duration-700 ease-out ${
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
           style={{ transitionDelay: "300ms" }}
@@ -214,7 +251,7 @@ const SupportedHorizons = () => {
             <button
               key={horizon.id}
               onClick={() => setActiveHorizon(horizon.id)}
-              className={`group relative overflow-hidden rounded-2xl border px-5 py-3 transition-all duration-300 ${
+              className={`group relative overflow-hidden rounded-2xl border px-4 py-3 sm:px-5 transition-all duration-300 ${
                 activeHorizon === horizon.id
                   ? "border-[var(--brand)]/50 bg-[var(--brand)]/10 shadow-md"
                   : "border-neutral-200 bg-white hover:border-neutral-300 hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700"
@@ -357,7 +394,7 @@ const SupportedHorizons = () => {
               <div className="space-y-3">
                 {HORIZONS.map((h) => (
                   <div key={h.id} className="flex items-center gap-3">
-                    <span className="w-16 text-xs text-neutral-600 dark:text-neutral-400">
+                    <span className="w-20 text-xs text-neutral-600 dark:text-neutral-400">
                       {h.name}
                     </span>
                     <div className="flex-1 h-2 rounded-full bg-neutral-100 dark:bg-neutral-800 overflow-hidden">
@@ -367,16 +404,11 @@ const SupportedHorizons = () => {
                         }`}
                         style={{
                           backgroundColor: "var(--brand)",
-                          width:
-                            h.id === "intraday"
-                              ? "25%"
-                              : h.id === "daily"
-                              ? "50%"
-                              : "100%",
+                          width: h.barWidth,
                         }}
                       />
                     </div>
-                    <span className="w-16 text-right text-xs text-neutral-500 dark:text-neutral-500">
+                    <span className="w-12 text-right text-xs text-neutral-500 dark:text-neutral-500">
                       {h.range}
                     </span>
                   </div>

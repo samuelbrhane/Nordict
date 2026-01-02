@@ -207,7 +207,7 @@ const AlertTypes = () => {
       {/* Top divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Header */}
         <div className="max-w-2xl">
           <div
@@ -380,61 +380,9 @@ const AlertTypes = () => {
                   ))}
                 </div>
               </div>
-
-              {/* Right: Use case */}
-              <div className="flex flex-col justify-center">
-                <div className="rounded-2xl border border-dashed border-neutral-300 bg-neutral-50 p-6 dark:border-neutral-700 dark:bg-neutral-900">
-                  <div className="flex items-center gap-2 mb-3">
-                    <svg
-                      className="h-5 w-5"
-                      style={{ color: "var(--brand)" }}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                      />
-                    </svg>
-                    <h4 className="text-sm font-semibold text-neutral-900 dark:text-white">
-                      When to use
-                    </h4>
-                  </div>
-                  <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-300">
-                    {activeAlert.useCase}
-                  </p>
-                </div>
-
-                {/* Quick actions */}
-                <div className="mt-4 flex items-center gap-3">
-                  <button className="flex-1 rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-700 transition-all hover:bg-neutral-50 hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700">
-                    View documentation
-                  </button>
-                  <button
-                    className="flex-1 rounded-xl px-4 py-2.5 text-sm font-medium text-black transition-all hover:opacity-90"
-                    style={{ backgroundColor: "var(--brand)" }}
-                  >
-                    Try this alert
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         )}
-
-        {/* Bottom note */}
-        <p
-          className={`mt-6 text-center text-sm text-neutral-500 dark:text-neutral-400 transition-all duration-700 ease-out ${
-            isVisible ? "opacity-100" : "opacity-0"
-          }`}
-          style={{ transitionDelay: "600ms" }}
-        >
-          Combine multiple alert types for comprehensive coverage. All alerts
-          can be customized per asset.
-        </p>
       </div>
     </section>
   );

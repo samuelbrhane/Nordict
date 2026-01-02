@@ -7,7 +7,7 @@ const LIMITATIONS = [
     id: "blackswan",
     title: "Black Swan Events",
     description:
-      "Our models learn from historical patterns. Events without precedent—exchange hacks, regulatory surprises, geopolitical shocks—can't be predicted from past data.",
+      "Our models learn from historical patterns. Events without precedent, exchange hacks, regulatory surprises, geopolitical shocks, can't be predicted from past data.",
     example:
       "The FTX collapse, Terra/Luna crash, or sudden regulatory bans are examples of events no model could have predicted in advance.",
     icon: (
@@ -32,7 +32,7 @@ const LIMITATIONS = [
     description:
       "Sometimes our models simply don't know. During regime transitions or unusual market conditions, confidence scores drop. Low confidence means low predictability.",
     example:
-      "When confidence is below 50%, the forecast is barely better than a coin flip. We show this clearly—don't ignore it.",
+      "When confidence is below 50%, the forecast is barely better than a coin flip. We show this clearly, don't ignore it.",
     icon: (
       <svg
         className="h-5 w-5"
@@ -53,7 +53,7 @@ const LIMITATIONS = [
     id: "shortterm",
     title: "Very Short Timeframes",
     description:
-      "Our shortest horizon is 4 hours. We don't attempt to predict minute-by-minute moves—that's dominated by noise, not signal.",
+      "Our shortest horizon is 4 hours. We don't attempt to predict minute-by-minute moves, that's dominated by noise, not signal.",
     example:
       "If you're scalping or trading on 1-minute charts, our forecasts won't help. They're designed for 4h+ decision-making.",
     icon: (
@@ -76,7 +76,7 @@ const LIMITATIONS = [
     id: "smallcaps",
     title: "Low Liquidity Assets",
     description:
-      "Illiquid assets with thin order books behave differently. A single large order can move price 10%—no model predicts that.",
+      "Illiquid assets with thin order books behave differently. A single large order can move price 10% no model predicts that.",
     example:
       "We focus on assets with sufficient liquidity and trading history. New tokens or micro-caps aren't in our coverage.",
     icon: (
@@ -101,7 +101,7 @@ const LIMITATIONS = [
     description:
       "Coordinated pump-and-dumps, wash trading, or spoofing create artificial patterns. Our models can be fooled by bad actors, just like human traders.",
     example:
-      "If a whale group coordinates a pump on Telegram, our model sees bullish signals—but those signals are artificial.",
+      "If a whale group coordinates a pump on Telegram, our model sees bullish signals, but those signals are artificial.",
     icon: (
       <svg
         className="h-5 w-5"
@@ -124,7 +124,7 @@ const LIMITATIONS = [
     description:
       "Our models find statistical patterns, not causal relationships. A pattern that worked for 5 years can stop working without warning if the underlying dynamics change.",
     example:
-      "Past performance doesn't guarantee future results. This isn't a disclaimer—it's a fundamental truth of statistical modeling.",
+      "Past performance doesn't guarantee future results. This isn't a disclaimer, it's a fundamental truth of statistical modeling.",
     icon: (
       <svg
         className="h-5 w-5"
@@ -383,10 +383,10 @@ const Limitations = () => {
                 Why we share this
               </h3>
               <p className="mt-1 text-sm leading-relaxed text-neutral-600 dark:text-neutral-300">
-                Being upfront about limitations isn't weakness—it's how we build
-                trust. If we only showed you the wins, you wouldn't have the
-                full picture. Use our forecasts as one input among many, not as
-                the sole basis for decisions.
+                Being upfront about limitations isn't weakness. It's how we
+                build trust. If we only showed you the wins, you wouldn't have
+                the full picture. Use our forecasts as one input among many, not
+                as the sole basis for decisions.
               </p>
             </div>
           </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 
 interface PricingTiersProps {
   billingCycle: "monthly" | "annual";
@@ -8,113 +9,86 @@ interface PricingTiersProps {
 
 const TIERS = [
   {
-    id: "free",
-    name: "Free",
-    description: "For exploration and testing",
-    monthlyPrice: 0,
-    annualPrice: 0,
+    id: "pro",
+    name: "Pro",
+    description: "For individual traders getting started",
+    monthlyPrice: 9,
+    annualPrice: 7,
+    annualTotal: 84,
     limits: {
-      "API requests": "100 / day",
-      "Assets tracked": "3",
-      Webhooks: "1",
-      "Historical data": "7 days",
-      "Forecast horizons": "24h only",
+      Markets: "10",
+      Alerts: "5",
+      Sessions: "3",
+      "Historical data": "30 days",
     },
+    horizons: ["24H", "30D"],
     features: [
-      "All endpoints access",
-      "Test environment",
-      "Community support",
-      "Basic dashboard",
+      "Probabilistic forecasts",
+      "Confidence scoring",
+      "Direction signals",
+      "Basic alerts",
+      "Email support",
     ],
-    cta: "Get started free",
-    ctaStyle: "secondary",
+    cta: "Start 7-day trial",
+    ctaHref: "/signup?plan=pro",
     popular: false,
   },
   {
-    id: "pro",
-    name: "Pro",
-    description: "For individual traders and developers",
-    monthlyPrice: 49,
-    annualPrice: 39,
+    id: "premium",
+    name: "Premium",
+    description: "For serious traders and investors",
+    monthlyPrice: 19,
+    annualPrice: 15,
+    annualTotal: 180,
     limits: {
-      "API requests": "10,000 / day",
-      "Assets tracked": "Unlimited",
-      Webhooks: "10",
-      "Historical data": "1 year",
-      "Forecast horizons": "All (4h–30d)",
+      Markets: "Unlimited",
+      Alerts: "Unlimited",
+      Sessions: "5",
+      "Historical data": "Unlimited",
     },
+    horizons: ["24H", "30D", "12W", "12M"],
     features: [
-      "All endpoints access",
-      "Production environment",
-      "Email support",
-      "Webhook delivery logs",
-      "Custom alerts",
-      "Confidence bands",
-      "Priority API access",
+      "Everything in Pro",
+      "All 4 forecast horizons",
+      "Unlimited markets & alerts",
+      "Full historical backtest",
+      "Priority support",
     ],
-    cta: "Start 14-day trial",
-    ctaStyle: "primary",
+    cta: "Start 7-day trial",
+    ctaHref: "/signup?plan=premium",
     popular: true,
   },
   {
-    id: "team",
-    name: "Team",
-    description: "For teams and businesses",
-    monthlyPrice: 199,
-    annualPrice: 159,
+    id: "teams",
+    name: "Teams",
+    description: "For teams and organizations",
+    monthlyPrice: 49,
+    annualPrice: 39,
+    annualTotal: 468,
     limits: {
-      "API requests": "100,000 / day",
-      "Assets tracked": "Unlimited",
-      Webhooks: "Unlimited",
-      "Historical data": "Full history",
-      "Forecast horizons": "All (4h–30d)",
+      Markets: "Unlimited",
+      Alerts: "Unlimited",
+      Sessions: "Unlimited",
+      "Team members": "Up to 10",
     },
+    horizons: ["24H", "30D", "12W", "12M"],
     features: [
-      "Everything in Pro",
-      "Multiple API keys",
+      "Everything in Premium",
+      "API access",
       "Team dashboards",
       "Role-based access",
       "Shared alerts",
       "Audit logs",
-      "Priority support",
-      "SLA guarantee",
     ],
-    cta: "Start 14-day trial",
-    ctaStyle: "primary",
-    popular: false,
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    description: "For institutions and large teams",
-    monthlyPrice: null,
-    annualPrice: null,
-    limits: {
-      "API requests": "Custom",
-      "Assets tracked": "Unlimited",
-      Webhooks: "Unlimited",
-      "Historical data": "Full history",
-      "Forecast horizons": "All + custom",
-    },
-    features: [
-      "Everything in Team",
-      "SSO / SAML",
-      "Custom integrations",
-      "Dedicated support",
-      "On-premise option",
-      "Custom SLA",
-      "Volume discounts",
-      "Training & onboarding",
-    ],
-    cta: "Contact sales",
-    ctaStyle: "secondary",
+    cta: "Coming soon",
+    ctaHref: null,
+    comingSoon: true,
     popular: false,
   },
 ];
 
 const PricingTiers = ({ billingCycle }: PricingTiersProps) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [selectedTier, setSelectedTier] = useState<string>("pro");
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -136,7 +110,6 @@ const PricingTiers = ({ billingCycle }: PricingTiersProps) => {
   }, []);
 
   const getPrice = (tier: (typeof TIERS)[0]) => {
-    if (tier.monthlyPrice === null) return null;
     return billingCycle === "monthly" ? tier.monthlyPrice : tier.annualPrice;
   };
 
@@ -145,92 +118,163 @@ const PricingTiers = ({ billingCycle }: PricingTiersProps) => {
       ref={sectionRef}
       className="relative overflow-hidden bg-white pb-20 dark:bg-black"
     >
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Tiers grid */}
         <div
-          className={`grid gap-6 lg:grid-cols-4 md:grid-cols-2 transition-all duration-700 ease-out ${
+          className={`grid gap-6 lg:grid-cols-3 md:grid-cols-2 max-w-5xl mx-auto transition-all duration-700 ease-out ${
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
           }`}
         >
           {TIERS.map((tier, i) => {
             const price = getPrice(tier);
-            const isSelected = selectedTier === tier.id;
+            const isPopular = tier.popular;
+            const isComingSoon = tier.comingSoon;
 
             return (
               <div
                 key={tier.id}
-                onClick={() => setSelectedTier(tier.id)}
-                className={`relative flex flex-col overflow-hidden rounded-3xl border p-6 transition-all duration-300 cursor-pointer ${
-                  isSelected
-                    ? "border-[var(--brand)]/50 bg-[var(--brand)]/5 shadow-xl ring-1 ring-[var(--brand)]/20 scale-[1.02]"
+                className={`relative flex flex-col overflow-hidden rounded-3xl border p-6 transition-all duration-300 ${
+                  isComingSoon
+                    ? "border-neutral-200 bg-neutral-50 opacity-75 dark:border-neutral-800 dark:bg-neutral-900/50"
+                    : isPopular
+                    ? "border-[var(--brand)]/50 bg-[var(--brand)]/5 shadow-xl ring-1 ring-[var(--brand)]/20"
                     : "border-neutral-200 bg-white hover:border-neutral-300 hover:shadow-lg dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700"
                 }`}
                 style={{ transitionDelay: `${i * 100}ms` }}
               >
-                {/* Selected badge */}
-                {isSelected && (
+                {/* Popular badge */}
+                {isPopular && (
                   <div className="absolute -right-12 top-6 rotate-45">
                     <div
                       className="px-12 py-1 text-xs font-bold text-black"
                       style={{ backgroundColor: "var(--brand)" }}
                     >
-                      Selected
+                      Most Popular
+                    </div>
+                  </div>
+                )}
+
+                {/* Coming soon badge */}
+                {isComingSoon && (
+                  <div className="absolute -right-10 top-6 rotate-45">
+                    <div className="px-12 py-1 text-xs font-bold text-neutral-600 bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300">
+                      Coming Soon
                     </div>
                   </div>
                 )}
 
                 {/* Header */}
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
+                  <h3
+                    className={`text-lg font-semibold ${
+                      isComingSoon
+                        ? "text-neutral-500 dark:text-neutral-400"
+                        : "text-neutral-900 dark:text-white"
+                    }`}
+                  >
                     {tier.name}
                   </h3>
-                  <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+                  <p
+                    className={`mt-1 text-sm ${
+                      isComingSoon
+                        ? "text-neutral-400 dark:text-neutral-500"
+                        : "text-neutral-500 dark:text-neutral-400"
+                    }`}
+                  >
                     {tier.description}
                   </p>
                 </div>
 
                 {/* Price */}
                 <div className="mb-6">
-                  {price !== null ? (
-                    <div className="flex items-baseline gap-1">
-                      <span
-                        className={`text-4xl font-bold transition-colors duration-300 ${
-                          isSelected ? "" : "text-neutral-900 dark:text-white"
-                        }`}
-                        style={{
-                          color: isSelected ? "var(--brand)" : undefined,
-                        }}
-                      >
-                        ${price}
-                      </span>
-                      <span className="text-sm text-neutral-500 dark:text-neutral-400">
-                        / month
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex items-baseline">
-                      <span
-                        className={`text-4xl font-bold transition-colors duration-300 ${
-                          isSelected ? "" : "text-neutral-900 dark:text-white"
-                        }`}
-                        style={{
-                          color: isSelected ? "var(--brand)" : undefined,
-                        }}
-                      >
-                        Custom
-                      </span>
-                    </div>
-                  )}
-                  {billingCycle === "annual" && price !== null && price > 0 && (
-                    <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-                      Billed annually (${price * 12}/year)
+                  <div className="flex items-baseline gap-1">
+                    <span
+                      className={`text-4xl font-bold transition-colors duration-300 ${
+                        isComingSoon
+                          ? "text-neutral-400 dark:text-neutral-500"
+                          : isPopular
+                          ? ""
+                          : "text-neutral-900 dark:text-white"
+                      }`}
+                      style={{
+                        color:
+                          isPopular && !isComingSoon
+                            ? "var(--brand)"
+                            : undefined,
+                      }}
+                    >
+                      ${price.toFixed(price % 1 === 0 ? 0 : 2)}
+                    </span>
+                    <span
+                      className={`text-sm ${
+                        isComingSoon
+                          ? "text-neutral-400 dark:text-neutral-500"
+                          : "text-neutral-500 dark:text-neutral-400"
+                      }`}
+                    >
+                      / month
+                    </span>
+                  </div>
+                  {billingCycle === "annual" && (
+                    <p
+                      className={`mt-1 text-xs ${
+                        isComingSoon
+                          ? "text-neutral-400 dark:text-neutral-500"
+                          : "text-neutral-500 dark:text-neutral-400"
+                      }`}
+                    >
+                      Billed annually (${tier.annualTotal.toFixed(2)}/year)
                     </p>
                   )}
                 </div>
 
+                {/* Horizons */}
+                <div className="mb-4">
+                  <p
+                    className={`text-xs font-medium uppercase tracking-wider mb-2 ${
+                      isComingSoon
+                        ? "text-neutral-400 dark:text-neutral-500"
+                        : "text-neutral-500 dark:text-neutral-400"
+                    }`}
+                  >
+                    Forecast Horizons
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {tier.horizons.map((horizon) => (
+                      <span
+                        key={horizon}
+                        className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                          isComingSoon
+                            ? "bg-neutral-200 text-neutral-500 dark:bg-neutral-700 dark:text-neutral-400"
+                            : "text-black"
+                        }`}
+                        style={{
+                          backgroundColor: isComingSoon
+                            ? undefined
+                            : "var(--brand)",
+                        }}
+                      >
+                        {horizon}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Limits */}
-                <div className="mb-6 rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
-                  <p className="text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-3">
+                <div
+                  className={`mb-6 rounded-xl p-4 ${
+                    isComingSoon
+                      ? "bg-neutral-100 dark:bg-neutral-800/50"
+                      : "bg-neutral-50 dark:bg-neutral-800"
+                  }`}
+                >
+                  <p
+                    className={`text-xs font-medium uppercase tracking-wider mb-3 ${
+                      isComingSoon
+                        ? "text-neutral-400 dark:text-neutral-500"
+                        : "text-neutral-500 dark:text-neutral-400"
+                    }`}
+                  >
                     Limits
                   </p>
                   <div className="space-y-2">
@@ -239,10 +283,22 @@ const PricingTiers = ({ billingCycle }: PricingTiersProps) => {
                         key={key}
                         className="flex items-center justify-between"
                       >
-                        <span className="text-xs text-neutral-600 dark:text-neutral-400">
+                        <span
+                          className={`text-xs ${
+                            isComingSoon
+                              ? "text-neutral-400 dark:text-neutral-500"
+                              : "text-neutral-600 dark:text-neutral-400"
+                          }`}
+                        >
                           {key}
                         </span>
-                        <span className="text-xs font-medium text-neutral-900 dark:text-white">
+                        <span
+                          className={`text-xs font-medium ${
+                            isComingSoon
+                              ? "text-neutral-500 dark:text-neutral-400"
+                              : "text-neutral-900 dark:text-white"
+                          }`}
+                        >
                           {value}
                         </span>
                       </div>
@@ -252,15 +308,25 @@ const PricingTiers = ({ billingCycle }: PricingTiersProps) => {
 
                 {/* Features */}
                 <div className="mb-6 flex-1">
-                  <p className="text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-3">
+                  <p
+                    className={`text-xs font-medium uppercase tracking-wider mb-3 ${
+                      isComingSoon
+                        ? "text-neutral-400 dark:text-neutral-500"
+                        : "text-neutral-500 dark:text-neutral-400"
+                    }`}
+                  >
                     Features
                   </p>
                   <div className="space-y-2">
                     {tier.features.map((feature) => (
                       <div key={feature} className="flex items-start gap-2">
                         <svg
-                          className="h-4 w-4 shrink-0 mt-0.5"
-                          style={{ color: "var(--brand)" }}
+                          className={`h-4 w-4 shrink-0 mt-0.5 ${
+                            isComingSoon ? "text-neutral-400" : ""
+                          }`}
+                          style={{
+                            color: isComingSoon ? undefined : "var(--brand)",
+                          }}
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -272,7 +338,13 @@ const PricingTiers = ({ billingCycle }: PricingTiersProps) => {
                             d="M5 13l4 4L19 7"
                           />
                         </svg>
-                        <span className="text-sm text-neutral-600 dark:text-neutral-400">
+                        <span
+                          className={`text-sm ${
+                            isComingSoon
+                              ? "text-neutral-400 dark:text-neutral-500"
+                              : "text-neutral-600 dark:text-neutral-400"
+                          }`}
+                        >
                           {feature}
                         </span>
                       </div>
@@ -281,18 +353,28 @@ const PricingTiers = ({ billingCycle }: PricingTiersProps) => {
                 </div>
 
                 {/* CTA */}
-                <button
-                  className={`w-full rounded-xl py-3 text-sm font-medium transition-all duration-200 ${
-                    isSelected
-                      ? "text-black hover:opacity-90"
-                      : "border border-neutral-200 bg-white text-neutral-900 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
-                  }`}
-                  style={{
-                    backgroundColor: isSelected ? "var(--brand)" : undefined,
-                  }}
-                >
-                  {tier.cta}
-                </button>
+                {isComingSoon ? (
+                  <button
+                    disabled
+                    className="w-full rounded-xl py-3 text-sm font-medium bg-neutral-200 text-neutral-500 cursor-not-allowed dark:bg-neutral-700 dark:text-neutral-400"
+                  >
+                    {tier.cta}
+                  </button>
+                ) : tier.ctaHref ? (
+                  <Link
+                    href={tier.ctaHref}
+                    className={`w-full rounded-xl py-3 text-sm font-medium text-center transition-all duration-200 block ${
+                      isPopular
+                        ? "text-black hover:opacity-90"
+                        : "border border-neutral-200 bg-white text-neutral-900 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
+                    }`}
+                    style={{
+                      backgroundColor: isPopular ? "var(--brand)" : undefined,
+                    }}
+                  >
+                    {tier.cta}
+                  </Link>
+                ) : null}
               </div>
             );
           })}
@@ -306,9 +388,9 @@ const PricingTiers = ({ billingCycle }: PricingTiersProps) => {
           style={{ transitionDelay: "500ms" }}
         >
           <p className="text-sm text-neutral-500 dark:text-neutral-400">
-            All plans include access to our{" "}
+            All plans include{" "}
             <span className="font-medium text-neutral-700 dark:text-neutral-300">
-              forecasting engine
+              probabilistic forecasts
             </span>
             ,{" "}
             <span className="font-medium text-neutral-700 dark:text-neutral-300">
@@ -318,7 +400,7 @@ const PricingTiers = ({ billingCycle }: PricingTiersProps) => {
             <span className="font-medium text-neutral-700 dark:text-neutral-300">
               direction signals
             </span>
-            . Only limits differ.
+            . Start with a 7-day free trial of Premium.
           </p>
         </div>
       </div>

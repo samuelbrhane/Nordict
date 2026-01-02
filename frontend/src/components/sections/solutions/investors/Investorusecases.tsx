@@ -10,7 +10,7 @@ const USE_CASES = [
       "You invest $500 every week into crypto. Should you buy today or wait a few days?",
     withoutNordict: "Buy on the same day every week regardless of conditions",
     withNordict:
-      "Check weekly forecast—delay if strongly bearish, proceed if neutral/bullish",
+      "Check weekly forecast, delay if strongly bearish, proceed if neutral/bullish",
     example: {
       situation: "Weekly DCA day is Monday, forecast shows bearish outlook",
       signal: "30-day forecast: -4.2% • Confidence: 67% • Direction: Bearish",
@@ -40,13 +40,13 @@ const USE_CASES = [
       "Your ETH position has grown to 40% of your portfolio. Time to rebalance?",
     withoutNordict: "Rebalance purely based on allocation drift thresholds",
     withNordict:
-      "Check if conviction supports the overweight—maybe it's earned",
+      "Check if conviction supports the overweight, maybe it's earned",
     example: {
       situation: "ETH is 40% of portfolio (target: 30%), considering trim",
       signal:
         "ETH 30-day forecast: +8.1% • Confidence: 76% • Direction: Bullish",
       action:
-        "High conviction supports overweight—hold off on rebalancing for now",
+        "High conviction supports overweight, hold off on rebalancing for now",
     },
     icon: (
       <svg
@@ -69,7 +69,7 @@ const USE_CASES = [
     title: "Drawdown Management",
     scenario:
       "Market is down 25% from highs. Should you panic sell or buy the dip?",
-    withoutNordict: "React emotionally—either panic sell or blindly buy",
+    withoutNordict: "React emotionally, either panic sell or blindly buy",
     withNordict: "Check if forecasts are recovering or still deteriorating",
     example: {
       situation: "BTC down 25%, considering selling to prevent further losses",
@@ -167,7 +167,7 @@ const InvestorUseCases = () => {
       {/* Top divider */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-6">
         {/* Header */}
         <div className="max-w-2xl">
           <div
@@ -431,31 +431,6 @@ const InvestorUseCases = () => {
             </div>
           </div>
         )}
-
-        {/* Bottom disclaimer */}
-        <div
-          className={`mt-8 flex items-center justify-center gap-2 transition-all duration-700 ease-out ${
-            isVisible ? "opacity-100" : "opacity-0"
-          }`}
-          style={{ transitionDelay: "600ms" }}
-        >
-          <svg
-            className="h-4 w-4 text-amber-500"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-            />
-          </svg>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400">
-            Examples are illustrative. This is not financial advice.
-          </p>
-        </div>
       </div>
     </section>
   );
