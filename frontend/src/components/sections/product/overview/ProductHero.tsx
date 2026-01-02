@@ -279,19 +279,24 @@ const ProductHero = () => {
             }`}
             style={{ transitionDelay: "700ms" }}
           >
-            {mounted ? (
-              <video
-                key={isDark ? "dark" : "light"}
-                src={`/videos/product_${isDark ? "black" : "white"}.mp4`}
-                className="h-auto w-full"
-                autoPlay
-                loop
-                muted
-                playsInline
-              />
-            ) : (
-              <div className="aspect-video w-full animate-pulse bg-neutral-800" />
-            )}
+            {/* Loading placeholder - maintains aspect ratio */}
+            <div className="aspect-video w-full bg-neutral-100 dark:bg-neutral-900">
+              {mounted ? (
+                <video
+                  key={isDark ? "dark" : "light"}
+                  src={`/videos/product_${isDark ? "black" : "white"}.mp4`}
+                  className="h-full w-full object-cover"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center">
+                  <div className="h-10 w-10 animate-spin rounded-full border-4 border-neutral-300 border-t-[var(--brand)] dark:border-neutral-700 dark:border-t-[var(--brand)]" />
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Caption */}
