@@ -321,3 +321,6 @@ class UserSession(models.Model):
         else:
             days = diff.days
             return f"{days} day{'s' if days != 1 else ''} ago"
+        
+        
+

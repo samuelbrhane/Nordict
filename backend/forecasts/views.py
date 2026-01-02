@@ -734,7 +734,6 @@ def list_forecasts(request):
     })
     
     
-    
 @extend_schema(
     summary="Forecast performance data",
     description="Get predicted vs actual data for performance chart",
@@ -775,15 +774,20 @@ def forecast_performance(request):
             status=status.HTTP_403_FORBIDDEN
         )
     
-    # Rest of the function remains the same...
-    days_map = {
-        "24H": 7,
-        "30D": 60,
-        "12W": 180,
-        "12M": 365,
+    # Time range and max points per horizon
+    # 24H (hourly): 2 days = 48 points
+    # 30D (daily): 30 days = 30 points
+    # 12W (weekly): 6 months = ~26 points
+    # 12M (monthly): 2 years = 24 points
+    horizon_config = {
+        "24H": {"days": 2, "max_points": 48},
+        "30D": {"days": 30, "max_points": 30},
+        "12W": {"days": 180, "max_points": 26},
+        "12M": {"days": 730, "max_points": 24},  # 2 years
     }
-    days = days_map.get(horizon, 7)
-    cutoff = timezone.now() - timedelta(days=days)
+    
+    config = horizon_config.get(horizon, {"days": 2, "max_points": 48})
+    cutoff = timezone.now() - timedelta(days=config["days"])
     
     points = ForecastPoint.objects.filter(
         forecast__market__symbol=market_symbol,
@@ -791,7 +795,10 @@ def forecast_performance(request):
         timestamp__gte=cutoff,
         timestamp__lte=timezone.now(),
         actual_price__isnull=False,
-    ).select_related("forecast").order_by("timestamp")
+    ).select_related("forecast").order_by("-timestamp")[:config["max_points"]]
+    
+    # Reverse to get chronological order after slicing
+    points = list(points)[::-1]
     
     results = []
     for i, point in enumerate(points):
@@ -819,6 +826,7 @@ def forecast_performance(request):
             "errorPercent": error_percent,
         })
     
+    # Calculate stats
     if results:
         errors = [abs(r["errorPercent"]) for r in results]
         avg_error = round(sum(errors) / len(errors), 2)
@@ -845,8 +853,7 @@ def forecast_performance(request):
             "totalPoints": len(results),
         },
     })
-
-
+    
 
 @extend_schema(
     summary="Top forecast signals",
