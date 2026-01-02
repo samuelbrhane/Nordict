@@ -82,7 +82,7 @@ const AboutHero = () => {
             }`}
             style={{ transitionDelay: "200ms" }}
           >
-            Nordict exists to give traders and investors an edge—not through
+            Nordict exists to give traders and investors an edge, not through
             hype or promises, but through{" "}
             <span className="font-medium text-neutral-900 dark:text-white">
               rigorous, transparent forecasting
@@ -124,7 +124,7 @@ const AboutHero = () => {
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
                 Build the most honest, transparent, and useful market
-                forecasting tool in crypto. No black boxes. No overpromising.
+                forecasting tool available. No black boxes. No overpromising.
                 Just data-driven insights with clearly quantified confidence
                 levels.
               </p>
@@ -140,8 +140,8 @@ const AboutHero = () => {
           style={{ transitionDelay: "400ms" }}
         >
           {[
-            { value: "2024", label: "Founded" },
-            { value: "100+", label: "Assets covered" },
+            { value: "2025", label: "Founded" },
+            { value: "50+", label: "Markets covered" },
             { value: "24/7", label: "Forecast updates" },
           ].map((stat) => (
             <div

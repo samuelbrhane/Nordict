@@ -33,7 +33,7 @@ const VALUES = [
     id: "honesty",
     title: "Honest About Uncertainty",
     description:
-      "Confidence scores aren't decoration—they're the point. We'd rather say 'we don't know' than pretend to have answers we don't have.",
+      "Confidence scores aren't decoration, they're the point. We'd rather say 'we don't know' than pretend to have answers we don't have.",
     icon: (
       <svg
         className="h-6 w-6"
@@ -206,18 +206,6 @@ const AboutValues = () => {
               </p>
             </div>
           ))}
-        </div>
-
-        {/* Bottom note */}
-        <div
-          className={`mt-10 text-center transition-all duration-700 ease-out ${
-            isVisible ? "opacity-100" : "opacity-0"
-          }`}
-          style={{ transitionDelay: "500ms" }}
-        >
-          <p className="text-sm text-neutral-500 dark:text-neutral-400">
-            If any of this resonates, you'll probably like what we're building.
-          </p>
         </div>
       </div>
     </section>

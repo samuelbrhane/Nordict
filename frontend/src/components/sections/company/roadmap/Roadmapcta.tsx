@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useAuth } from "@/context/auth/AuthProvider";
 
 const RoadmapCTA = () => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
+  const { user, isLoading } = useAuth();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -79,36 +81,59 @@ const RoadmapCTA = () => {
               you'd like to see, we'd love to hear about it.
             </p>
 
-            {/* CTA */}
-            <div className="mt-6">
-              <Link
-                href="/contact"
-                className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl px-6 py-3 text-sm font-medium text-black shadow-lg shadow-[var(--brand)]/25 transition-all duration-300 hover:shadow-xl hover:shadow-[var(--brand)]/30 hover:scale-[1.02] active:scale-[0.98]"
-                style={{ backgroundColor: "var(--brand)" }}
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  Share your ideas
-                  <svg
-                    className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+            {/* CTAs */}
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              {!isLoading && (
+                <>
+                  <Link
+                    href="/contact"
+                    className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl px-6 py-3 text-sm font-medium text-black shadow-lg shadow-[var(--brand)]/25 transition-all duration-300 hover:shadow-xl hover:shadow-[var(--brand)]/30 hover:scale-[1.02] active:scale-[0.98]"
+                    style={{ backgroundColor: "var(--brand)" }}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 7l5 5m0 0l-5 5m5-5H6"
-                    />
-                  </svg>
-                </span>
-                <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-              </Link>
+                    <span className="relative z-10 flex items-center gap-2">
+                      Share your ideas
+                      <svg
+                        className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 7l5 5m0 0l-5 5m5-5H6"
+                        />
+                      </svg>
+                    </span>
+                    <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+                  </Link>
+
+                  {!user && (
+                    <Link
+                      href="/signup"
+                      className="inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-6 py-3 text-sm font-medium text-neutral-900 shadow-sm transition-all duration-300 hover:bg-neutral-50 hover:border-neutral-300 active:scale-[0.98] dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
+                    >
+                      Start free trial
+                    </Link>
+                  )}
+
+                  {user && (
+                    <Link
+                      href="/app/dashboard"
+                      className="inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-6 py-3 text-sm font-medium text-neutral-900 shadow-sm transition-all duration-300 hover:bg-neutral-50 hover:border-neutral-300 active:scale-[0.98] dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
+                    >
+                      Go to Dashboard
+                    </Link>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Follow updates */}
+        {/* Follow updates - commented out for now */}
+        {/*
         <div
           className={`mt-8 text-center transition-all duration-700 ease-out ${
             isVisible ? "opacity-100" : "opacity-0"
@@ -119,7 +144,7 @@ const RoadmapCTA = () => {
             Get notified when we ship
           </p>
           <div className="flex justify-center gap-3">
-            <a
+            
               href="https://twitter.com/nordict"
               target="_blank"
               rel="noopener noreferrer"
@@ -157,6 +182,7 @@ const RoadmapCTA = () => {
             </Link>
           </div>
         </div>
+        */}
       </div>
     </section>
   );

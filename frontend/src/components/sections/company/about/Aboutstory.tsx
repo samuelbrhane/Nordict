@@ -94,7 +94,7 @@ const AboutStory = () => {
                   The problem we kept seeing
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
-                  Every crypto "signal" service out there tells the same story:
+                  Every market "signal" service out there tells the same story:
                   vague predictions, no accountability, and zero transparency
                   about methodology. When they're right, they celebrate. When
                   they're wrong, they quietly move on. We wanted something
@@ -120,7 +120,7 @@ const AboutStory = () => {
                   What if predictions came with confidence scores? What if you
                   knew exactly how the model worked? What if performance was
                   tracked transparently, including the misses? That's what we
-                  set out to build—a forecasting tool that treats users like
+                  set out to build, a forecasting tool that treats users like
                   adults.
                 </p>
               </div>
@@ -141,7 +141,7 @@ const AboutStory = () => {
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
                   Nordict is just getting started. The goal isn't to be the
-                  loudest voice in crypto—it's to be the most reliable. We're
+                  loudest voice in the room, it's to be the most reliable. We're
                   building this in public, shipping fast, and iterating based on
                   real user feedback. If you believe in transparent, data-driven
                   tools, we'd love for you to join the journey.
@@ -183,7 +183,7 @@ const AboutStory = () => {
                 Built with care
               </h3>
               <p className="mt-1 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
-                We're not a VC-backed startup chasing hype. We're builders who
+                We're not a VC-backed startup chasing hype. We're developers who
                 got tired of bad predictions and decided to create something
                 better. If that resonates with you, we'd love to have you along
                 for the ride.
