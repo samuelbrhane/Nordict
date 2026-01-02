@@ -70,7 +70,7 @@ const CoreFeatures = () => {
       {/* subtle top line */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent dark:via-neutral-700/60" />
 
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-screen-2xl px-6">
         {/* header */}
         <div className="max-w-2xl">
           <div
@@ -135,7 +135,7 @@ const CoreFeatures = () => {
             style={{ transitionDelay: "200ms" }}
           >
             Forecasts are paired with uncertainty, performance tracking, and an
-            auditable model lifecycle—so signals stay accountable.
+            auditable model lifecycle, so signals stay accountable.
           </p>
         </div>
 
@@ -197,7 +197,7 @@ const CoreFeatures = () => {
         </div>
 
         {/* actions */}
-        <div
+        {/* <div
           className={`mt-10 flex flex-wrap items-center gap-3 transition-all duration-700 ease-out ${
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
           }`}
@@ -247,7 +247,7 @@ const CoreFeatures = () => {
               </svg>
             </span>
           </Link>
-        </div>
+        </div> */}
       </div>
     </section>
   );

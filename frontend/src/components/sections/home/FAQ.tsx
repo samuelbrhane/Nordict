@@ -61,7 +61,7 @@ const FAQ = () => {
           style={{ backgroundColor: "var(--brand)" }}
         />
       </div>
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-screen-2xl px-6">
         <div className="grid gap-12 lg:grid-cols-12">
           {/* Left column - header (sticky on desktop) */}
           <div className="lg:col-span-4 lg:sticky lg:top-24 lg:self-start">
@@ -257,23 +257,6 @@ const FAQ = () => {
                 );
               })}
             </div>
-
-            {/* Footer note */}
-            <p
-              className={`mt-6 text-xs text-neutral-500 dark:text-neutral-400 transition-all duration-700 ease-out ${
-                isVisible ? "opacity-100" : "opacity-0"
-              }`}
-              style={{ transitionDelay: "800ms" }}
-            >
-              More technical details are available in the{" "}
-              <Link
-                href="/resources/methodology"
-                className="underline underline-offset-2 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors"
-              >
-                methodology section
-              </Link>
-              .
-            </p>
           </div>
         </div>
       </div>

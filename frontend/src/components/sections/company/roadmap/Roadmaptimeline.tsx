@@ -9,23 +9,33 @@ const ROADMAP_ITEMS = [
     items: [
       {
         title: "Forecasting Engine v1",
-        description: "Core prediction models for top 50 assets",
-        date: "Q3 2024",
+        description: "Core prediction models for 50+ markets",
+        date: "Q4 2024",
       },
       {
         title: "Confidence Scoring",
         description: "0-100% confidence on every forecast",
-        date: "Q3 2024",
-      },
-      {
-        title: "REST API",
-        description: "Full API access with authentication",
         date: "Q4 2024",
       },
       {
-        title: "Webhook Alerts",
-        description: "Real-time notifications via webhooks",
-        date: "Q4 2024",
+        title: "Dashboard v1",
+        description: "Web interface for viewing forecasts",
+        date: "Q1 2025",
+      },
+      {
+        title: "4 Forecast Horizons",
+        description: "24H, 30D, 12W, and 12M predictions",
+        date: "Q1 2025",
+      },
+      {
+        title: "Alerts System",
+        description: "Custom alerts with email notifications",
+        date: "Q1 2025",
+      },
+      {
+        title: "Pro & Premium Plans",
+        description: "Subscription tiers with 7-day free trial",
+        date: "Q1 2025",
       },
     ],
   },
@@ -34,13 +44,18 @@ const ROADMAP_ITEMS = [
     label: "In Progress",
     items: [
       {
-        title: "Dashboard v1",
-        description: "Web interface for viewing forecasts",
+        title: "Confidence Bands",
+        description: "50/75/95% prediction intervals",
         date: "Now",
       },
       {
-        title: "Confidence Bands",
-        description: "50/75/95% prediction intervals",
+        title: "REST API",
+        description: "Full API access for Premium users",
+        date: "Now",
+      },
+      {
+        title: "Webhook Alerts",
+        description: "Real-time notifications via webhooks",
         date: "Now",
       },
     ],
@@ -50,29 +65,29 @@ const ROADMAP_ITEMS = [
     label: "Planned",
     items: [
       {
-        title: "Mobile App",
-        description: "iOS and Android apps",
-        date: "Q1 2025",
-      },
-      {
         title: "Team Features",
         description: "Shared dashboards, roles, audit logs",
-        date: "Q1 2025",
+        date: "Q2 2025",
       },
       {
-        title: "Extended Asset Coverage",
-        description: "100+ assets including DeFi tokens",
+        title: "Mobile App",
+        description: "iOS and Android apps",
         date: "Q2 2025",
+      },
+      {
+        title: "Extended Market Coverage",
+        description: "100+ markets including more asset classes",
+        date: "Q3 2025",
       },
       {
         title: "Custom Alerts Builder",
         description: "Visual alert configuration UI",
-        date: "Q2 2025",
+        date: "Q3 2025",
       },
       {
         title: "Backtesting Playground",
         description: "Test strategies against historical forecasts",
-        date: "Q2 2025",
+        date: "Q3 2025",
       },
     ],
   },

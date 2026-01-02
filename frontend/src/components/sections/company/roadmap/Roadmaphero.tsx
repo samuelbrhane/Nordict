@@ -113,7 +113,7 @@ const RoadmapHero = () => {
             <span className="text-sm text-neutral-600 dark:text-neutral-400">
               Last updated:{" "}
               <span className="font-medium text-neutral-900 dark:text-white">
-                December 2024
+                January 2026
               </span>
             </span>
           </div>
