@@ -193,32 +193,37 @@ const Header = () => {
           <ThemeToggle />
         </div>
 
-        {/* Mobile Menu Button - Animated hamburger */}
-        <button
-          type="button"
-          className="relative inline-flex h-10 w-10 items-center justify-center rounded-lg border border-neutral-200 text-neutral-700 transition-colors duration-200 hover:bg-neutral-100 lg:hidden dark:border-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-900"
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
-          aria-expanded={mobileOpen}
-          onClick={() => setMobileOpen((v) => !v)}
-        >
-          <div className="flex h-4 w-5 flex-col items-center justify-center">
-            <span
-              className={`block h-0.5 w-5 rounded-full bg-current transition-all duration-300 ${
-                mobileOpen ? "translate-y-[3px] rotate-45" : "-translate-y-1"
-              }`}
-            />
-            <span
-              className={`block h-0.5 w-5 rounded-full bg-current transition-all duration-300 ${
-                mobileOpen ? "opacity-0 scale-0" : "opacity-100 scale-100"
-              }`}
-            />
-            <span
-              className={`block h-0.5 w-5 rounded-full bg-current transition-all duration-300 ${
-                mobileOpen ? "-translate-y-[3px] -rotate-45" : "translate-y-1"
-              }`}
-            />
-          </div>
-        </button>
+        {/* Mobile: Theme Toggle + Hamburger */}
+        <div className="flex items-center gap-2 lg:hidden">
+          <ThemeToggle />
+
+          {/* Mobile Menu Button - Animated hamburger */}
+          <button
+            type="button"
+            className="relative inline-flex h-10 w-10 items-center justify-center rounded-lg border border-neutral-200 text-neutral-700 transition-colors duration-200 hover:bg-neutral-100 dark:border-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-900"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((v) => !v)}
+          >
+            <div className="flex h-4 w-5 flex-col items-center justify-center">
+              <span
+                className={`block h-0.5 w-5 rounded-full bg-current transition-all duration-300 ${
+                  mobileOpen ? "translate-y-[3px] rotate-45" : "-translate-y-1"
+                }`}
+              />
+              <span
+                className={`block h-0.5 w-5 rounded-full bg-current transition-all duration-300 ${
+                  mobileOpen ? "opacity-0 scale-0" : "opacity-100 scale-100"
+                }`}
+              />
+              <span
+                className={`block h-0.5 w-5 rounded-full bg-current transition-all duration-300 ${
+                  mobileOpen ? "-translate-y-[3px] -rotate-45" : "translate-y-1"
+                }`}
+              />
+            </div>
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu Panel - Animated */}
@@ -341,7 +346,7 @@ const Header = () => {
               })}
             </div>
 
-            {/* Mobile Actions */}
+            {/* Mobile Actions - Sign in / Get started only */}
             <div
               className="mt-4 flex flex-col gap-3 transition-all duration-300"
               style={{
@@ -388,65 +393,6 @@ const Header = () => {
                   Dashboard
                 </Link>
               )}
-
-              {/* Theme toggle - compact with both icons */}
-              <div className="flex justify-center">
-                <div className="inline-flex overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      document.documentElement.classList.remove("dark");
-                      localStorage.setItem("theme", "light");
-                    }}
-                    className="p-2.5 text-neutral-500 transition-all duration-200 hover:bg-[rgba(4,236,58,0.1)] hover:text-[var(--brand)] dark:text-neutral-400 dark:hover:bg-[rgba(4,236,58,0.1)] dark:hover:text-[var(--brand)]"
-                    aria-label="Light mode"
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <circle cx="12" cy="12" r="5" />
-                      <line x1="12" y1="1" x2="12" y2="3" />
-                      <line x1="12" y1="21" x2="12" y2="23" />
-                      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                      <line x1="1" y1="12" x2="3" y2="12" />
-                      <line x1="21" y1="12" x2="23" y2="12" />
-                      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                    </svg>
-                  </button>
-                  <div className="w-px bg-neutral-200 dark:bg-neutral-700" />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      document.documentElement.classList.add("dark");
-                      localStorage.setItem("theme", "dark");
-                    }}
-                    className="p-2.5 text-neutral-500 transition-all duration-200 hover:bg-[rgba(4,236,58,0.1)] hover:text-[var(--brand)] dark:text-neutral-400 dark:hover:bg-[rgba(4,236,58,0.1)] dark:hover:text-[var(--brand)]"
-                    aria-label="Dark mode"
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         </div>
