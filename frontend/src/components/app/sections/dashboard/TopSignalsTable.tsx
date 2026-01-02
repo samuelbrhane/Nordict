@@ -57,7 +57,9 @@ const TopSignalsTable = ({ horizon }: TopSignalsTableProps) => {
             Markets ranked by signal strength and confidence
           </p>
         </div>
-        <div className="overflow-x-auto">
+
+        {/* Desktop Table */}
+        <div className="hidden md:block">
           <table className="w-full">
             <thead>
               <tr className="border-b border-neutral-100 dark:border-neutral-800">
@@ -87,6 +89,13 @@ const TopSignalsTable = ({ horizon }: TopSignalsTableProps) => {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="divide-y divide-neutral-100 dark:divide-neutral-800 md:hidden">
+          {signals.map((signal) => (
+            <SignalCard key={signal.symbol} signal={signal} />
+          ))}
         </div>
       </div>
     </AnimatedCard>
@@ -204,6 +213,137 @@ const SignalRow = ({ signal }: { signal: Signal }) => {
         </span>
       </td>
     </tr>
+  );
+};
+
+const SignalCard = ({ signal }: { signal: Signal }) => {
+  return (
+    <Link
+      href={`/app/forecast/${signal.symbol}`}
+      className="block p-4 transition-colors duration-150 hover:bg-neutral-50 dark:hover:bg-neutral-800/50"
+    >
+      {/* Header: Market info + Signal */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-sm font-bold"
+            style={{
+              backgroundColor: "rgba(4,236,58,0.1)",
+              color: "var(--brand)",
+            }}
+          >
+            {signal.symbol.slice(0, 2)}
+          </div>
+          <div>
+            <p className="font-medium text-neutral-900 dark:text-white">
+              {signal.symbol}
+            </p>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              {signal.name}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span
+            className={`flex h-7 w-7 items-center justify-center rounded-md ${
+              signal.signal === "up"
+                ? "bg-emerald-100 dark:bg-emerald-900/30"
+                : signal.signal === "down"
+                ? "bg-red-100 dark:bg-red-900/30"
+                : "bg-neutral-100 dark:bg-neutral-700"
+            }`}
+          >
+            <svg
+              className={`h-4 w-4 ${
+                signal.signal === "up"
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : signal.signal === "down"
+                  ? "rotate-180 text-red-600 dark:text-red-400"
+                  : "rotate-90 text-neutral-500"
+              }`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M5 10l7-7m0 0l7 7m-7-7v18"
+              />
+            </svg>
+          </span>
+          <span
+            className={`text-sm font-semibold capitalize ${
+              signal.signal === "up"
+                ? "text-emerald-600 dark:text-emerald-400"
+                : signal.signal === "down"
+                ? "text-red-600 dark:text-red-400"
+                : "text-neutral-500"
+            }`}
+          >
+            {signal.signal}
+          </span>
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="mt-3 grid grid-cols-3 gap-3">
+        <div className="rounded-lg bg-neutral-50 p-2 dark:bg-neutral-800/50">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400">
+            Horizon
+          </p>
+          <p className="mt-0.5 text-sm font-medium text-neutral-900 dark:text-white">
+            {signal.horizon}
+          </p>
+        </div>
+        <div className="rounded-lg bg-neutral-50 p-2 dark:bg-neutral-800/50">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400">
+            Expected
+          </p>
+          <p
+            className={`mt-0.5 text-sm font-medium ${
+              signal.expected_move_value > 0
+                ? "text-emerald-600 dark:text-emerald-400"
+                : signal.expected_move_value < 0
+                ? "text-red-600 dark:text-red-400"
+                : "text-neutral-500"
+            }`}
+          >
+            {signal.expected_move}
+          </p>
+        </div>
+        <div className="rounded-lg bg-neutral-50 p-2 dark:bg-neutral-800/50">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400">
+            Updated
+          </p>
+          <p className="mt-0.5 text-sm font-medium text-neutral-900 dark:text-white">
+            {signal.updated_ago}
+          </p>
+        </div>
+      </div>
+
+      {/* Confidence Bar */}
+      <div className="mt-3">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-neutral-500 dark:text-neutral-400">
+            Confidence
+          </span>
+          <span className="font-medium text-neutral-900 dark:text-white">
+            {signal.confidence}%
+          </span>
+        </div>
+        <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
+          <div
+            className="h-full rounded-full transition-all duration-300"
+            style={{
+              width: `${signal.confidence}%`,
+              backgroundColor: "var(--brand)",
+            }}
+          />
+        </div>
+      </div>
+    </Link>
   );
 };
 

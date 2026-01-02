@@ -38,7 +38,6 @@ const formatPrice = (value: number): string => {
   if (value >= 1) {
     return `$${value.toFixed(2)}`;
   }
-  // For small values (like SHIB, PEPE)
   return `$${value.toFixed(3)}`;
 };
 
@@ -60,12 +59,10 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
 
   const config = getHorizonConfig(horizon);
 
-  // Handle market selection
   const handleMarketSelect = (market: { symbol: string; name: string }) => {
     setSelectedMarket(market);
   };
 
-  // If loading or error, show states
   if (isLoading) {
     return (
       <AnimatedCard delay={400}>
@@ -92,7 +89,7 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
     directionAccuracy: 0,
     totalPoints: 0,
   };
-  // If no data
+
   if (data.length === 0) {
     return (
       <>
@@ -105,7 +102,6 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
 
         <AnimatedCard delay={400}>
           <div className="rounded-2xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
-            {/* Header with market selector */}
             <div className="flex items-center gap-4 border-b border-neutral-100 p-4 dark:border-neutral-800 sm:p-6">
               <button
                 onClick={() => setIsModalOpen(true)}
@@ -144,7 +140,6 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
               </p>
             </div>
 
-            {/* Empty state message */}
             <div className="flex h-[300px] items-center justify-center">
               <p className="text-neutral-500 dark:text-neutral-400">
                 No performance data available yet for {selectedMarket.symbol} (
@@ -156,7 +151,7 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
       </>
     );
   }
-  // Calculate chart bounds
+
   const allValues = data.flatMap((d) => [d.predicted, d.actual]);
   const maxValue = Math.max(...allValues);
   const minValue = Math.min(...allValues);
@@ -175,7 +170,6 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
     return (index / (data.length - 1)) * 100;
   };
 
-  // Generate paths
   const predictedPath = data
     .map((d, i) => `${i === 0 ? "M" : "L"} ${getX(i)} ${getY(d.predicted)}`)
     .join(" ");
@@ -184,20 +178,40 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
     .map((d, i) => `${i === 0 ? "M" : "L"} ${getX(i)} ${getY(d.actual)}`)
     .join(" ");
 
-  // X-axis labels
+  // X-axis labels - show fewer labels based on data length
   const getXLabels = () => {
-    const step = horizon === "24H" ? 4 : horizon === "30D" ? 5 : 2;
-    return data
-      .filter((_, i) => i % step === 0 || i === data.length - 1)
+    const totalPoints = data.length;
+    let step: number;
+
+    // Dynamically calculate step to show max 6-8 labels
+    if (totalPoints <= 12) {
+      step = 2;
+    } else if (totalPoints <= 24) {
+      step = 4;
+    } else if (totalPoints <= 30) {
+      step = 5;
+    } else {
+      step = Math.ceil(totalPoints / 6);
+    }
+
+    const labels = data
+      .filter((_, i) => i % step === 0)
       .map((d) => ({
         index: d.index,
         label: d.label,
       }));
+
+    // Always include the last point if not already included
+    const lastPoint = data[data.length - 1];
+    if (labels[labels.length - 1]?.index !== lastPoint.index) {
+      labels.push({ index: lastPoint.index, label: lastPoint.label });
+    }
+
+    return labels;
   };
 
   const xLabels = getXLabels();
 
-  // Y-axis labels
   const yLabels = [
     { value: paddedMax, label: formatPrice(paddedMax) },
     {
@@ -258,7 +272,6 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
         <div className="rounded-2xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
           {/* Header */}
           <div className="flex flex-col gap-4 border-b border-neutral-100 p-4 dark:border-neutral-800 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-            {/* Left - Market selector and title */}
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setIsModalOpen(true)}
@@ -303,9 +316,7 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
               </div>
             </div>
 
-            {/* Right - Stats */}
             <div className="flex flex-wrap items-center gap-4 sm:gap-6">
-              {/* Direction Accuracy */}
               <div className="flex items-center gap-2">
                 <span
                   className={`flex h-8 w-8 items-center justify-center rounded-lg ${
@@ -348,7 +359,6 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
 
               <div className="hidden h-10 w-px bg-neutral-200 dark:bg-neutral-700 sm:block" />
 
-              {/* Avg Error */}
               <div>
                 <p className="text-xs text-neutral-500 dark:text-neutral-400">
                   Avg Error
@@ -360,7 +370,6 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
 
               <div className="hidden h-10 w-px bg-neutral-200 dark:bg-neutral-700 sm:block" />
 
-              {/* Data Points */}
               <div>
                 <p className="text-xs text-neutral-500 dark:text-neutral-400">
                   Data Points
@@ -382,11 +391,11 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
             >
               <div className="flex w-full">
                 {/* Y-Axis Labels */}
-                <div className="flex w-[60px] shrink-0 flex-col justify-between py-2 pr-2 text-right">
+                <div className="flex w-[50px] shrink-0 flex-col justify-between py-2 pr-2 text-right sm:w-[60px]">
                   {yLabels.map(({ label }, i) => (
                     <span
                       key={i}
-                      className="text-xs text-neutral-400 dark:text-neutral-500"
+                      className="text-[10px] text-neutral-400 dark:text-neutral-500 sm:text-xs"
                     >
                       {label}
                     </span>
@@ -396,7 +405,7 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
                 {/* Chart */}
                 <div
                   className="relative flex-1"
-                  style={{ height: "clamp(250px, 35vh, 450px)" }}
+                  style={{ height: "clamp(200px, 35vh, 450px)" }}
                 >
                   {/* Grid Lines */}
                   <div className="absolute inset-0">
@@ -415,7 +424,6 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
                     preserveAspectRatio="none"
                     className="absolute inset-0 h-full w-full"
                   >
-                    {/* Predicted Line */}
                     <path
                       d={predictedPath}
                       fill="none"
@@ -425,8 +433,6 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
                       strokeLinejoin="round"
                       vectorEffect="non-scaling-stroke"
                     />
-
-                    {/* Actual Line */}
                     <path
                       d={actualPath}
                       fill="none"
@@ -442,9 +448,9 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
                   {data.map((d, i) => (
                     <div
                       key={`predicted-${i}`}
-                      className={`absolute h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-150 ${
+                      className={`absolute h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-150 sm:h-2 sm:w-2 ${
                         activeIndex === i
-                          ? "h-3 w-3 ring-4 ring-[var(--brand)]/20"
+                          ? "!h-3 !w-3 ring-4 ring-[var(--brand)]/20"
                           : ""
                       }`}
                       style={{
@@ -459,9 +465,9 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
                   {data.map((d, i) => (
                     <div
                       key={`actual-${i}`}
-                      className={`absolute h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-150 ${
+                      className={`absolute h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-150 sm:h-2 sm:w-2 ${
                         activeIndex === i
-                          ? "h-3 w-3 ring-4 ring-blue-500/20"
+                          ? "!h-3 !w-3 ring-4 ring-blue-500/20"
                           : ""
                       }`}
                       style={{
@@ -483,13 +489,21 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
               </div>
 
               {/* X-Axis Labels */}
-              <div className="mt-3 flex w-full">
-                <div className="w-[60px] shrink-0" />
-                <div className="flex flex-1 justify-between">
+              <div className="relative mt-2 sm:mt-3">
+                <div className="ml-[50px] flex justify-between sm:ml-[60px]">
                   {xLabels.map(({ index, label }) => (
                     <span
                       key={index}
-                      className="text-xs text-neutral-400 dark:text-neutral-500"
+                      className="text-[10px] text-neutral-400 dark:text-neutral-500 sm:text-xs"
+                      style={{
+                        position: "relative",
+                        left: `${
+                          (index / (data.length - 1)) * 100 -
+                          (xLabels.findIndex((l) => l.index === index) /
+                            (xLabels.length - 1)) *
+                            100
+                        }%`,
+                      }}
                     >
                       {label}
                     </span>
@@ -500,7 +514,7 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
               {/* Tooltip */}
               {tooltip && (
                 <div
-                  className="pointer-events-none absolute z-20 min-w-[200px] rounded-xl border border-neutral-200 bg-white p-3 shadow-xl dark:border-neutral-700 dark:bg-neutral-800"
+                  className="pointer-events-none absolute z-20 min-w-[180px] rounded-xl border border-neutral-200 bg-white p-3 shadow-xl dark:border-neutral-700 dark:bg-neutral-800 sm:min-w-[200px]"
                   style={{
                     left: tooltip.x,
                     top: "20px",
@@ -571,22 +585,22 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
               )}
 
               {/* Legend */}
-              <div className="mt-6 flex flex-wrap items-center justify-center gap-6 border-t border-neutral-100 pt-4 dark:border-neutral-800">
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-4 border-t border-neutral-100 pt-4 dark:border-neutral-800 sm:mt-6 sm:gap-6">
                 <div className="flex items-center gap-2">
                   <div
-                    className="h-1 w-6 rounded-full"
+                    className="h-1 w-4 rounded-full sm:w-6"
                     style={{ backgroundColor: "var(--brand)" }}
                   />
-                  <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                  <span className="text-[10px] text-neutral-500 dark:text-neutral-400 sm:text-xs">
                     Predicted
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div
-                    className="h-1 w-6 rounded-full"
+                    className="h-1 w-4 rounded-full sm:w-6"
                     style={{ backgroundColor: "#3b82f6" }}
                   />
-                  <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                  <span className="text-[10px] text-neutral-500 dark:text-neutral-400 sm:text-xs">
                     Actual
                   </span>
                 </div>
