@@ -258,3 +258,6 @@ class NotificationSettingsSerializer(serializers.ModelSerializer):
             'notify_forecast_daily',
             'notify_forecast_significant',
         ]
+        
+        
+        

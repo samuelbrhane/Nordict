@@ -37,4 +37,7 @@ urlpatterns = [
     path('billing/cancel/', stripe_views.CancelSubscriptionView.as_view(), name='cancel-subscription'),
     path('billing/reactivate/', stripe_views.ReactivateSubscriptionView.as_view(), name='reactivate-subscription'),
     path('billing/webhook/', stripe_views.StripeWebhookView.as_view(), name='stripe-webhook'),
+    
+    
+    
 ]

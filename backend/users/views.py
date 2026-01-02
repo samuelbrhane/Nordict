@@ -629,3 +629,6 @@ def get_usage(request):
         'alerts': alerts_count,
         'sessions': sessions_count,
     })
+    
+    
+    
