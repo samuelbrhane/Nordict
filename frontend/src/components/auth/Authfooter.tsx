@@ -7,7 +7,7 @@ const AuthFooter = () => {
         <div className="flex flex-col items-center justify-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left">
           {/* Copyright */}
           <p className="text-xs text-neutral-500 dark:text-neutral-500">
-            © {new Date().getFullYear()} Nordict
+            © 2025 – {new Date().getFullYear()} Nordict
           </p>
 
           {/* Legal links */}

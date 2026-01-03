@@ -130,8 +130,7 @@ Any disputes arising from these Terms or your use of the Service shall be resolv
     title: "12. Contact Information",
     content: `If you have questions about these Terms of Service, please contact us:
 
-- Email: legal@nordict.com
-- Address: [Company Address]
+Email: support@nordict.com
 
 We aim to respond to all inquiries within 5 business days.`,
   },

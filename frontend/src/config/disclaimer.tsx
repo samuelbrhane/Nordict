@@ -267,9 +267,9 @@ We encourage you to review this Disclaimer periodically for any updates.`,
     title: "10. Contact Us",
     content: `If you have any questions about this Disclaimer, please contact us:
 
-- Email: legal@nordict.com
-- Support: support@nordict.com
-- Address: [Company Address]
+Email: hello@nordict.com
+Support: support@nordict.com
+
 
 We aim to respond to all inquiries within 5 business days.`,
     icon: (
