@@ -80,17 +80,18 @@ const TrustStrip = () => {
             isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-6"
           }`}
         >
-          <div className="group relative h-full overflow-hidden rounded-2xl border border-neutral-200 bg-white/70 shadow-sm backdrop-blur transition-shadow duration-300 hover:shadow-lg dark:border-neutral-800 dark:bg-black/40">
+          <div className="group relative h-full min-h-[300px] sm:min-h-[400px] lg:min-h-0 overflow-hidden rounded-2xl border border-neutral-200 bg-white/70 shadow-sm backdrop-blur transition-shadow duration-300 hover:shadow-lg dark:border-neutral-800 dark:bg-black/40 flex items-center justify-center">
             {mounted ? (
               <Image
                 src={imageSrc}
                 alt="Forecast preview"
-                fill
-                className="object-cover opacity-95 transition duration-500 group-hover:scale-[1.02] group-hover:opacity-100"
+                width={800}
+                height={500}
+                className="w-full h-full object-contain p-4 transition duration-500 group-hover:scale-[1.02]"
                 priority={false}
               />
             ) : (
-              <div className="h-full w-full animate-pulse bg-neutral-200 dark:bg-neutral-800" />
+              <div className="aspect-[8/5] w-full animate-pulse bg-neutral-200 dark:bg-neutral-800" />
             )}
 
             {/* Sliding overlay (hover) */}

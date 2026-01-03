@@ -28,6 +28,7 @@ const ProductPreview = () => {
 
     return () => observer.disconnect();
   }, []);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -121,7 +122,7 @@ const ProductPreview = () => {
         <div className="mt-12 grid gap-8 lg:grid-cols-2">
           {/* Forecast panel */}
           <div
-            className={`group relative min-h-[400px] lg:min-h-[500px] overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-sm transition-all duration-500 ease-out hover:shadow-lg dark:border-neutral-800 dark:bg-black ${
+            className={`group relative overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-sm transition-all duration-500 ease-out hover:shadow-lg dark:border-neutral-800 dark:bg-black flex items-center justify-center ${
               isVisible
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-8"
@@ -134,11 +135,12 @@ const ProductPreview = () => {
               <Image
                 src={`/images/2_${isDark ? "black" : "white"}.png`}
                 alt="Forecast panel preview"
-                fill
-                className="object-cover transition duration-700 ease-out group-hover:scale-[1.02]"
+                width={800}
+                height={500}
+                className="w-full h-auto object-contain p-4 transition duration-700 ease-out group-hover:scale-[1.02]"
               />
             ) : (
-              <div className="absolute inset-0 animate-pulse bg-neutral-200 dark:bg-neutral-800" />
+              <div className="aspect-[8/5] w-full animate-pulse bg-neutral-200 dark:bg-neutral-800" />
             )}
 
             {/* slide overlay */}
@@ -173,7 +175,7 @@ const ProductPreview = () => {
 
           {/* Performance panel */}
           <div
-            className={`group relative min-h-[400px] lg:min-h-[500px] overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-sm transition-all duration-500 ease-out hover:shadow-lg dark:border-neutral-800 dark:bg-black ${
+            className={`group relative overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-sm transition-all duration-500 ease-out hover:shadow-lg dark:border-neutral-800 dark:bg-black flex items-center justify-center ${
               isVisible
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-8"
@@ -186,11 +188,12 @@ const ProductPreview = () => {
               <Image
                 src={`/images/3_${isDark ? "black" : "white"}.png`}
                 alt="Performance panel preview"
-                fill
-                className="object-cover transition duration-700 ease-out group-hover:scale-[1.02]"
+                width={800}
+                height={500}
+                className="w-full h-auto object-contain p-4 transition duration-700 ease-out group-hover:scale-[1.02]"
               />
             ) : (
-              <div className="absolute inset-0 animate-pulse bg-neutral-200 dark:bg-neutral-800" />
+              <div className="aspect-[8/5] w-full animate-pulse bg-neutral-200 dark:bg-neutral-800" />
             )}
 
             {/* slide overlay */}
@@ -223,6 +226,7 @@ const ProductPreview = () => {
             />
           </div>
         </div>
+
         {/* footer actions */}
         <div
           className={`mt-10 flex flex-wrap items-center gap-3 transition-all duration-700 ease-out ${
