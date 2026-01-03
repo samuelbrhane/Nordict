@@ -17,6 +17,7 @@ from drf_spectacular.utils import extend_schema
 from .utils import get_client_info, get_location_from_ip
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 from .serializers import *
+from config.email_services import EmailService
 
 User = get_user_model()
 
@@ -54,6 +55,9 @@ class RegisterView(APIView):
         # Create preferences
         UserPreferences.objects.create(user=user)
         
+        # Send welcome email
+        EmailService.send_welcome_email(user)
+        
         # Generate tokens
         refresh = RefreshToken.for_user(user)
         access_token = refresh.access_token
@@ -78,7 +82,8 @@ class RegisterView(APIView):
                 'access': str(access_token),
             }
         }, status=status.HTTP_201_CREATED)
-           
+        
+                
 
 class LoginView(APIView):
     """Login and get JWT tokens."""
@@ -317,6 +322,8 @@ class APIKeyView(APIView):
         return Response({'message': 'API key revoked'})
 
 
+
+
 class PasswordResetRequestView(APIView):
     """Request a password reset link."""
     
@@ -343,12 +350,9 @@ class PasswordResetRequestView(APIView):
             }
             token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
             
-            # TODO: Send email with reset link
-            # reset_url = f"{settings.FRONTEND_URL}/reset-password?token={token}"
-            # send_password_reset_email(user.email, reset_url)
-            
-            # For development, print token to console
-            print(f"Password reset token for {email}: {token}")
+            # Send email with reset link
+            reset_url = f"{settings.FRONTEND_URL}/reset-password?token={token}"
+            EmailService.send_password_reset(user, reset_url)
             
         except User.DoesNotExist:
             # Don't reveal if email exists
@@ -357,8 +361,8 @@ class PasswordResetRequestView(APIView):
         return Response({
             'message': 'If an account exists with this email, a reset link has been sent.'
         })
-
-
+        
+        
 class PasswordResetConfirmView(APIView):
     """Confirm password reset with token."""
     
