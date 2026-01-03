@@ -123,14 +123,14 @@ class LoginView(APIView):
         # Get client info
         client_info = get_client_info(request)
         
-        # Check for existing session from same device/browser/IP
+        # Check for existing session from same device/browser/OS (NOT IP)
         existing_session = UserSession.objects.filter(
             user=user,
             is_active=True,
             device=client_info['device'],
             browser=client_info['browser'],
             os=client_info['os'],
-            ip_address=client_info['ip_address'],
+            # Removed: ip_address=client_info['ip_address'],
         ).first()
         
         if existing_session:
@@ -145,9 +145,11 @@ class LoginView(APIView):
             refresh = RefreshToken.for_user(user)
             access_token = refresh.access_token
             
-            # Update existing session with new tokens
+            # Update existing session with new tokens AND new IP
             existing_session.refresh_token_jti = str(refresh['jti'])
             existing_session.access_token_jti = str(access_token['jti'])
+            existing_session.ip_address = client_info['ip_address']  # Update IP
+            existing_session.location = get_location_from_ip(client_info['ip_address'])  # Update location
             existing_session.last_active = timezone.now()
             existing_session.save()
         else:
@@ -200,7 +202,7 @@ class LoginView(APIView):
             }
         })
         
-             
+                 
 class LogoutView(APIView):
     """Logout and blacklist refresh token."""
     
