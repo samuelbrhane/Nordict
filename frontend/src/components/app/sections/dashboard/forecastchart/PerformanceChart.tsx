@@ -318,7 +318,7 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
 
             <div className="flex flex-wrap items-center gap-4 sm:gap-6">
               <div className="flex items-center gap-2">
-                <span
+                {/* <span
                   className={`flex h-8 w-8 items-center justify-center rounded-lg ${
                     stats.directionAccuracy >= 70
                       ? "bg-emerald-100 dark:bg-emerald-900/30"
@@ -346,15 +346,15 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
                       d="M5 13l4 4L19 7"
                     />
                   </svg>
-                </span>
-                <div>
+                </span> */}
+                {/* <div>
                   <p className="text-xs text-neutral-500 dark:text-neutral-400">
                     Direction
                   </p>
                   <p className="text-sm font-semibold text-neutral-900 dark:text-white">
                     {stats.directionAccuracy}% accurate
                   </p>
-                </div>
+                </div> */}
               </div>
 
               <div className="hidden h-10 w-px bg-neutral-200 dark:bg-neutral-700 sm:block" />
