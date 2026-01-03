@@ -2,19 +2,16 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { NAV_ITEMS } from "@/config/navigation";
 import { ThemeToggle } from "../layout";
 import { useAuth } from "@/context/auth/AuthProvider";
-import { LoadingSpinner } from "../app";
 
 const Header = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileOpenIndex, setMobileOpenIndex] = useState<number | null>(null);
   const [scrolled, setScrolled] = useState(false);
-  const { user, isLoading } = useAuth();
-
+  const { user } = useAuth();
   // Track scroll for header background
   useEffect(() => {
     const onScroll = () => {
@@ -49,15 +46,6 @@ const Header = () => {
     };
   }, [mobileOpen]);
 
-  if (isLoading) {
-    return (
-      <header className="sticky top-0 z-50 border-b border-transparent bg-white/80 backdrop-blur dark:bg-neutral-950/80">
-        <div className="mx-auto flex max-w-screen-2xl items-center justify-center px-4 py-3 md:px-6 md:py-4">
-          <LoadingSpinner />
-        </div>
-      </header>
-    );
-  }
   return (
     <header
       className={`sticky top-0 z-50 border-b transition-all duration-300 ${
