@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AnimatedCard from "../AnimatedCard";
 import MarketSelectorModal from "./MarketSelectorModal";
 import ChartArea from "./ChartArea";
@@ -28,6 +28,16 @@ const ForecastChart = ({ horizon, fixedMarket }: ForecastChartProps) => {
     name: "Bitcoin",
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Update current time every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Use fixed market if provided, otherwise use selected
   const market = fixedMarket || selectedMarket;
@@ -74,6 +84,30 @@ const ForecastChart = ({ horizon, fixedMarket }: ForecastChartProps) => {
           rotate: "rotate-90",
         };
     }
+  };
+
+  // Format current time
+  const formatCurrentTime = () => {
+    return currentTime.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
+  // Format forecast generated time
+  const formatGeneratedTime = (timestamp?: string) => {
+    if (!timestamp) return null;
+    const date = new Date(timestamp);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
   };
 
   const directionStyle = getDirectionStyle(forecast?.direction);
@@ -151,14 +185,25 @@ const ForecastChart = ({ horizon, fixedMarket }: ForecastChartProps) => {
                 </button>
               )}
 
-              {/* Title */}
+              {/* Title and Time Info */}
               <div className="hidden sm:block">
-                <p className="text-sm font-medium text-neutral-900 dark:text-white">
-                  Price Forecast
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium text-neutral-900 dark:text-white">
+                    Price Forecast
+                  </p>
+                  <span className="text-xs text-neutral-400">•</span>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    {formatCurrentTime()}
+                  </p>
+                </div>
                 <p className="text-xs text-neutral-500 dark:text-neutral-400">
                   Next {config.points} {config.label.toLowerCase()} with
                   confidence bands
+                  {forecast?.generated_at && (
+                    <span className="ml-1">
+                      • Updated {formatGeneratedTime(forecast.generated_at)}
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
@@ -259,6 +304,20 @@ const ForecastChart = ({ horizon, fixedMarket }: ForecastChartProps) => {
             </div>
           </div>
 
+          {/* Mobile time info */}
+          <div className="border-b border-neutral-100 px-4 py-2 dark:border-neutral-800 sm:hidden">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                Current: {formatCurrentTime()}
+              </p>
+              {forecast?.generated_at && (
+                <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                  Updated: {formatGeneratedTime(forecast.generated_at)}
+                </p>
+              )}
+            </div>
+          </div>
+
           {/* Chart Area */}
           <div className="p-4 sm:p-6">
             {isLoading ? (
@@ -276,6 +335,34 @@ const ForecastChart = ({ horizon, fixedMarket }: ForecastChartProps) => {
                 <p className="text-neutral-500">No forecast data available</p>
               </div>
             )}
+          </div>
+
+          {/* Legend */}
+          <div className="flex flex-wrap items-center justify-center gap-6 border-t border-neutral-100 px-4 py-3 dark:border-neutral-800">
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                Predicted (Future)
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-neutral-400" />
+              <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                Predicted (Past)
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-blue-500" />
+              <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                Actual Price
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-0.5 w-4 border-b-2 border-dashed border-neutral-400" />
+              <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                Current Price
+              </span>
+            </div>
           </div>
         </div>
       </AnimatedCard>

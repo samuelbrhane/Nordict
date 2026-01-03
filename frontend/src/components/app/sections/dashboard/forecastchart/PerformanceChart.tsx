@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import AnimatedCard from "../AnimatedCard";
 import MarketSelectorModal from "./MarketSelectorModal";
 import { Horizon } from "@/lib/hooks/useDashboardKpi";
@@ -20,10 +20,10 @@ interface TooltipData {
 
 const getHorizonConfig = (horizon: Horizon) => {
   const configs = {
-    "24H": { points: 24, label: "Hours" },
-    "30D": { points: 30, label: "Days" },
-    "12W": { points: 12, label: "Weeks" },
-    "12M": { points: 12, label: "Months" },
+    "24H": { points: 48, label: "Hours", periodLabel: "Past 48 hours" },
+    "30D": { points: 30, label: "Days", periodLabel: "Past 30 days" },
+    "12W": { points: 12, label: "Weeks", periodLabel: "Past 12 weeks" },
+    "12M": { points: 12, label: "Months", periodLabel: "Past 12 months" },
   };
   return configs[horizon];
 };
@@ -39,6 +39,85 @@ const formatPrice = (value: number): string => {
     return `$${value.toFixed(2)}`;
   }
   return `$${value.toFixed(3)}`;
+};
+
+const formatPriceFull = (value: number): string => {
+  return `$${value.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+};
+
+// Format timestamp for tooltip (full format like Binance)
+const formatTimestampFull = (timestamp: string, horizon: Horizon): string => {
+  const date = new Date(timestamp);
+
+  switch (horizon) {
+    case "24H":
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      });
+    case "30D":
+      return date.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    case "12W":
+      return date.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    case "12M":
+      return date.toLocaleDateString("en-US", {
+        month: "long",
+        year: "numeric",
+      });
+    default:
+      return date.toLocaleDateString();
+  }
+};
+
+// Format timestamp for X-axis labels (shorter but with date context)
+const formatTimestampShort = (timestamp: string, horizon: Horizon): string => {
+  const date = new Date(timestamp);
+
+  switch (horizon) {
+    case "24H":
+      // Show "Jan 2, 2AM" format for clarity
+      return date
+        .toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          hour12: true,
+        })
+        .replace(",", "");
+    case "30D":
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+    case "12W":
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+    case "12M":
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        year: "2-digit",
+      });
+    default:
+      return date.toLocaleDateString();
+  }
 };
 
 const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
@@ -178,33 +257,47 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
     .map((d, i) => `${i === 0 ? "M" : "L"} ${getX(i)} ${getY(d.actual)}`)
     .join(" ");
 
-  // X-axis labels - show fewer labels based on data length
+  // X-axis labels - use actual timestamps, show fewer labels
   const getXLabels = () => {
     const totalPoints = data.length;
     let step: number;
 
-    // Dynamically calculate step to show max 6-8 labels
+    // Show 5-6 labels max for readability
     if (totalPoints <= 12) {
       step = 2;
     } else if (totalPoints <= 24) {
       step = 4;
     } else if (totalPoints <= 30) {
-      step = 5;
+      step = 6;
     } else {
-      step = Math.ceil(totalPoints / 6);
+      step = Math.ceil(totalPoints / 5);
     }
 
-    const labels = data
-      .filter((_, i) => i % step === 0)
-      .map((d) => ({
-        index: d.index,
-        label: d.label,
-      }));
+    const labels: { index: number; label: string; x: number }[] = [];
 
-    // Always include the last point if not already included
-    const lastPoint = data[data.length - 1];
-    if (labels[labels.length - 1]?.index !== lastPoint.index) {
-      labels.push({ index: lastPoint.index, label: lastPoint.label });
+    // Always include first point
+    labels.push({
+      index: 0,
+      label: formatTimestampShort(data[0].timestamp, horizon),
+      x: 0,
+    });
+
+    // Add intermediate points
+    for (let i = step; i < totalPoints - 1; i += step) {
+      labels.push({
+        index: i,
+        label: formatTimestampShort(data[i].timestamp, horizon),
+        x: getX(i),
+      });
+    }
+
+    // Always include last point
+    if (totalPoints > 1) {
+      labels.push({
+        index: totalPoints - 1,
+        label: formatTimestampShort(data[totalPoints - 1].timestamp, horizon),
+        x: 100,
+      });
     }
 
     return labels;
@@ -230,14 +323,15 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
   ];
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || data.length === 0) return;
 
     const rect = containerRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const containerWidth = rect.width;
 
     const chartLeft = 60;
-    const chartWidth = containerWidth - chartLeft - 20;
+    const chartRight = 20;
+    const chartWidth = containerWidth - chartLeft - chartRight;
 
     if (x >= chartLeft && x <= chartLeft + chartWidth) {
       const normalizedX = (x - chartLeft) / chartWidth;
@@ -257,6 +351,21 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
   const handleMouseLeave = () => {
     setActiveIndex(null);
     setTooltip(null);
+  };
+
+  // Get date range for subtitle
+  const getDateRange = () => {
+    if (data.length === 0) return "";
+    const firstDate = new Date(data[0].timestamp);
+    const lastDate = new Date(data[data.length - 1].timestamp);
+
+    const formatDate = (d: Date) =>
+      d.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+
+    return `${formatDate(firstDate)} - ${formatDate(lastDate)}`;
   };
 
   return (
@@ -307,58 +416,22 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
               </button>
 
               <div className="hidden sm:block">
-                <p className="text-sm font-medium text-neutral-900 dark:text-white">
-                  Prediction vs Actual
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium text-neutral-900 dark:text-white">
+                    Prediction vs Actual
+                  </p>
+                  <span className="text-xs text-neutral-400">•</span>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    {config.periodLabel}
+                  </p>
+                </div>
                 <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                  Past {config.points} {config.label.toLowerCase()} performance
+                  {getDateRange()} • {stats.totalPoints} data points
                 </p>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-4 sm:gap-6">
-              <div className="flex items-center gap-2">
-                {/* <span
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg ${
-                    stats.directionAccuracy >= 70
-                      ? "bg-emerald-100 dark:bg-emerald-900/30"
-                      : stats.directionAccuracy >= 50
-                      ? "bg-amber-100 dark:bg-amber-900/30"
-                      : "bg-red-100 dark:bg-red-900/30"
-                  }`}
-                >
-                  <svg
-                    className={`h-4 w-4 ${
-                      stats.directionAccuracy >= 70
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : stats.directionAccuracy >= 50
-                        ? "text-amber-600 dark:text-amber-400"
-                        : "text-red-600 dark:text-red-400"
-                    }`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </span> */}
-                {/* <div>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                    Direction
-                  </p>
-                  <p className="text-sm font-semibold text-neutral-900 dark:text-white">
-                    {stats.directionAccuracy}% accurate
-                  </p>
-                </div> */}
-              </div>
-
-              <div className="hidden h-10 w-px bg-neutral-200 dark:bg-neutral-700 sm:block" />
-
               <div>
                 <p className="text-xs text-neutral-500 dark:text-neutral-400">
                   Avg Error
@@ -379,6 +452,13 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
                 </p>
               </div>
             </div>
+          </div>
+
+          {/* Mobile info */}
+          <div className="border-b border-neutral-100 px-4 py-2 dark:border-neutral-800 sm:hidden">
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              {getDateRange()} • {stats.totalPoints} data points
+            </p>
           </div>
 
           {/* Chart Area */}
@@ -489,20 +569,21 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
               </div>
 
               {/* X-Axis Labels */}
-              <div className="relative mt-2 sm:mt-3">
-                <div className="ml-[50px] flex justify-between sm:ml-[60px]">
-                  {xLabels.map(({ index, label }) => (
+              <div className="relative ml-[50px] mt-2 sm:ml-[60px] sm:mt-3">
+                <div className="relative h-4">
+                  {xLabels.map(({ index, label, x }) => (
                     <span
                       key={index}
-                      className="text-[10px] text-neutral-400 dark:text-neutral-500 sm:text-xs"
+                      className="absolute text-[9px] text-neutral-400 dark:text-neutral-500 sm:text-[10px]"
                       style={{
-                        position: "relative",
-                        left: `${
-                          (index / (data.length - 1)) * 100 -
-                          (xLabels.findIndex((l) => l.index === index) /
-                            (xLabels.length - 1)) *
-                            100
-                        }%`,
+                        left: `${x}%`,
+                        transform:
+                          x === 0
+                            ? "translateX(0)"
+                            : x === 100
+                            ? "translateX(-100%)"
+                            : "translateX(-50%)",
+                        whiteSpace: "nowrap",
                       }}
                     >
                       {label}
@@ -514,7 +595,7 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
               {/* Tooltip */}
               {tooltip && (
                 <div
-                  className="pointer-events-none absolute z-20 min-w-[180px] rounded-xl border border-neutral-200 bg-white p-3 shadow-xl dark:border-neutral-700 dark:bg-neutral-800 sm:min-w-[200px]"
+                  className="pointer-events-none absolute z-20 min-w-[200px] rounded-xl border border-neutral-200 bg-white p-3 shadow-xl dark:border-neutral-700 dark:bg-neutral-800 sm:min-w-[220px]"
                   style={{
                     left: tooltip.x,
                     top: "20px",
@@ -527,9 +608,10 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
                         : "translateX(-50%)",
                   }}
                 >
+                  {/* Full timestamp header */}
                   <div className="mb-2 border-b border-neutral-100 pb-2 dark:border-neutral-700">
                     <p className="text-sm font-semibold text-neutral-900 dark:text-white">
-                      {tooltip.point.label}
+                      {formatTimestampFull(tooltip.point.timestamp, horizon)}
                     </p>
                   </div>
 
@@ -545,7 +627,7 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
                         </span>
                       </div>
                       <span className="text-sm font-bold text-neutral-900 dark:text-white">
-                        {formatPrice(tooltip.point.predicted)}
+                        {formatPriceFull(tooltip.point.predicted)}
                       </span>
                     </div>
 
@@ -557,7 +639,7 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
                         </span>
                       </div>
                       <span className="text-sm font-bold text-neutral-900 dark:text-white">
-                        {formatPrice(tooltip.point.actual)}
+                        {formatPriceFull(tooltip.point.actual)}
                       </span>
                     </div>
 
