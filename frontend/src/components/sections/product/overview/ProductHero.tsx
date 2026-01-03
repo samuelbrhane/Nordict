@@ -286,7 +286,7 @@ const ProductHero = () => {
                   <video
                     key={isDark ? "dark" : "light"}
                     src={`/videos/product_${isDark ? "black" : "white"}.mp4`}
-                    className="absolute inset-0 h-full w-full object-cover"
+                    className="absolute inset-0 h-full w-full object-contain"
                     autoPlay
                     loop
                     muted
