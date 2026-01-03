@@ -9,7 +9,7 @@ import { useForecastChart } from "@/lib/hooks/useForecastChart";
 
 interface ForecastChartProps {
   horizon: Horizon;
-  fixedMarket?: { symbol: string; name: string }; // Optional: if provided, hide selector
+  fixedMarket?: { symbol: string; name: string };
 }
 
 const getHorizonConfig = (horizon: Horizon) => {
@@ -30,16 +30,13 @@ const ForecastChart = ({ horizon, fixedMarket }: ForecastChartProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Update current time every minute
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(new Date());
-    }, 60000); // Update every minute
-
+    }, 60000);
     return () => clearInterval(interval);
   }, []);
 
-  // Use fixed market if provided, otherwise use selected
   const market = fixedMarket || selectedMarket;
 
   const {
@@ -50,19 +47,16 @@ const ForecastChart = ({ horizon, fixedMarket }: ForecastChartProps) => {
 
   const config = getHorizonConfig(horizon);
 
-  // Handle market selection from modal
   const handleMarketSelect = (market: { symbol: string; name: string }) => {
     setSelectedMarket(market);
     setIsModalOpen(false);
   };
 
-  // Format direction for display
   const getDirectionDisplay = (direction?: string) => {
     if (!direction) return "Neutral";
     return direction.charAt(0).toUpperCase() + direction.slice(1);
   };
 
-  // Get direction styling
   const getDirectionStyle = (direction?: string) => {
     switch (direction) {
       case "up":
@@ -86,7 +80,6 @@ const ForecastChart = ({ horizon, fixedMarket }: ForecastChartProps) => {
     }
   };
 
-  // Format current time
   const formatCurrentTime = () => {
     return currentTime.toLocaleDateString("en-US", {
       month: "short",
@@ -97,7 +90,6 @@ const ForecastChart = ({ horizon, fixedMarket }: ForecastChartProps) => {
     });
   };
 
-  // Format forecast generated time
   const formatGeneratedTime = (timestamp?: string) => {
     if (!timestamp) return null;
     const date = new Date(timestamp);
@@ -114,7 +106,6 @@ const ForecastChart = ({ horizon, fixedMarket }: ForecastChartProps) => {
 
   return (
     <>
-      {/* Market Selector Modal - only show if no fixedMarket */}
       {!fixedMarket && (
         <MarketSelectorModal
           selected={selectedMarket}
@@ -126,51 +117,49 @@ const ForecastChart = ({ horizon, fixedMarket }: ForecastChartProps) => {
 
       <AnimatedCard delay={350}>
         <div className="rounded-2xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
-          {/* Header */}
+          {/* Header - DESKTOP: Original layout unchanged, MOBILE: Stacked with grid */}
           <div className="flex flex-col gap-4 border-b border-neutral-100 p-4 dark:border-neutral-800 sm:flex-row sm:items-center sm:justify-between sm:p-6">
             {/* Left - Market selector/display and title */}
             <div className="flex items-center gap-4">
               {/* Market Selector Button or Fixed Display */}
               {fixedMarket ? (
-                // Fixed market display (no button)
-                <div className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-2.5 dark:border-neutral-700 dark:bg-neutral-800">
+                <div className="flex items-center gap-2.5 rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800 sm:gap-3 sm:px-4 sm:py-2.5">
                   <div
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-white"
+                    className="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold text-white sm:h-8 sm:w-8 sm:text-sm"
                     style={{ backgroundColor: "var(--brand)" }}
                   >
                     {market.symbol.slice(0, 2)}
                   </div>
                   <div className="text-left">
-                    <p className="text-sm font-semibold text-neutral-900 dark:text-white">
+                    <p className="text-xs font-semibold text-neutral-900 dark:text-white sm:text-sm">
                       {market.symbol}
                     </p>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    <p className="text-[10px] text-neutral-500 dark:text-neutral-400 sm:text-xs">
                       {market.name}
                     </p>
                   </div>
                 </div>
               ) : (
-                // Clickable market selector
                 <button
                   onClick={() => setIsModalOpen(true)}
-                  className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-2.5 transition-all hover:border-neutral-300 hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:border-neutral-600 dark:hover:bg-neutral-700"
+                  className="flex items-center gap-2.5 rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2 transition-all hover:border-neutral-300 hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:border-neutral-600 dark:hover:bg-neutral-700 sm:gap-3 sm:px-4 sm:py-2.5"
                 >
                   <div
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-white"
+                    className="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold text-white sm:h-8 sm:w-8 sm:text-sm"
                     style={{ backgroundColor: "var(--brand)" }}
                   >
                     {market.symbol.slice(0, 2)}
                   </div>
                   <div className="text-left">
-                    <p className="text-sm font-semibold text-neutral-900 dark:text-white">
+                    <p className="text-xs font-semibold text-neutral-900 dark:text-white sm:text-sm">
                       {market.symbol}
                     </p>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    <p className="text-[10px] text-neutral-500 dark:text-neutral-400 sm:text-xs">
                       {market.name}
                     </p>
                   </div>
                   <svg
-                    className="ml-1 h-4 w-4 text-neutral-400"
+                    className="ml-0.5 h-3.5 w-3.5 text-neutral-400 sm:ml-1 sm:h-4 sm:w-4"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -185,7 +174,7 @@ const ForecastChart = ({ horizon, fixedMarket }: ForecastChartProps) => {
                 </button>
               )}
 
-              {/* Title and Time Info */}
+              {/* Title and Time Info - Desktop only (UNCHANGED) */}
               <div className="hidden sm:block">
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-medium text-neutral-900 dark:text-white">
@@ -209,18 +198,23 @@ const ForecastChart = ({ horizon, fixedMarket }: ForecastChartProps) => {
             </div>
 
             {/* Right - Summary stats */}
-            <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+            {/* Desktop: flex-wrap (UNCHANGED), Mobile: 2x2 grid with card backgrounds */}
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-6">
               {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-20 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
-                  <div className="h-8 w-24 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
-                </div>
+                <>
+                  <div className="h-12 animate-pulse rounded-lg bg-neutral-100 dark:bg-neutral-800 sm:h-8 sm:w-20 sm:rounded" />
+                  <div className="h-12 animate-pulse rounded-lg bg-neutral-100 dark:bg-neutral-800 sm:h-8 sm:w-24 sm:rounded" />
+                  <div className="h-12 animate-pulse rounded-lg bg-neutral-100 dark:bg-neutral-800 sm:h-8 sm:w-20 sm:rounded" />
+                  <div className="h-12 animate-pulse rounded-lg bg-neutral-100 dark:bg-neutral-800 sm:h-8 sm:w-24 sm:rounded" />
+                </>
               ) : error ? (
-                <span className="text-sm text-red-500">Error loading data</span>
+                <span className="col-span-2 text-sm text-red-500">
+                  Error loading data
+                </span>
               ) : (
                 <>
                   {/* Direction */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 rounded-lg bg-neutral-50 p-2.5 dark:bg-neutral-800/50 sm:bg-transparent sm:p-0 dark:sm:bg-transparent">
                     <span
                       className={`flex h-8 w-8 items-center justify-center rounded-lg ${directionStyle.bg}`}
                     >
@@ -239,7 +233,7 @@ const ForecastChart = ({ horizon, fixedMarket }: ForecastChartProps) => {
                       </svg>
                     </span>
                     <div>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                      <p className="text-[10px] text-neutral-500 dark:text-neutral-400 sm:text-xs">
                         Direction
                       </p>
                       <p
@@ -253,8 +247,8 @@ const ForecastChart = ({ horizon, fixedMarket }: ForecastChartProps) => {
                   <div className="hidden h-10 w-px bg-neutral-200 dark:bg-neutral-700 sm:block" />
 
                   {/* Confidence */}
-                  <div>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                  <div className="rounded-lg bg-neutral-50 p-2.5 dark:bg-neutral-800/50 sm:bg-transparent sm:p-0 dark:sm:bg-transparent">
+                    <p className="text-[10px] text-neutral-500 dark:text-neutral-400 sm:text-xs">
                       Confidence
                     </p>
                     <p className="text-sm font-semibold text-neutral-900 dark:text-white">
@@ -267,11 +261,11 @@ const ForecastChart = ({ horizon, fixedMarket }: ForecastChartProps) => {
                   <div className="hidden h-10 w-px bg-neutral-200 dark:bg-neutral-700 sm:block" />
 
                   {/* Range */}
-                  <div>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                  <div className="rounded-lg bg-neutral-50 p-2.5 dark:bg-neutral-800/50 sm:bg-transparent sm:p-0 dark:sm:bg-transparent">
+                    <p className="text-[10px] text-neutral-500 dark:text-neutral-400 sm:text-xs">
                       Range
                     </p>
-                    <p className="text-sm font-semibold text-neutral-900 dark:text-white">
+                    <p className="truncate text-sm font-semibold text-neutral-900 dark:text-white">
                       {forecast?.price_range || "N/A"}
                     </p>
                   </div>
@@ -279,8 +273,8 @@ const ForecastChart = ({ horizon, fixedMarket }: ForecastChartProps) => {
                   <div className="hidden h-10 w-px bg-neutral-200 dark:bg-neutral-700 sm:block" />
 
                   {/* Change */}
-                  <div>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                  <div className="rounded-lg bg-neutral-50 p-2.5 dark:bg-neutral-800/50 sm:bg-transparent sm:p-0 dark:sm:bg-transparent">
+                    <p className="text-[10px] text-neutral-500 dark:text-neutral-400 sm:text-xs">
                       Predicted Change
                     </p>
                     <p
@@ -304,62 +298,62 @@ const ForecastChart = ({ horizon, fixedMarket }: ForecastChartProps) => {
             </div>
           </div>
 
-          {/* Mobile time info */}
+          {/* Mobile time info - Only visible on mobile */}
           <div className="border-b border-neutral-100 px-4 py-2 dark:border-neutral-800 sm:hidden">
             <div className="flex items-center justify-between">
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              <p className="text-[10px] text-neutral-500 dark:text-neutral-400">
                 Current: {formatCurrentTime()}
               </p>
               {forecast?.generated_at && (
-                <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                <p className="text-[10px] text-neutral-500 dark:text-neutral-400">
                   Updated: {formatGeneratedTime(forecast.generated_at)}
                 </p>
               )}
             </div>
           </div>
 
-          {/* Chart Area */}
-          <div className="p-4 sm:p-6">
+          {/* Chart Area - Mobile: smaller height, Desktop: unchanged */}
+          <div className="p-3 sm:p-6">
             {isLoading ? (
-              <div className="flex h-[400px] items-center justify-center">
+              <div className="flex h-[260px] items-center justify-center sm:h-[400px]">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-neutral-200 border-t-emerald-500" />
               </div>
             ) : error ? (
-              <div className="flex h-[400px] items-center justify-center">
+              <div className="flex h-[260px] items-center justify-center sm:h-[400px]">
                 <p className="text-red-500">Failed to load chart: {error}</p>
               </div>
             ) : forecast ? (
               <ChartArea forecast={forecast} horizon={horizon} />
             ) : (
-              <div className="flex h-[400px] items-center justify-center">
+              <div className="flex h-[260px] items-center justify-center sm:h-[400px]">
                 <p className="text-neutral-500">No forecast data available</p>
               </div>
             )}
           </div>
 
-          {/* Legend */}
-          <div className="flex flex-wrap items-center justify-center gap-6 border-t border-neutral-100 px-4 py-3 dark:border-neutral-800">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              <span className="text-xs text-neutral-500 dark:text-neutral-400">
+          {/* Legend - Desktop: unchanged, Mobile: smaller */}
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 border-t border-neutral-100 px-4 py-2.5 dark:border-neutral-800 sm:gap-6 sm:py-3">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 sm:h-2 sm:w-2" />
+              <span className="text-[10px] text-neutral-500 dark:text-neutral-400 sm:text-xs">
                 Predicted (Future)
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-neutral-400" />
-              <span className="text-xs text-neutral-500 dark:text-neutral-400">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-neutral-400 sm:h-2 sm:w-2" />
+              <span className="text-[10px] text-neutral-500 dark:text-neutral-400 sm:text-xs">
                 Predicted (Past)
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-blue-500" />
-              <span className="text-xs text-neutral-500 dark:text-neutral-400">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-500 sm:h-2 sm:w-2" />
+              <span className="text-[10px] text-neutral-500 dark:text-neutral-400 sm:text-xs">
                 Actual Price
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="h-0.5 w-4 border-b-2 border-dashed border-neutral-400" />
-              <span className="text-xs text-neutral-500 dark:text-neutral-400">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="h-0.5 w-3 border-b border-dashed border-neutral-400 sm:w-4 sm:border-b-2" />
+              <span className="text-[10px] text-neutral-500 dark:text-neutral-400 sm:text-xs">
                 Current Price
               </span>
             </div>
