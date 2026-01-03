@@ -272,27 +272,27 @@ const ProductHero = () => {
 
           {/* Video container */}
           <div
-            className={`relative mx-auto max-w-screen-2xl overflow-hidden rounded-3xl border border-neutral-200 shadow-2xl shadow-neutral-900/10 dark:border-neutral-800 dark:shadow-black/30 transition-all duration-700 ease-out ${
+            className={`relative mx-auto max-w-5xl overflow-hidden rounded-3xl border border-neutral-200 shadow-2xl shadow-neutral-900/10 dark:border-neutral-800 dark:shadow-black/30 transition-all duration-700 ease-out ${
               isVisible
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-6"
             }`}
             style={{ transitionDelay: "700ms" }}
           >
-            {/* Loading placeholder - maintains aspect ratio */}
-            <div className="aspect-video w-full bg-neutral-100 dark:bg-neutral-900">
+            {/* Video wrapper */}
+            <div className="w-full bg-neutral-100 dark:bg-neutral-900">
               {mounted ? (
                 <video
                   key={isDark ? "dark" : "light"}
                   src={`/videos/product_${isDark ? "black" : "white"}.mp4`}
-                  className="h-full w-full object-cover"
+                  className="w-full h-auto"
                   autoPlay
                   loop
                   muted
                   playsInline
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center">
+                <div className="aspect-video flex items-center justify-center">
                   <div className="h-10 w-10 animate-spin rounded-full border-4 border-neutral-300 border-t-[var(--brand)] dark:border-neutral-700 dark:border-t-[var(--brand)]" />
                 </div>
               )}

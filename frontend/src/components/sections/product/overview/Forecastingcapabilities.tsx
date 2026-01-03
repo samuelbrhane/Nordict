@@ -179,7 +179,7 @@ const ForecastingCapabilities = () => {
             style={{ transitionDelay: "200ms" }}
           >
             Each forecast includes probability distributions and confidence
-            bands—so you know not just{" "}
+            bands, so you know not just{" "}
             <span className="font-medium text-neutral-900 dark:text-white">
               what
             </span>{" "}

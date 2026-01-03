@@ -31,7 +31,7 @@ const ALERT_TYPES = [
   {
     id: "confidence",
     title: "Confidence shifts",
-    desc: "Alert when model confidence changes significantly—up or down.",
+    desc: "Alert when model confidence changes significantly, up or down.",
     icon: (
       <svg
         className="h-6 w-6"
