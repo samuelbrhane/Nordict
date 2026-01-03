@@ -67,27 +67,27 @@ const ROADMAP_ITEMS = [
       {
         title: "Team Features",
         description: "Shared dashboards, roles, audit logs",
-        date: "Q2 2025",
+        date: "Q2 2026",
       },
       {
         title: "Mobile App",
         description: "iOS and Android apps",
-        date: "Q2 2025",
+        date: "Q2 2026",
       },
       {
         title: "Extended Market Coverage",
         description: "100+ markets including more asset classes",
-        date: "Q3 2025",
+        date: "Q3 2026",
       },
       {
         title: "Custom Alerts Builder",
         description: "Visual alert configuration UI",
-        date: "Q3 2025",
+        date: "Q3 2026",
       },
       {
         title: "Backtesting Playground",
         description: "Test strategies against historical forecasts",
-        date: "Q3 2025",
+        date: "Q3 2026",
       },
     ],
   },
