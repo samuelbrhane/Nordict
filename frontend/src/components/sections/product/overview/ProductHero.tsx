@@ -281,21 +281,24 @@ const ProductHero = () => {
           >
             {/* Video wrapper */}
             <div className="w-full bg-neutral-100 dark:bg-neutral-900">
-              {mounted ? (
-                <video
-                  key={isDark ? "dark" : "light"}
-                  src={`/videos/product_${isDark ? "black" : "white"}.mp4`}
-                  className="w-full h-auto"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                />
-              ) : (
-                <div className="aspect-video flex items-center justify-center">
-                  <div className="h-10 w-10 animate-spin rounded-full border-4 border-neutral-300 border-t-[var(--brand)] dark:border-neutral-700 dark:border-t-[var(--brand)]" />
-                </div>
-              )}
+              <div className="relative aspect-video w-full">
+                {mounted ? (
+                  <video
+                    key={isDark ? "dark" : "light"}
+                    src={`/videos/product_${isDark ? "black" : "white"}.mp4`}
+                    className="absolute inset-0 h-full w-full object-cover"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    preload="metadata"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="h-10 w-10 animate-spin rounded-full border-4 border-neutral-300 border-t-[var(--brand)] dark:border-neutral-700 dark:border-t-[var(--brand)]" />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
