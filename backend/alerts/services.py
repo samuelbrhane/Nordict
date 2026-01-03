@@ -1,7 +1,9 @@
-from django.core.mail import send_mail
+# alerts/services.py
+
 from django.conf import settings
 from django.utils import timezone
 from .models import Alert, AlertHistory
+from config.email_services import EmailService
 
 
 def check_alert_condition(alert, forecast) -> tuple[bool, str, str]:
@@ -64,39 +66,21 @@ def check_alert_condition(alert, forecast) -> tuple[bool, str, str]:
     return False, "", ""
 
 
-def send_alert_email(alert, condition_met: str, forecast_value: str) -> bool:
-    """Send alert email to user."""
+def send_alert_email(alert, condition_met: str, forecast_value: str, forecast) -> bool:
+    """Send alert email to user using EmailService."""
     try:
         # Check if user has email notifications enabled
-        if hasattr(alert.user, 'notification_settings'):
-            if not alert.user.notification_settings.notify_alerts_email:
+        if hasattr(alert.user, 'preferences'):
+            if not alert.user.preferences.notify_alerts_email:
                 return False
         
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:3000')
-        
-        subject = f"🔔 Alert: {alert.market.symbol} - {condition_met}"
-        
-        message = f"""
-Your alert for {alert.market.symbol} ({alert.market.name}) has been triggered.
-
-Condition: {condition_met}
-Value: {forecast_value}
-Horizon: {alert.horizon}
-
-View details: {frontend_url}/app/market/{alert.market.symbol}
-
----
-Manage your alerts: {frontend_url}/app/alerts
-"""
-        
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[alert.user.email],
-            fail_silently=False,
+        # Use the new EmailService
+        return EmailService.send_price_alert(
+            user=alert.user,
+            alert=alert,
+            forecast=forecast,
+            trigger_reason=condition_met
         )
-        return True
     except Exception as e:
         print(f"Failed to send alert email: {e}")
         return False
@@ -118,8 +102,8 @@ def process_alerts_for_forecast(forecast):
         is_triggered, condition_met, forecast_value = check_alert_condition(alert, forecast)
         
         if is_triggered:
-            # Send email
-            email_sent = send_alert_email(alert, condition_met, forecast_value)
+            # Send email (now passing forecast)
+            email_sent = send_alert_email(alert, condition_met, forecast_value, forecast)
             
             # Create history record
             AlertHistory.objects.create(
@@ -140,4 +124,4 @@ def process_alerts_for_forecast(forecast):
             
             alert.save(update_fields=['last_triggered_at', 'trigger_count', 'status'])
             
-            print(f"Alert triggered: {alert} - {condition_met}")
+            print(f"Alert triggered: {alert.user.email} - {alert.market.symbol} - {condition_met}")
