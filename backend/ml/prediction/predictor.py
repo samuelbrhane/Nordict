@@ -262,7 +262,7 @@ def generate_forecast(
     predicted_prices = []
 
     # Use actual volatility from features, but cap it
-    volatility_factor = min(volatility, 0.03) * 0.2  # Small fraction of real volatility
+    volatility_factor = min(volatility, 0.03) * 0.3  # Small fraction of real volatility
 
     for i in range(config['horizon']):
         progress = (i + 1) / config['horizon']
