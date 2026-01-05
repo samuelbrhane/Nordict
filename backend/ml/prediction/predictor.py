@@ -198,7 +198,6 @@ def scale_confidence_for_display(internal_confidence: float, horizon: str) -> fl
     
     return round(scaled, 2)
 
-
 def generate_forecast(
     market: Market,
     horizon: str,
@@ -276,44 +275,39 @@ def generate_forecast(
     # Determine direction
     direction = determine_direction(current_price, predicted_prices)
     
-    # Overall confidence is average
-    overall_confidence = np.mean(confidences)
+    # Overall confidence is average (internal)
+    internal_confidence = np.mean(confidences)
+    
+    # Scale for display
+    display_confidence = scale_confidence_for_display(internal_confidence, horizon)
     
     # Calculate validity period
     now = timezone.now()
     valid_from = now
     valid_until = now + config['step_timedelta'] * config['horizon']
     
-    # Mark previous forecasts as not latest
-    Forecast.objects.filter(
-        market=market,
-        horizon=horizon,
-        is_latest=True
-    ).update(is_latest=False)
-    
-     # Overall confidence is average (internal)
-    internal_confidence = np.mean(confidences)
-    
-    # Scale for display
-    display_confidence = scale_confidence_for_display(internal_confidence, horizon)
-    
-    # Create forecast
+    # Create or update forecast (ONE per market/horizon)
     with transaction.atomic():
-        forecast = Forecast.objects.create(
+        forecast, created = Forecast.objects.update_or_create(
             market=market,
-            model=db_model,
             horizon=horizon,
-            generated_at=now,
-            valid_from=valid_from,
-            valid_until=valid_until,
-            direction=direction,
-            confidence_score=display_confidence,
-            current_price=Decimal(str(current_price)),
-            predicted_low=Decimal(str(min(predicted_prices))),
-            predicted_mid=Decimal(str(np.mean(predicted_prices))),
-            predicted_high=Decimal(str(max(predicted_prices))),
             is_latest=True,
+            defaults={
+                'model': db_model,
+                'generated_at': now,
+                'valid_from': valid_from,
+                'valid_until': valid_until,
+                'direction': direction,
+                'confidence_score': display_confidence,
+                'current_price': Decimal(str(current_price)),
+                'predicted_low': Decimal(str(min(predicted_prices))),
+                'predicted_mid': Decimal(str(np.mean(predicted_prices))),
+                'predicted_high': Decimal(str(max(predicted_prices))),
+            }
         )
+        
+        # Delete old points and create fresh
+        forecast.points.all().delete()
         
         # Create forecast points
         base_time = now.replace(minute=0, second=0, microsecond=0)
@@ -334,9 +328,9 @@ def generate_forecast(
             ))
         
         ForecastPoint.objects.bulk_create(points)
+    
     process_alerts_for_forecast(forecast)
     return forecast
-
 
 def generate_all_forecasts(horizon: str) -> list:
     """
