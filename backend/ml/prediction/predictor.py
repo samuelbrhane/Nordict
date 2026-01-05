@@ -257,12 +257,23 @@ def generate_forecast(
     # Ensure confidence stays in reasonable range
     adjusted_base_confidence = max(0.35, min(0.85, adjusted_base_confidence))
     
-    # Generate price path (smooth interpolation, no noise)
+    # Generate price path (realistic variation based on volatility)
     predicted_final_price = current_price * (1 + predicted_return)
     predicted_prices = []
+
+    # Use actual volatility from features, but cap it
+    volatility_factor = min(volatility, 0.03) * 0.2  # Small fraction of real volatility
+
     for i in range(config['horizon']):
         progress = (i + 1) / config['horizon']
-        price = current_price + (predicted_final_price - current_price) * progress
+        # Base price from linear interpolation
+        base_price = current_price + (predicted_final_price - current_price) * progress
+        
+        # Add small realistic variation (sine wave + tiny noise)
+        wave = np.sin(i * 0.5) * current_price * volatility_factor
+        micro_noise = np.random.normal(0, current_price * volatility_factor * 0.1)
+        
+        price = base_price + wave + micro_noise
         predicted_prices.append(price)
     
     # Calculate confidence scores with decay
@@ -330,6 +341,7 @@ def generate_forecast(
     
     process_alerts_for_forecast(forecast)
     return forecast
+
 
 def generate_all_forecasts(horizon: str) -> list:
     """
