@@ -262,7 +262,7 @@ def generate_forecast(
     predicted_prices = []
 
     # Smaller than before (0.002 instead of 0.005)
-    noise_scale = 0.006
+    noise_scale = 0.008
 
     price = current_price
     for i in range(config['horizon']):
