@@ -257,13 +257,12 @@ def generate_forecast(
     # Ensure confidence stays in reasonable range
     adjusted_base_confidence = max(0.35, min(0.85, adjusted_base_confidence))
     
-    # Generate price path
+    # Generate price path (smooth interpolation, no noise)
+    predicted_final_price = current_price * (1 + predicted_return)
     predicted_prices = []
-    price = current_price
     for i in range(config['horizon']):
-        step_variation = np.random.normal(0, 0.005)
-        step_return = predicted_return / config['horizon'] + step_variation
-        price = price * (1 + step_return)
+        progress = (i + 1) / config['horizon']
+        price = current_price + (predicted_final_price - current_price) * progress
         predicted_prices.append(price)
     
     # Calculate confidence scores with decay
