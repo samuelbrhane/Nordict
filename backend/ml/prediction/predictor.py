@@ -274,7 +274,7 @@ def generate_forecast(
         price = price * (1 + step_variation)
         
         # Gradually pull toward target (so it ends near prediction)
-        price = price * 0.7 + target_price * 0.8
+        price = price * 0.7 + target_price * 0.3
         
         predicted_prices.append(price)
 
