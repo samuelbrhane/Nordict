@@ -25,6 +25,15 @@ from ml.lstm.features import create_lstm_features, create_targets, clean_feature
 from ml.lstm.config import HORIZON_CONFIG
 
 
+# Training data years per horizon
+TRAINING_YEARS = {
+    '24H': 3,   # ~26,000 hourly candles
+    '30D': 5,   # ~1,825 daily candles
+    '12W': 5,   # ~260 weekly candles
+    '12M': 5,   # ~60 monthly candles
+}
+
+
 def get_scaler(scaler_type: str):
     """Get scaler by type name."""
     if scaler_type == 'minmax':
@@ -125,8 +134,11 @@ def prepare_lstm_dataset(
     timeframe = config['timeframe']
     horizon_steps = config['horizon']
     
+    # Get training years for this horizon
+    years = TRAINING_YEARS.get(horizon, 5)
+    
     # Load data
-    df = load_market_data(market, timeframe, years=5)
+    df = load_market_data(market, timeframe, years=years)
     
     if df.empty:
         raise ValueError(f"No data for {market.symbol}")
@@ -180,6 +192,8 @@ def prepare_lstm_dataset(
     _, y_test_dir = create_sequences(X_test_raw, y_test_direction, sequence_length)
     
     print(f"\nDataset for {market.symbol} ({horizon}):")
+    print(f"  Years of data: {years}")
+    print(f"  Raw samples: {len(df)}")
     print(f"  Features: {len(feature_cols)} ({'returns only' if use_returns_only else 'full'})")
     print(f"  Feature lag: {feature_lag}")
     print(f"  Sequence length: {sequence_length}")

@@ -307,30 +307,44 @@ def generate_all_backtests(horizon: str = None, days_back: int = 30):
     if horizon:
         models = models.filter(horizon=horizon)
     
-    markets = Market.objects.filter(status='active')
-    
     print(f"Models: {models.count()}")
-    print(f"Markets: {markets.count()}")
     
     created_count = 0
     
     for model in models:
         print(f"\n{model.name} v{model.version} ({model.horizon}):")
         
-        for market in markets:
-            backtest = generate_backtest_run(
-                model=model,
-                market=market,
-                horizon=model.horizon,
-                days_back=days_back,
-            )
+        if model.model_type == MLModel.ModelType.LSTM:
+            # LSTM: Only backtest for its specific market
+            if model.market:
+                backtest = generate_backtest_run(
+                    model=model,
+                    market=model.market,
+                    horizon=model.horizon,
+                    days_back=days_back,
+                )
+                
+                if backtest:
+                    print(f"  {model.market.symbol}: MAE={backtest.mae:.4f}, Dir={backtest.directional_accuracy:.1f}%")
+                    created_count += 1
+        else:
+            # XGBoost: Backtest for all markets
+            markets = Market.objects.filter(status='active')
             
-            if backtest:
-                print(f"  {market.symbol}: MAE={backtest.mae:.4f}, Dir={backtest.directional_accuracy:.1f}%")
-                created_count += 1
+            for market in markets:
+                backtest = generate_backtest_run(
+                    model=model,
+                    market=market,
+                    horizon=model.horizon,
+                    days_back=days_back,
+                )
+                
+                if backtest:
+                    print(f"  {market.symbol}: MAE={backtest.mae:.4f}, Dir={backtest.directional_accuracy:.1f}%")
+                    created_count += 1
     
     print(f"\nTotal backtest runs created: {created_count}")
-
+    
 
 def get_model_performance_summary(model: MLModel) -> dict:
     """

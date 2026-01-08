@@ -14,14 +14,14 @@ Update manually as you train new LSTM models.
 # Format: {coin: [horizons still needing LSTM]}
 
 TRAINING_QUEUE = {
-    # Priority 1: Top coins
+    # Priority 1: Top coins (full 5 years data)
     'BTC-USD': ['24H', '30D', '12W', '12M'],
     'ETH-USD': ['24H', '30D', '12W', '12M'],
     'SOL-USD': ['24H', '30D', '12W', '12M'],
     'BNB-USD': ['24H', '30D', '12W', '12M'],
     'XRP-USD': ['24H', '30D', '12W', '12M'],
     
-    # Priority 2: Major alts
+    # Priority 2: Major alts (full 5 years data)
     'ADA-USD': ['24H', '30D', '12W', '12M'],
     'AVAX-USD': ['24H', '30D', '12W', '12M'],
     'DOGE-USD': ['24H', '30D', '12W', '12M'],
@@ -29,63 +29,62 @@ TRAINING_QUEUE = {
     'LINK-USD': ['24H', '30D', '12W', '12M'],
     
     # Priority 3: DeFi & Layer 2
-    'MATIC-USD': ['24H', '30D', '12W', '12M'],
+    'MATIC-USD': ['24H', '30D', '12W'],  # Data stops 2024-09-10
     'UNI-USD': ['24H', '30D', '12W', '12M'],
     'AAVE-USD': ['24H', '30D', '12W', '12M'],
-    'ARB-USD': ['24H', '30D', '12W', '12M'],
-    'OP-USD': ['24H', '30D', '12W', '12M'],
+    'ARB-USD': ['24H', '30D'],  # ~2.8 years
+    'OP-USD': ['24H', '30D', '12W'],  # ~3.6 years
     
-    # Priority 4: Other major
+    # Priority 4: Other major (full 5 years data)
     'ATOM-USD': ['24H', '30D', '12W', '12M'],
     'LTC-USD': ['24H', '30D', '12W', '12M'],
     'ETC-USD': ['24H', '30D', '12W', '12M'],
     'XLM-USD': ['24H', '30D', '12W', '12M'],
     'NEAR-USD': ['24H', '30D', '12W', '12M'],
     
-    # Priority 5: Emerging
-    'APT-USD': ['24H', '30D', '12W', '12M'],
-    'SUI-USD': ['24H', '30D', '12W', '12M'],
-    'SEI-USD': ['24H', '30D', '12W', '12M'],
-    'INJ-USD': ['24H', '30D', '12W', '12M'],
-    'TIA-USD': ['24H', '30D', '12W', '12M'],
+    # Priority 5: Emerging (limited data)
+    'APT-USD': ['24H', '30D', '12W'],  # ~3.2 years
+    'SUI-USD': ['24H', '30D'],  # ~2.7 years
+    'SEI-USD': ['24H', '30D'],  # ~2.4 years
+    'INJ-USD': ['24H', '30D', '12W', '12M'],  # full data
+    'TIA-USD': ['24H', '30D'],  # ~2.2 years
     
     # Priority 6: AI & Gaming
-    'FET-USD': ['24H', '30D', '12W', '12M'],
-    'RENDER-USD': ['24H', '30D', '12W', '12M'],
-    'TAO-USD': ['24H', '30D', '12W', '12M'],
-    'IMX-USD': ['24H', '30D', '12W', '12M'],
-    'GALA-USD': ['24H', '30D', '12W', '12M'],
+    'FET-USD': ['24H', '30D', '12W', '12M'],  # full data
+    'RENDER-USD': ['24H'],  # ~1.5 years only
+    'TAO-USD': ['24H'],  # ~1.7 years only
+    'IMX-USD': ['24H', '30D', '12W'],  # ~4 years
+    'GALA-USD': ['24H', '30D', '12W'],  # ~4.3 years
     
     # Priority 7: Meme
-    'SHIB-USD': ['24H', '30D', '12W', '12M'],
-    'PEPE-USD': ['24H', '30D', '12W', '12M'],
-    'WIF-USD': ['24H', '30D', '12W', '12M'],
+    'SHIB-USD': ['24H', '30D', '12W', '12M'],  # ~4.7 years
+    'PEPE-USD': ['24H', '30D'],  # ~2.7 years
+    'WIF-USD': ['24H'],  # ~1.8 years only
     
     # Priority 8: DeFi protocols
-    'MKR-USD': ['24H', '30D', '12W', '12M'],
+    'MKR-USD': ['24H', '30D', '12W', '12M'],  # Data stops 2025-09-15 but still ~4.7 years
     'SNX-USD': ['24H', '30D', '12W', '12M'],
     'CRV-USD': ['24H', '30D', '12W', '12M'],
-    'LDO-USD': ['24H', '30D', '12W', '12M'],
+    'LDO-USD': ['24H', '30D', '12W'],  # ~3.7 years
     'GRT-USD': ['24H', '30D', '12W', '12M'],
     
     # Priority 9: Infrastructure
     'FIL-USD': ['24H', '30D', '12W', '12M'],
     'STX-USD': ['24H', '30D', '12W', '12M'],
     'RUNE-USD': ['24H', '30D', '12W', '12M'],
-    'ENS-USD': ['24H', '30D', '12W', '12M'],
+    'ENS-USD': ['24H', '30D', '12W'],  # ~4.2 years
     
     # Priority 10: Metaverse & Gaming
     'SAND-USD': ['24H', '30D', '12W', '12M'],
     'MANA-USD': ['24H', '30D', '12W', '12M'],
     'AXS-USD': ['24H', '30D', '12W', '12M'],
-    'FLOW-USD': ['24H', '30D', '12W', '12M'],
+    'FLOW-USD': ['24H', '30D', '12W'],  # ~4.4 years
     'CHZ-USD': ['24H', '30D', '12W', '12M'],
     'ENJ-USD': ['24H', '30D', '12W', '12M'],
-    'GMT-USD': ['24H', '30D', '12W', '12M'],
-    'APE-USD': ['24H', '30D', '12W', '12M'],
+    'GMT-USD': ['24H', '30D', '12W'],  # ~3.8 years
+    'APE-USD': ['24H', '30D', '12W'],  # ~3.8 years
     'ALGO-USD': ['24H', '30D', '12W', '12M'],
 }
-
 # ==========================================
 # CURRENT TRAINING TARGET
 # ==========================================

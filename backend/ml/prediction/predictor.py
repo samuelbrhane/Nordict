@@ -240,40 +240,51 @@ def generate_forecast(
     # Get features
     features = get_latest_features(market, config['timeframe'], feature_names, model_type)
     
-    # Get volatility from features (if available)
-    volatility = features['volatility_24'].values[0] if 'volatility_24' in features.columns else 0.02
-    
     # Predict
-    predicted_return = model.predict(features)[0]
+    if model_type == 'lstm':
+        predicted_return = model.predict(features)[0][0]
+    else:
+        predicted_return = model.predict(features)[0]
     
-    # Base confidence
-    if horizon == '24H':
-        base_confidence = 0.75
-        decay_rate = 0.005
-    elif horizon == '30D':
-        base_confidence = 0.65
-        decay_rate = 0.003
-    elif horizon == '12W':
-        base_confidence = 0.55
-        decay_rate = 0.008
-    else:  # 12M
-        base_confidence = 0.50
-        decay_rate = 0.008
-    
-    # Adjustments
-    volatility_penalty = min(0.10, volatility * 2)
-    adjusted_base_confidence = base_confidence - volatility_penalty
-    
-    prediction_magnitude = abs(predicted_return)
-    magnitude_penalty = min(0.05, prediction_magnitude)
-    adjusted_base_confidence = adjusted_base_confidence - magnitude_penalty
-    
-    adjusted_base_confidence = max(0.35, min(0.85, adjusted_base_confidence))
+    # ==========================================
+    # CONFIDENCE - LSTM vs XGBoost
+    # ==========================================
+    if model_type == 'lstm':
+        # LSTM: Use actual model accuracy, no fake adjustments
+        base_confidence = db_model.directional_accuracy / 100 if db_model.directional_accuracy else 0.55
+        decay_rate = 0.001  # Minimal decay
+        
+    else:
+        # XGBoost: Keep artificial adjustments (temporary until LSTM ready)
+        volatility = features['volatility_24'].values[0] if 'volatility_24' in features.columns else 0.02
+        
+        if horizon == '24H':
+            base_confidence = 0.75
+            decay_rate = 0.005
+        elif horizon == '30D':
+            base_confidence = 0.65
+            decay_rate = 0.003
+        elif horizon == '12W':
+            base_confidence = 0.55
+            decay_rate = 0.008
+        else:
+            base_confidence = 0.50
+            decay_rate = 0.008
+        
+        volatility_penalty = min(0.10, volatility * 2)
+        base_confidence = base_confidence - volatility_penalty
+        
+        prediction_magnitude = abs(predicted_return)
+        magnitude_penalty = min(0.05, prediction_magnitude)
+        base_confidence = base_confidence - magnitude_penalty
+        
+        base_confidence = max(0.35, min(0.85, base_confidence))
     
     # Generate price path
     predicted_final_price = current_price * (1 + predicted_return)
     predicted_prices = []
-    noise_scale = 0.008
+    
+    noise_scale = 0.005 if model_type == 'lstm' else 0.008
 
     price = current_price
     for i in range(config['horizon']):
@@ -291,12 +302,16 @@ def generate_forecast(
     # Confidence scores
     confidences = []
     for i in range(len(predicted_prices)):
-        conf = max(0.30, adjusted_base_confidence - (i * decay_rate))
+        conf = max(0.30, base_confidence - (i * decay_rate))
         confidences.append(conf)
     
     direction = determine_direction(current_price, predicted_prices)
-    internal_confidence = np.mean(confidences)
-    display_confidence = scale_confidence_for_display(internal_confidence, horizon)
+    
+    # LSTM: real confidence, XGBoost: scaled for display
+    if model_type == 'lstm':
+        display_confidence = round(np.mean(confidences), 2)
+    else:
+        display_confidence = scale_confidence_for_display(np.mean(confidences), horizon)
     
     now = timezone.now()
     valid_from = now
@@ -322,10 +337,8 @@ def generate_forecast(
             }
         )
         
-        # Only delete FUTURE points
         forecast.points.filter(timestamp__gt=now).delete()
         
-        # Create forecast points only for FUTURE timestamps
         points = []
         for i, (price, conf) in enumerate(zip(predicted_prices, confidences)):
             timestamp = base_time + config['step_timedelta'] * (i + 1)
