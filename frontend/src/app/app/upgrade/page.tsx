@@ -39,12 +39,12 @@ const UpgradePage = () => {
             >
               View Plans & Upgrade
             </Link>
-            <Link
+            {/* <Link
               href="/app/dashboard"
               className="block w-full rounded-xl border border-neutral-300 bg-white py-3 font-medium text-neutral-700 transition-all hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
             >
               Go Back to Dashboard
-            </Link>
+            </Link> */}
           </div>
         </div>
       </div>
