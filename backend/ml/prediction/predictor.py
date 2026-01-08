@@ -2,6 +2,7 @@
 
 """
 Generate forecasts using trained models.
+Supports both XGBoost (general) and LSTM (coin-specific) models.
 
 Usage:
     python -m ml.prediction.predictor --horizon 24H
@@ -50,52 +51,90 @@ HORIZON_CONFIG = {
     '12M': {
         'timeframe': '1M',
         'horizon': 12,
-        'step_timedelta': timedelta(days=30),  # Approximate
+        'step_timedelta': timedelta(days=30),
     },
 }
 
 
-def load_production_model(horizon: str) -> tuple:
+def load_production_model(horizon: str, market: Market = None) -> tuple:
     """
     Load production model for a horizon.
+    Checks for LSTM (coin-specific) first, falls back to XGBoost (general).
+    
+    Args:
+        horizon: Prediction horizon ('24H', '30D', '12W', '12M')
+        market: Market object (required for LSTM check)
     
     Returns:
-        (model, feature_names, db_model)
+        (model, feature_names, db_model, model_type)
     """
-    db_model = MLModel.objects.filter(
-        horizon=horizon,
-        status=MLModel.Status.PRODUCTION
-    ).first()
+    db_model = None
+    model_type = None
+    
+    # First, check for LSTM model (coin-specific)
+    if market:
+        db_model = MLModel.objects.filter(
+            model_type=MLModel.ModelType.LSTM,
+            market=market,
+            horizon=horizon,
+            status=MLModel.Status.PRODUCTION
+        ).first()
+        
+        if db_model:
+            model_type = 'lstm'
+    
+    # Fallback to XGBoost (general model)
+    if not db_model:
+        db_model = MLModel.objects.filter(
+            model_type=MLModel.ModelType.XGBOOST,
+            horizon=horizon,
+            status=MLModel.Status.PRODUCTION
+        ).first()
+        
+        if db_model:
+            model_type = 'xgboost'
     
     if not db_model:
         raise ValueError(f"No production model for {horizon}. Train and promote one first.")
     
-    # Load from storage (local or S3 based on path)
+    # Load from storage (local or S3)
     model_data = load_model(db_model.artifact_path)
     
-    return model_data['model'], model_data['feature_names'], db_model
+    return model_data['model'], model_data['feature_names'], db_model, model_type
 
-def get_latest_features(market: Market, timeframe: str, feature_names: list) -> pd.DataFrame:
+
+def get_latest_features(market: Market, timeframe: str, feature_names: list, model_type: str = 'xgboost') -> pd.DataFrame:
     """
     Get latest features for prediction.
     
+    Args:
+        market: Market to get features for
+        timeframe: Data timeframe
+        feature_names: List of feature names to include
+        model_type: 'xgboost' or 'lstm'
+    
     Returns:
-        DataFrame with one row of features
+        DataFrame with one row of features (or sequence for LSTM)
     """
-    # Load recent data (uses years parameter now, not limit)
-    df = load_market_data(market, timeframe, years=1)  # 1 year is enough for features
+    df = load_market_data(market, timeframe, years=1)
     
     if df.empty:
         raise ValueError(f"No data for {market.symbol}")
     
-    # Create features
-    df = create_features(df)
+    if model_type == 'lstm':
+        # Use LSTM-specific features
+        from ml.lstm.features import create_lstm_features
+        df = create_lstm_features(df)
+    else:
+        # Use XGBoost features
+        df = create_features(df)
     
-    # Add market one-hot encoding
-    for col in feature_names:
-        if col.startswith('market_'):
-            market_symbol = col.replace('market_', '')
-            df[col] = 1 if market.symbol == market_symbol else 0
+    # Add market one-hot encoding (XGBoost only)
+    if model_type == 'xgboost':
+        for col in feature_names:
+            if col.startswith('market_'):
+                market_symbol = col.replace('market_', '')
+                df[col] = 1 if market.symbol == market_symbol else 0
     
     # Get latest row
     latest = df.iloc[[-1]]
@@ -110,22 +149,13 @@ def get_latest_features(market: Market, timeframe: str, feature_names: list) -> 
     
     return latest
 
+
 def calculate_confidence(
     predictions: np.ndarray,
     base_confidence: float = 0.85,
     decay_rate: float = 0.02,
 ) -> list:
-    """
-    Calculate confidence scores that decay over time.
-    
-    Args:
-        predictions: Array of predictions
-        base_confidence: Starting confidence
-        decay_rate: How much confidence decreases per step
-    
-    Returns:
-        List of confidence scores
-    """
+    """Calculate confidence scores that decay over time."""
     confidences = []
     for i in range(len(predictions)):
         conf = max(0.25, base_confidence - (i * decay_rate))
@@ -138,24 +168,15 @@ def calculate_prediction_bounds(
     confidence: float,
     volatility: float = 0.02,
 ) -> tuple:
-    """
-    Calculate upper and lower bounds based on confidence.
-    
-    Returns:
-        (lower_bound, upper_bound)
-    """
-    # Width increases as confidence decreases
+    """Calculate upper and lower bounds based on confidence."""
     width = volatility * (1 - confidence) * 2
-    
     lower = predicted_price * (1 - width)
     upper = predicted_price * (1 + width)
-    
     return lower, upper
 
 
 def determine_direction(current_price: float, predicted_prices: list) -> str:
     """Determine overall forecast direction."""
-    
     avg_predicted = np.mean(predicted_prices)
     change_pct = (avg_predicted - current_price) / current_price
     
@@ -168,42 +189,32 @@ def determine_direction(current_price: float, predicted_prices: list) -> str:
     
     
 def scale_confidence_for_display(internal_confidence: float, horizon: str) -> float:
-    """
-    Scale confidence for better UI display.
-    Users don't understand that 50% is actually decent for crypto prediction.
-    """
-    # Different scaling per horizon
+    """Scale confidence for better UI display."""
     if horizon == '24H':
-        # Internal 0.55-0.75 -> Display 0.65-0.85
         min_in, max_in = 0.55, 0.75
         min_out, max_out = 0.65, 0.85
     elif horizon == '30D':
-        # Internal 0.40-0.60 -> Display 0.55-0.75
         min_in, max_in = 0.40, 0.60
         min_out, max_out = 0.55, 0.75
     elif horizon == '12W':
-        # Internal 0.30-0.50 -> Display 0.45-0.65
         min_in, max_in = 0.30, 0.50
         min_out, max_out = 0.45, 0.65
     else:  # 12M
-        # Internal 0.25-0.45 -> Display 0.40-0.60
         min_in, max_in = 0.25, 0.45
         min_out, max_out = 0.40, 0.60
     
-    # Clamp internal value
     clamped = max(min_in, min(max_in, internal_confidence))
-    
-    # Scale to display range
     scaled = min_out + (clamped - min_in) * (max_out - min_out) / (max_in - min_in)
-    
     return round(scaled, 2)
+
 
 def generate_forecast(
     market: Market,
     horizon: str,
-    model,
-    feature_names: list,
-    db_model: MLModel,
+    model=None,
+    feature_names: list = None,
+    db_model: MLModel = None,
+    model_type: str = None,
 ) -> Forecast:
     """
     Generate forecast for a single market.
@@ -211,7 +222,11 @@ def generate_forecast(
     """
     config = HORIZON_CONFIG[horizon]
     
-    # Get current price and features
+    # Load model if not provided
+    if model is None:
+        model, feature_names, db_model, model_type = load_production_model(horizon, market)
+    
+    # Get current price
     latest_data = MarketData.objects.filter(
         market=market,
         timeframe=config['timeframe']
@@ -221,10 +236,9 @@ def generate_forecast(
         raise ValueError(f"No price data for {market.symbol}")
     
     current_price = float(latest_data.close)
-    current_time = latest_data.timestamp
     
     # Get features
-    features = get_latest_features(market, config['timeframe'], feature_names)
+    features = get_latest_features(market, config['timeframe'], feature_names, model_type)
     
     # Get volatility from features (if available)
     volatility = features['volatility_24'].values[0] if 'volatility_24' in features.columns else 0.02
@@ -232,7 +246,7 @@ def generate_forecast(
     # Predict
     predicted_return = model.predict(features)[0]
     
-    # Base confidence - higher values for better UI display
+    # Base confidence
     if horizon == '24H':
         base_confidence = 0.75
         decay_rate = 0.005
@@ -246,22 +260,19 @@ def generate_forecast(
         base_confidence = 0.50
         decay_rate = 0.008
     
-    # Small adjustment based on volatility (max -10%)
+    # Adjustments
     volatility_penalty = min(0.10, volatility * 2)
     adjusted_base_confidence = base_confidence - volatility_penalty
     
-    # Small adjustment based on prediction magnitude (max -5%)
     prediction_magnitude = abs(predicted_return)
     magnitude_penalty = min(0.05, prediction_magnitude)
     adjusted_base_confidence = adjusted_base_confidence - magnitude_penalty
     
-    # Ensure confidence stays in reasonable range
     adjusted_base_confidence = max(0.35, min(0.85, adjusted_base_confidence))
     
-    # Generate price path (realistic random movement, controlled size)
+    # Generate price path
     predicted_final_price = current_price * (1 + predicted_return)
     predicted_prices = []
-
     noise_scale = 0.008
 
     price = current_price
@@ -271,38 +282,28 @@ def generate_forecast(
         
         step_variation = np.random.normal(0, noise_scale)
         price = price * (1 + step_variation)
-        
         price = price * 0.7 + target_price * 0.3
         
         predicted_prices.append(price)
 
     predicted_prices[-1] = predicted_final_price
     
-    # Calculate confidence scores with decay
+    # Confidence scores
     confidences = []
     for i in range(len(predicted_prices)):
         conf = max(0.30, adjusted_base_confidence - (i * decay_rate))
         confidences.append(conf)
     
-    # Determine direction
     direction = determine_direction(current_price, predicted_prices)
-    
-    # Overall confidence is average (internal)
     internal_confidence = np.mean(confidences)
-    
-    # Scale for display
     display_confidence = scale_confidence_for_display(internal_confidence, horizon)
     
-    # Calculate validity period
     now = timezone.now()
     valid_from = now
     valid_until = now + config['step_timedelta'] * config['horizon']
-    
-    # Base time for forecast points
     base_time = now.replace(minute=0, second=0, microsecond=0)
     
     with transaction.atomic():
-        # Get or create forecast
         forecast, created = Forecast.objects.update_or_create(
             market=market,
             horizon=horizon,
@@ -321,7 +322,7 @@ def generate_forecast(
             }
         )
         
-        # Only delete FUTURE points - preserve past points with actuals
+        # Only delete FUTURE points
         forecast.points.filter(timestamp__gt=now).delete()
         
         # Create forecast points only for FUTURE timestamps
@@ -329,7 +330,6 @@ def generate_forecast(
         for i, (price, conf) in enumerate(zip(predicted_prices, confidences)):
             timestamp = base_time + config['step_timedelta'] * (i + 1)
             
-            # Skip past timestamps - they already have predictions (and maybe actuals)
             if timestamp <= now:
                 continue
             
@@ -353,51 +353,81 @@ def generate_forecast(
 
 
 def generate_all_forecasts(horizon: str) -> list:
-    """
-    Generate forecasts for all active markets.
-    
-    Returns:
-        List of created Forecast objects
-    """
+    """Generate forecasts for all active markets."""
     print(f"\n{'='*50}")
     print(f"GENERATING {horizon} FORECASTS")
     print(f"{'='*50}")
     
-    # Load model
-    print("\nLoading production model...")
-    model, feature_names, db_model = load_production_model(horizon)
-    print(f"Model: {db_model.name} v{db_model.version}")
-    
-    # Get all active markets
     markets = Market.objects.filter(status='active')
     print(f"Markets: {markets.count()}")
     
     forecasts = []
     errors = []
     
+    # Cache XGBoost model (used as fallback)
+    xgb_model, xgb_features, xgb_db_model = None, None, None
+    try:
+        xgb_db_model = MLModel.objects.filter(
+            model_type=MLModel.ModelType.XGBOOST,
+            horizon=horizon,
+            status=MLModel.Status.PRODUCTION
+        ).first()
+        if xgb_db_model:
+            xgb_data = load_model(xgb_db_model.artifact_path)
+            xgb_model = xgb_data['model']
+            xgb_features = xgb_data['feature_names']
+            print(f"XGBoost model: {xgb_db_model.name} v{xgb_db_model.version}")
+    except Exception as e:
+        print(f"Warning: No XGBoost model available - {e}")
+    
     for market in markets:
         try:
-            forecast = generate_forecast(
+            # Check for LSTM model first
+            lstm_db_model = MLModel.objects.filter(
+                model_type=MLModel.ModelType.LSTM,
                 market=market,
                 horizon=horizon,
-                model=model,
-                feature_names=feature_names,
-                db_model=db_model,
-            )
+                status=MLModel.Status.PRODUCTION
+            ).first()
+            
+            if lstm_db_model:
+                # Use LSTM
+                lstm_data = load_model(lstm_db_model.artifact_path)
+                forecast = generate_forecast(
+                    market=market,
+                    horizon=horizon,
+                    model=lstm_data['model'],
+                    feature_names=lstm_data['feature_names'],
+                    db_model=lstm_db_model,
+                    model_type='lstm',
+                )
+                print(f"  {market.symbol}: {forecast.direction} (LSTM, conf: {forecast.confidence_score:.2f})")
+            elif xgb_model:
+                # Fallback to XGBoost
+                forecast = generate_forecast(
+                    market=market,
+                    horizon=horizon,
+                    model=xgb_model,
+                    feature_names=xgb_features,
+                    db_model=xgb_db_model,
+                    model_type='xgboost',
+                )
+                print(f"  {market.symbol}: {forecast.direction} (XGB, conf: {forecast.confidence_score:.2f})")
+            else:
+                raise ValueError("No model available")
+            
             forecasts.append(forecast)
-            print(f"  {market.symbol}: {forecast.direction} (conf: {forecast.confidence_score:.2f})")
+            
         except Exception as e:
             errors.append((market.symbol, str(e)))
             print(f"  {market.symbol}: ERROR - {e}")
     
     print(f"\nComplete: {len(forecasts)} forecasts, {len(errors)} errors")
-    
     return forecasts
 
 
 def generate_forecasts_for_all_horizons():
     """Generate forecasts for all horizons."""
-    
     all_forecasts = {}
     
     for horizon in ['24H', '30D', '12W', '12M']:
@@ -428,11 +458,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     if args.market and args.horizon:
-        # Single market forecast
         market = Market.objects.get(symbol=args.market)
-        model, feature_names, db_model = load_production_model(args.horizon)
-        forecast = generate_forecast(market, args.horizon, model, feature_names, db_model)
+        model, feature_names, db_model, model_type = load_production_model(args.horizon, market)
+        forecast = generate_forecast(market, args.horizon, model, feature_names, db_model, model_type)
         print(f"\nForecast created:")
+        print(f"  Model: {model_type.upper()}")
         print(f"  Direction: {forecast.direction}")
         print(f"  Confidence: {forecast.confidence_score:.2f}")
         print(f"  Predicted: ${forecast.predicted_mid}")

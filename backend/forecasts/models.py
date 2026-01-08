@@ -15,11 +15,28 @@ class MLModel(models.Model):
         W12 = '12W', '12 Weeks'
         M12 = '12M', '12 Months'
     
+    class ModelType(models.TextChoices):
+        XGBOOST = 'xgboost', 'XGBoost'
+        LSTM = 'lstm', 'LSTM'
+    
     name = models.CharField(max_length=100)
     version = models.CharField(max_length=20)
+    model_type = models.CharField(
+        max_length=20,
+        choices=ModelType.choices,
+        default=ModelType.XGBOOST,
+    )
     horizon = models.CharField(
         max_length=10,
         choices=Horizon.choices,
+    )
+    # Null for XGBoost (general model), set for LSTM (coin-specific)
+    market = models.ForeignKey(
+        'markets.Market',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='ml_models',
     )
     status = models.CharField(
         max_length=20,
@@ -39,11 +56,11 @@ class MLModel(models.Model):
     mape = models.FloatField(null=True, blank=True)
     directional_accuracy = models.FloatField(null=True, blank=True)
     
-    r2 = models.FloatField(null=True, blank=True)  # R-squared
-    median_ae = models.FloatField(null=True, blank=True)  # Median Absolute Error
-    max_error = models.FloatField(null=True, blank=True)  # Worst prediction
-    bias = models.FloatField(null=True, blank=True)  # Prediction bias
-    correlation = models.FloatField(null=True, blank=True) 
+    r2 = models.FloatField(null=True, blank=True)
+    median_ae = models.FloatField(null=True, blank=True)
+    max_error = models.FloatField(null=True, blank=True)
+    bias = models.FloatField(null=True, blank=True)
+    correlation = models.FloatField(null=True, blank=True)
     
     config = models.JSONField(default=dict)
     description = models.TextField(blank=True)
@@ -53,10 +70,17 @@ class MLModel(models.Model):
     
     class Meta:
         db_table = 'ml_models'
-        unique_together = ['name', 'version', 'horizon']
         ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['model_type', 'horizon', 'market', 'version'],
+                name='unique_model_version'
+            )
+        ]
     
     def __str__(self):
+        if self.market:
+            return f"{self.name} {self.market.symbol} v{self.version} ({self.horizon}) - {self.status}"
         return f"{self.name} v{self.version} ({self.horizon}) - {self.status}"
     
     

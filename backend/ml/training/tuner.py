@@ -2,6 +2,7 @@
 
 """
 Hyperparameter tuning for XGBoost model.
+Skips coins that already have LSTM models for the horizon.
 
 Usage:
     python -m ml.training.tuner --horizon 24H
@@ -23,6 +24,7 @@ from sklearn.model_selection import RandomizedSearchCV, TimeSeriesSplit
 from xgboost import XGBRegressor
 
 from markets.models import Market
+from forecasts.models import MLModel
 from ml.features.engineer import prepare_multi_market_dataset
 
 
@@ -48,6 +50,32 @@ HORIZON_CONFIG = {
 }
 
 
+def get_xgboost_markets(horizon: str) -> list:
+    """
+    Get markets that should use XGBoost (no LSTM model exists).
+    
+    Args:
+        horizon: Prediction horizon
+    
+    Returns:
+        List of Market objects without LSTM models for this horizon
+    """
+    # Get all active markets
+    all_markets = Market.objects.filter(status='active')
+    
+    # Get markets that have LSTM production models for this horizon
+    lstm_market_ids = MLModel.objects.filter(
+        model_type=MLModel.ModelType.LSTM,
+        horizon=horizon,
+        status=MLModel.Status.PRODUCTION
+    ).values_list('market_id', flat=True)
+    
+    # Exclude markets with LSTM models
+    xgboost_markets = all_markets.exclude(id__in=lstm_market_ids)
+    
+    return list(xgboost_markets)
+
+
 def tune_hyperparameters(
     horizon: str,
     n_iter: int = 50,
@@ -56,6 +84,7 @@ def tune_hyperparameters(
 ) -> dict:
     """
     Find best hyperparameters for a horizon.
+    Only uses markets without LSTM models.
     
     Args:
         horizon: '24H', '30D', '12W', '12M'
@@ -71,14 +100,25 @@ def tune_hyperparameters(
         raise ValueError(f"Invalid horizon: {horizon}")
     
     print(f"\n{'='*50}")
-    print(f"TUNING HYPERPARAMETERS FOR {horizon}")
+    print(f"TUNING HYPERPARAMETERS FOR {horizon} (XGBoost)")
     print(f"{'='*50}")
     print(f"Timeframe: {config['timeframe']}")
     print(f"Horizon: {config['horizon']} steps")
     
-    # Load all active markets
-    markets = list(Market.objects.filter(status='active'))
-    print(f"Markets: {len(markets)}")
+    # Get markets without LSTM models
+    markets = get_xgboost_markets(horizon)
+    
+    # Count LSTM markets for info
+    all_markets_count = Market.objects.filter(status='active').count()
+    lstm_markets_count = all_markets_count - len(markets)
+    
+    print(f"Total markets: {all_markets_count}")
+    print(f"LSTM markets (skipped): {lstm_markets_count}")
+    print(f"XGBoost markets (training): {len(markets)}")
+    
+    if not markets:
+        print("\nNo markets need XGBoost - all have LSTM models!")
+        return {}
     
     # Prepare dataset
     print("\nPreparing dataset...")
@@ -153,6 +193,8 @@ def tune_hyperparameters(
             'train_samples': len(X_train),
             'test_samples': len(X_test),
             'n_features': len(X_train.columns),
+            'n_markets': len(markets),
+            'lstm_markets_skipped': lstm_markets_count,
             'tuned_at': datetime.utcnow().isoformat(),
         }
         

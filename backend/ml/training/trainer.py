@@ -1,5 +1,8 @@
+# ml/training/trainer.py
+
 """
 Train XGBoost model with tuned hyperparameters.
+Skips coins that already have LSTM models for the horizon.
 
 Usage:
     python -m ml.training.trainer --horizon 24H
@@ -41,6 +44,29 @@ CONFIGS_DIR = os.path.join(BASE_DIR, 'configs')
 MODELS_DIR = os.path.join(BASE_DIR, 'models')
 
 
+def get_xgboost_markets(horizon: str) -> list:
+    """
+    Get markets that should use XGBoost (no LSTM model exists).
+    
+    Args:
+        horizon: Prediction horizon
+    
+    Returns:
+        List of Market objects without LSTM models for this horizon
+    """
+    all_markets = Market.objects.filter(status='active')
+    
+    lstm_market_ids = MLModel.objects.filter(
+        model_type=MLModel.ModelType.LSTM,
+        horizon=horizon,
+        status=MLModel.Status.PRODUCTION
+    ).values_list('market_id', flat=True)
+    
+    xgboost_markets = all_markets.exclude(id__in=lstm_market_ids)
+    
+    return list(xgboost_markets)
+
+
 def load_best_params(horizon: str) -> dict:
     """Load saved hyperparameters for a horizon."""
     
@@ -74,61 +100,43 @@ def get_default_params() -> dict:
     }
 
 
-# ml/training/trainer.py
-
-# Replace the calculate_metrics function with this enhanced version:
-
 def calculate_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
     """Calculate comprehensive model performance metrics."""
     
-    # Basic regression metrics
     mse = np.mean((y_true - y_pred) ** 2)
     rmse = np.sqrt(mse)
     mae = np.mean(np.abs(y_true - y_pred))
     
-    # MAPE (avoid division by zero)
     mask = y_true != 0
     if mask.sum() > 0:
         mape = np.mean(np.abs((y_true[mask] - y_pred[mask]) / y_true[mask])) * 100
     else:
         mape = 0
     
-    # Directional accuracy
     actual_direction = (y_true > 0).astype(int)
     predicted_direction = (y_pred > 0).astype(int)
     directional_accuracy = np.mean(actual_direction == predicted_direction) * 100
     
-    # R-squared
     ss_res = np.sum((y_true - y_pred) ** 2)
     ss_tot = np.sum((y_true - np.mean(y_true)) ** 2)
     r2 = 1 - (ss_res / ss_tot) if ss_tot != 0 else 0
     
-    # Median Absolute Error (more robust to outliers)
     median_ae = np.median(np.abs(y_true - y_pred))
-    
-    # Max error (worst prediction)
     max_error = np.max(np.abs(y_true - y_pred))
     
-    # Percentile errors
     errors = np.abs(y_true - y_pred)
     p90_error = np.percentile(errors, 90)
     p95_error = np.percentile(errors, 95)
     
-    # Prediction bias (are we consistently over/under predicting?)
     bias = np.mean(y_pred - y_true)
-    
-    # Correlation
     correlation = np.corrcoef(y_true, y_pred)[0, 1] if len(y_true) > 1 else 0
     
     return {
-        # Primary metrics (stored in MLModel fields)
         'mse': float(mse),
         'rmse': float(rmse),
         'mae': float(mae),
         'mape': float(mape),
         'directional_accuracy': float(directional_accuracy),
-        
-        # Extended metrics (stored in MLModel.config)
         'r2': float(r2),
         'median_ae': float(median_ae),
         'max_error': float(max_error),
@@ -138,6 +146,7 @@ def calculate_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
         'correlation': float(correlation),
     }
 
+
 def train_model(
     horizon: str,
     use_tuned_params: bool = True,
@@ -145,6 +154,7 @@ def train_model(
 ) -> tuple:
     """
     Train XGBoost model for a horizon.
+    Only uses markets without LSTM models.
     
     Args:
         horizon: '24H', '30D', '12W', '12M'
@@ -152,14 +162,14 @@ def train_model(
         save_model: Save model to file and database
     
     Returns:
-        (model, metrics, model_path)
+        (model, metrics, model_path, db_model)
     """
     config = HORIZON_CONFIG.get(horizon)
     if not config:
         raise ValueError(f"Invalid horizon: {horizon}")
     
     print(f"\n{'='*50}")
-    print(f"TRAINING MODEL FOR {horizon}")
+    print(f"TRAINING XGBoost MODEL FOR {horizon}")
     print(f"{'='*50}")
     
     # Load hyperparameters
@@ -179,9 +189,19 @@ def train_model(
     for key, value in params.items():
         print(f"  {key}: {value}")
     
-    # Load all active markets
-    markets = list(Market.objects.filter(status='active'))
-    print(f"\nMarkets: {len(markets)}")
+    # Get markets without LSTM models
+    markets = get_xgboost_markets(horizon)
+    
+    all_markets_count = Market.objects.filter(status='active').count()
+    lstm_markets_count = all_markets_count - len(markets)
+    
+    print(f"\nTotal markets: {all_markets_count}")
+    print(f"LSTM markets (skipped): {lstm_markets_count}")
+    print(f"XGBoost markets (training): {len(markets)}")
+    
+    if not markets:
+        print("\nNo markets need XGBoost - all have LSTM models!")
+        return None, None, None, None
     
     # Prepare dataset
     print("\nPreparing dataset...")
@@ -192,7 +212,6 @@ def train_model(
         train_ratio=0.8,
     )
     
-    # Store feature names for later
     feature_names = list(X_train.columns)
     
     # Create model
@@ -249,11 +268,9 @@ def train_model(
     db_model = None
     
     if save_model:
-        # Generate version
         version = timezone.now().strftime('%Y%m%d_%H%M%S')
         model_filename = f'xgboost_{horizon}_{version}.pkl'
         
-        # Save model with metadata
         model_data = {
             'model': model,
             'feature_names': feature_names,
@@ -262,18 +279,20 @@ def train_model(
             'params': params,
             'metrics': test_metrics,
             'trained_at': training_completed.isoformat(),
+            'model_type': 'xgboost',
         }
         
-        # Save to storage (local or S3 based on env)
         model_path = save_model_to_storage(model_data, model_filename)
         
         print(f"\nModel saved to: {model_path}")
         
-        # Save to database
+        # Save to database with model_type
         db_model = MLModel.objects.create(
             name='XGBoost',
             version=version,
+            model_type=MLModel.ModelType.XGBOOST,
             horizon=horizon,
+            market=None,  # XGBoost is general, not coin-specific
             status=MLModel.Status.CANDIDATE,
             training_started_at=training_started,
             training_completed_at=training_completed,
@@ -294,6 +313,7 @@ def train_model(
                     'test_samples': len(X_test),
                     'n_features': len(feature_names),
                     'n_markets': len(markets),
+                    'lstm_markets_skipped': lstm_markets_count,
                 },
             },
             description=f"XGBoost model for {horizon} horizon. {len(markets)} markets, {len(feature_names)} features.",
@@ -309,17 +329,25 @@ def promote_model(model_id: int):
     
     model = MLModel.objects.get(id=model_id)
     
-    # Demote current production model
-    MLModel.objects.filter(
-        horizon=model.horizon,
-        status=MLModel.Status.PRODUCTION
-    ).update(status=MLModel.Status.DEPRECATED)
+    # Demote current production model (same type, same horizon, same market if LSTM)
+    demote_filter = {
+        'model_type': model.model_type,
+        'horizon': model.horizon,
+        'status': MLModel.Status.PRODUCTION,
+    }
+    
+    # For LSTM, also filter by market (coin-specific)
+    if model.model_type == MLModel.ModelType.LSTM:
+        demote_filter['market'] = model.market
+    
+    MLModel.objects.filter(**demote_filter).update(status=MLModel.Status.DEPRECATED)
     
     # Promote new model
     model.status = MLModel.Status.PRODUCTION
     model.save(update_fields=['status'])
     
-    print(f"Model {model_id} promoted to PRODUCTION")
+    market_info = f" for {model.market.symbol}" if model.market else ""
+    print(f"Model {model_id} ({model.model_type}{market_info}) promoted to PRODUCTION")
     print(f"Previous production models deprecated")
 
 
@@ -334,11 +362,12 @@ def train_all_horizons(use_tuned_params: bool = True):
                 horizon,
                 use_tuned_params=use_tuned_params
             )
-            results[horizon] = {
-                'metrics': metrics,
-                'path': path,
-                'db_id': db_model.id if db_model else None,
-            }
+            if db_model:
+                results[horizon] = {
+                    'metrics': metrics,
+                    'path': path,
+                    'db_id': db_model.id,
+                }
         except Exception as e:
             print(f"\nError training {horizon}: {e}")
             continue
