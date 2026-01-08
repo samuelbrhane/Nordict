@@ -2,7 +2,6 @@
 
 """
 Dataset preparation for LSTM.
-Creates sequences for time series prediction.
 """
 
 import os
@@ -22,16 +21,7 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
 from markets.models import Market
 from ml.features.engineer import load_market_data
 from ml.lstm.features import create_lstm_features, create_targets, clean_features, get_feature_columns
-from ml.lstm.config import HORIZON_CONFIG
-
-
-# Training data years per horizon
-TRAINING_YEARS = {
-    '24H': 3,   # ~26,000 hourly candles
-    '30D': 5,   # ~1,825 daily candles
-    '12W': 5,   # ~260 weekly candles
-    '12M': 5,   # ~60 monthly candles
-}
+from ml.lstm.config import HORIZON_CONFIG, TRAINING_YEARS
 
 
 def get_scaler(scaler_type: str):
@@ -44,24 +34,8 @@ def get_scaler(scaler_type: str):
         return StandardScaler()
 
 
-def create_sequences(
-    X: np.ndarray,
-    y: np.ndarray,
-    sequence_length: int = 72,
-) -> Tuple[np.ndarray, np.ndarray]:
-    """
-    Create sequences for LSTM input.
-    
-    Args:
-        X: Feature array (n_samples, n_features)
-        y: Target array (n_samples,)
-        sequence_length: Number of time steps per sequence
-    
-    Returns:
-        (X_sequences, y_sequences)
-        X_sequences shape: (n_sequences, sequence_length, n_features)
-        y_sequences shape: (n_sequences,)
-    """
+def create_sequences(X: np.ndarray, y: np.ndarray, sequence_length: int = 72) -> Tuple[np.ndarray, np.ndarray]:
+    """Create sequences for LSTM input."""
     X_seq = []
     y_seq = []
     
@@ -73,32 +47,24 @@ def create_sequences(
 
 
 def add_lagged_features(df: pd.DataFrame, feature_cols: list, lag: int) -> Tuple[pd.DataFrame, list]:
-    """
-    Add lagged versions of features to DataFrame.
-    
-    Args:
-        df: DataFrame with features
-        feature_cols: List of feature column names
-        lag: Number of lag periods to add
-    
-    Returns:
-        (DataFrame with lagged features, updated feature column list)
-    """
+    """Add lagged versions of features."""
     if lag <= 0:
         return df, feature_cols
     
     df = df.copy()
     new_cols = []
     
+    lagged_data = {}
     for col in feature_cols:
         for l in range(1, lag + 1):
             new_col_name = f'{col}_lag{l}'
-            df[new_col_name] = df[col].shift(l)
+            lagged_data[new_col_name] = df[col].shift(l)
             new_cols.append(new_col_name)
     
-    updated_cols = feature_cols + new_cols
+    lagged_df = pd.DataFrame(lagged_data, index=df.index)
+    df = pd.concat([df, lagged_df], axis=1)
     
-    return df, updated_cols
+    return df, feature_cols + new_cols
 
 
 def prepare_lstm_dataset(
@@ -111,63 +77,38 @@ def prepare_lstm_dataset(
     use_returns_only: bool = False,
     feature_lag: int = 0,
 ) -> dict:
-    """
-    Prepare dataset for LSTM training.
-    
-    Args:
-        market: Market to prepare data for
-        horizon: Prediction horizon ('24H', '30D', '12W', '12M')
-        sequence_length: Number of time steps per sequence
-        train_ratio: Ratio of data for training
-        scale_features: Whether to scale features
-        scaler_type: 'standard', 'minmax', or 'robust'
-        use_returns_only: Use only return-based features
-        feature_lag: Number of lag periods to add
-    
-    Returns:
-        Dict with X_train, X_test, y_train, y_test, scaler, feature_names
-    """
+    """Prepare dataset for LSTM training."""
     config = HORIZON_CONFIG.get(horizon)
     if not config:
         raise ValueError(f"Invalid horizon: {horizon}")
     
     timeframe = config['timeframe']
     horizon_steps = config['horizon']
-    
-    # Get training years for this horizon
     years = TRAINING_YEARS.get(horizon, 5)
     
-    # Load data
     df = load_market_data(market, timeframe, years=years)
     
     if df.empty:
         raise ValueError(f"No data for {market.symbol}")
     
-    # Create features and targets
     df = create_lstm_features(df)
     df = create_targets(df, horizon_steps)
     
-    # Get feature columns
     feature_cols = get_feature_columns(use_returns_only=use_returns_only)
     
-    # Add lagged features
     if feature_lag > 0:
         df, feature_cols = add_lagged_features(df, feature_cols, feature_lag)
     
-    # Clean after adding lags (will have NaN from shifts)
     df = clean_features(df)
     
-    # Ensure all features exist
     for col in feature_cols:
         if col not in df.columns:
             raise ValueError(f"Missing feature: {col}")
     
-    # Extract features and target
     X = df[feature_cols].values
     y_return = df['target_return'].values
     y_direction = df['target_direction'].values
     
-    # Split BEFORE creating sequences (time-based)
     split_idx = int(len(X) * train_ratio)
     
     X_train_raw = X[:split_idx]
@@ -177,14 +118,12 @@ def prepare_lstm_dataset(
     y_train_direction = y_direction[:split_idx]
     y_test_direction = y_direction[split_idx:]
     
-    # Scale features
     scaler = None
     if scale_features:
         scaler = get_scaler(scaler_type)
         X_train_raw = scaler.fit_transform(X_train_raw)
         X_test_raw = scaler.transform(X_test_raw)
     
-    # Create sequences
     X_train, y_train_ret = create_sequences(X_train_raw, y_train_return, sequence_length)
     X_test, y_test_ret = create_sequences(X_test_raw, y_test_return, sequence_length)
     
@@ -216,32 +155,3 @@ def prepare_lstm_dataset(
         'use_returns_only': use_returns_only,
         'feature_lag': feature_lag,
     }
-
-
-if __name__ == '__main__':
-    # Test
-    print("=" * 50)
-    print("TESTING LSTM DATASET")
-    print("=" * 50)
-    
-    market = Market.objects.filter(symbol='BTC-USD').first()
-    
-    if market:
-        # Test full features
-        data = prepare_lstm_dataset(market, horizon='24H', sequence_length=72)
-        
-        # Test returns only
-        data_returns = prepare_lstm_dataset(
-            market, horizon='24H', sequence_length=72, 
-            use_returns_only=True
-        )
-        
-        # Test with lag
-        data_lag = prepare_lstm_dataset(
-            market, horizon='24H', sequence_length=72,
-            feature_lag=2
-        )
-        
-        print(f"\nTest complete!")
-    else:
-        print("No BTC-USD market found.")
