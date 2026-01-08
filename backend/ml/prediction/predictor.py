@@ -207,6 +207,7 @@ def generate_forecast(
 ) -> Forecast:
     """
     Generate forecast for a single market.
+    Preserves past predictions, only updates future timestamps.
     """
     config = HORIZON_CONFIG[horizon]
     
@@ -261,7 +262,6 @@ def generate_forecast(
     predicted_final_price = current_price * (1 + predicted_return)
     predicted_prices = []
 
-    # Smaller than before (0.002 instead of 0.005)
     noise_scale = 0.008
 
     price = current_price
@@ -269,16 +269,13 @@ def generate_forecast(
         progress = (i + 1) / config['horizon']
         target_price = current_price + (predicted_final_price - current_price) * progress
         
-        # Random movement like old code, but smaller
         step_variation = np.random.normal(0, noise_scale)
         price = price * (1 + step_variation)
         
-        # Gradually pull toward target (so it ends near prediction)
         price = price * 0.7 + target_price * 0.3
         
         predicted_prices.append(price)
 
-    # Ensure last price matches prediction
     predicted_prices[-1] = predicted_final_price
     
     # Calculate confidence scores with decay
@@ -301,8 +298,11 @@ def generate_forecast(
     valid_from = now
     valid_until = now + config['step_timedelta'] * config['horizon']
     
-    # Create or update forecast (ONE per market/horizon)
+    # Base time for forecast points
+    base_time = now.replace(minute=0, second=0, microsecond=0)
+    
     with transaction.atomic():
+        # Get or create forecast
         forecast, created = Forecast.objects.update_or_create(
             market=market,
             horizon=horizon,
@@ -321,15 +321,18 @@ def generate_forecast(
             }
         )
         
-        # Delete old points and create fresh
-        forecast.points.all().delete()
+        # Only delete FUTURE points - preserve past points with actuals
+        forecast.points.filter(timestamp__gt=now).delete()
         
-        # Create forecast points
-        base_time = now.replace(minute=0, second=0, microsecond=0)
-
+        # Create forecast points only for FUTURE timestamps
         points = []
         for i, (price, conf) in enumerate(zip(predicted_prices, confidences)):
             timestamp = base_time + config['step_timedelta'] * (i + 1)
+            
+            # Skip past timestamps - they already have predictions (and maybe actuals)
+            if timestamp <= now:
+                continue
+            
             lower, upper = calculate_prediction_bounds(price, conf)
             
             points.append(ForecastPoint(
@@ -342,7 +345,8 @@ def generate_forecast(
                 confidence_score=conf,
             ))
         
-        ForecastPoint.objects.bulk_create(points)
+        if points:
+            ForecastPoint.objects.bulk_create(points)
     
     process_alerts_for_forecast(forecast)
     return forecast
