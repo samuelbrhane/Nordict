@@ -296,6 +296,7 @@ def generate_backtest_run(
 def generate_all_backtests(horizon: str = None, days_back: int = 30):
     """
     Generate backtest runs for all models/markets.
+    Handles both coin-specific and general XGBoost models.
     """
     print(f"\n{'='*50}")
     print("GENERATING BACKTEST RUNS")
@@ -312,24 +313,38 @@ def generate_all_backtests(horizon: str = None, days_back: int = 30):
     created_count = 0
     
     for model in models:
-        print(f"\n{model.name} v{model.version} ({model.horizon}):")
+        # Determine model type based on market field
+        is_coin_specific = model.market is not None
+        model_label = f"XGB-Coin ({model.market.symbol})" if is_coin_specific else "XGB-General"
         
-        if model.model_type == MLModel.ModelType.LSTM:
-            # LSTM: Only backtest for its specific market
-            if model.market:
-                backtest = generate_backtest_run(
-                    model=model,
-                    market=model.market,
-                    horizon=model.horizon,
-                    days_back=days_back,
-                )
-                
-                if backtest:
-                    print(f"  {model.market.symbol}: MAE={backtest.mae:.4f}, Dir={backtest.directional_accuracy:.1f}%")
-                    created_count += 1
+        print(f"\n{model.name} v{model.version} ({model.horizon}) - {model_label}:")
+        
+        if is_coin_specific:
+            # Coin-specific XGBoost: Only backtest for its specific market
+            backtest = generate_backtest_run(
+                model=model,
+                market=model.market,
+                horizon=model.horizon,
+                days_back=days_back,
+            )
+            
+            if backtest:
+                print(f"  {model.market.symbol}: MAE={backtest.mae:.4f}, Dir={backtest.directional_accuracy:.1f}%")
+                created_count += 1
         else:
-            # XGBoost: Backtest for all markets
+            # General XGBoost: Backtest for all markets (excluding those with coin-specific models)
             markets = Market.objects.filter(status='active')
+            
+            # Get markets that have coin-specific models for this horizon
+            coin_specific_market_ids = MLModel.objects.filter(
+                model_type=MLModel.ModelType.XGBOOST,
+                market__isnull=False,
+                horizon=model.horizon,
+                status=MLModel.Status.PRODUCTION
+            ).values_list('market_id', flat=True)
+            
+            # Exclude markets with coin-specific models
+            markets = markets.exclude(id__in=coin_specific_market_ids)
             
             for market in markets:
                 backtest = generate_backtest_run(
@@ -376,9 +391,13 @@ def print_performance_report():
     models = MLModel.objects.filter(status=MLModel.Status.PRODUCTION)
     
     for model in models:
+        # Determine model type
+        is_coin_specific = model.market is not None
+        model_label = f"XGB-Coin ({model.market.symbol})" if is_coin_specific else "XGB-General"
+        
         summary = get_model_performance_summary(model)
         
-        print(f"\n{model.name} v{model.version} ({model.horizon}):")
+        print(f"\n{model.name} v{model.version} ({model.horizon}) - {model_label}:")
         
         if summary:
             print(f"  Markets tested: {summary['total_markets']}")

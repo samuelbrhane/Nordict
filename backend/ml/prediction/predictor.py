@@ -2,7 +2,7 @@
 
 """
 Generate forecasts using trained models.
-Supports both XGBoost (general) and LSTM (coin-specific) models.
+Supports XGBoost (coin-specific) and XGBoost (general).
 
 Usage:
     python -m ml.prediction.predictor --horizon 24H
@@ -59,11 +59,11 @@ HORIZON_CONFIG = {
 def load_production_model(horizon: str, market: Market = None) -> tuple:
     """
     Load production model for a horizon.
-    Checks for LSTM (coin-specific) first, falls back to XGBoost (general).
+    Priority: XGBoost (coin-specific) > XGBoost (general)
     
     Args:
         horizon: Prediction horizon ('24H', '30D', '12W', '12M')
-        market: Market object (required for LSTM check)
+        market: Market object (required for coin-specific check)
     
     Returns:
         (model, feature_names, db_model, model_type)
@@ -71,28 +71,29 @@ def load_production_model(horizon: str, market: Market = None) -> tuple:
     db_model = None
     model_type = None
     
-    # First, check for LSTM model (coin-specific)
     if market:
+        # 1. Check for XGBoost coin-specific model
         db_model = MLModel.objects.filter(
-            model_type=MLModel.ModelType.LSTM,
+            model_type=MLModel.ModelType.XGBOOST,
             market=market,
             horizon=horizon,
             status=MLModel.Status.PRODUCTION
         ).first()
         
         if db_model:
-            model_type = 'lstm'
+            model_type = 'xgboost_coin'
     
-    # Fallback to XGBoost (general model)
+    # 2. Fallback to XGBoost general model
     if not db_model:
         db_model = MLModel.objects.filter(
             model_type=MLModel.ModelType.XGBOOST,
+            market__isnull=True,  # General model has no market
             horizon=horizon,
             status=MLModel.Status.PRODUCTION
         ).first()
         
         if db_model:
-            model_type = 'xgboost'
+            model_type = 'xgboost_general'
     
     if not db_model:
         raise ValueError(f"No production model for {horizon}. Train and promote one first.")
@@ -103,7 +104,7 @@ def load_production_model(horizon: str, market: Market = None) -> tuple:
     return model_data['model'], model_data['feature_names'], db_model, model_type
 
 
-def get_latest_features(market: Market, timeframe: str, feature_names: list, model_type: str = 'xgboost') -> pd.DataFrame:
+def get_latest_features(market: Market, timeframe: str, feature_names: list, model_type: str = 'xgboost_general', model_data: dict = None) -> pd.DataFrame:
     """
     Get latest features for prediction.
     
@@ -111,26 +112,31 @@ def get_latest_features(market: Market, timeframe: str, feature_names: list, mod
         market: Market to get features for
         timeframe: Data timeframe
         feature_names: List of feature names to include
-        model_type: 'xgboost' or 'lstm'
+        model_type: 'xgboost_coin' or 'xgboost_general'
+        model_data: Full model data dict (for coin-specific with scaler/lag)
     
     Returns:
-        DataFrame with one row of features (or sequence for LSTM)
+        DataFrame with one row of features
     """
     df = load_market_data(market, timeframe, years=1)
     
     if df.empty:
         raise ValueError(f"No data for {market.symbol}")
     
-    if model_type == 'lstm':
-        # Use LSTM-specific features
-        from ml.lstm.features import create_lstm_features
-        df = create_lstm_features(df)
+    if model_type == 'xgboost_coin' and model_data:
+        # Use coin-specific features (may have more features + lag)
+        from ml.xgboost_coin.features import create_coin_features, add_lag_features
+        df = create_coin_features(df)
+        
+        # Add lag features if model was trained with them
+        feature_lag = model_data.get('feature_lag', 0)
+        if feature_lag > 0:
+            df = add_lag_features(df, feature_lag)
     else:
-        # Use XGBoost features
+        # Use general XGBoost features
         df = create_features(df)
-    
-    # Add market one-hot encoding (XGBoost only)
-    if model_type == 'xgboost':
+        
+        # Add market one-hot encoding (general XGBoost only)
         for col in feature_names:
             if col.startswith('market_'):
                 market_symbol = col.replace('market_', '')
@@ -148,19 +154,6 @@ def get_latest_features(market: Market, timeframe: str, feature_names: list, mod
     latest = latest[feature_names]
     
     return latest
-
-
-def calculate_confidence(
-    predictions: np.ndarray,
-    base_confidence: float = 0.85,
-    decay_rate: float = 0.02,
-) -> list:
-    """Calculate confidence scores that decay over time."""
-    confidences = []
-    for i in range(len(predictions)):
-        conf = max(0.25, base_confidence - (i * decay_rate))
-        confidences.append(conf)
-    return confidences
 
 
 def calculate_prediction_bounds(
@@ -189,7 +182,7 @@ def determine_direction(current_price: float, predicted_prices: list) -> str:
     
     
 def scale_confidence_for_display(internal_confidence: float, horizon: str) -> float:
-    """Scale confidence for better UI display."""
+    """Scale confidence for better UI display (general XGBoost only)."""
     if horizon == '24H':
         min_in, max_in = 0.55, 0.75
         min_out, max_out = 0.65, 0.85
@@ -215,6 +208,7 @@ def generate_forecast(
     feature_names: list = None,
     db_model: MLModel = None,
     model_type: str = None,
+    model_data: dict = None,
 ) -> Forecast:
     """
     Generate forecast for a single market.
@@ -238,24 +232,21 @@ def generate_forecast(
     current_price = float(latest_data.close)
     
     # Get features
-    features = get_latest_features(market, config['timeframe'], feature_names, model_type)
+    features = get_latest_features(market, config['timeframe'], feature_names, model_type, model_data)
     
     # Predict
-    if model_type == 'lstm':
-        predicted_return = model.predict(features)[0][0]
-    else:
-        predicted_return = model.predict(features)[0]
+    predicted_return = model.predict(features)[0]
     
     # ==========================================
-    # CONFIDENCE - LSTM vs XGBoost
+    # CONFIDENCE - Coin-specific vs General
     # ==========================================
-    if model_type == 'lstm':
-        # LSTM: Use actual model accuracy, no fake adjustments
+    if model_type == 'xgboost_coin':
+        # Coin-specific: Use real directional accuracy, no fake adjustments
         base_confidence = db_model.directional_accuracy / 100 if db_model.directional_accuracy else 0.55
         decay_rate = 0.001  # Minimal decay
         
     else:
-        # XGBoost: Keep artificial adjustments (temporary until LSTM ready)
+        # General XGBoost: Keep artificial adjustments (temporary)
         volatility = features['volatility_24'].values[0] if 'volatility_24' in features.columns else 0.02
         
         if horizon == '24H':
@@ -284,7 +275,7 @@ def generate_forecast(
     predicted_final_price = current_price * (1 + predicted_return)
     predicted_prices = []
     
-    noise_scale = 0.005 if model_type == 'lstm' else 0.008
+    noise_scale = 0.005 if model_type == 'xgboost_coin' else 0.008
 
     price = current_price
     for i in range(config['horizon']):
@@ -307,8 +298,8 @@ def generate_forecast(
     
     direction = determine_direction(current_price, predicted_prices)
     
-    # LSTM: real confidence, XGBoost: scaled for display
-    if model_type == 'lstm':
+    # Coin-specific: real confidence, General: scaled for display
+    if model_type == 'xgboost_coin':
         display_confidence = round(np.mean(confidences), 2)
     else:
         display_confidence = scale_confidence_for_display(np.mean(confidences), horizon)
@@ -363,6 +354,7 @@ def generate_forecast(
     process_alerts_for_forecast(forecast)
     return forecast
 
+
 def generate_all_forecasts(horizon: str) -> list:
     """Generate forecasts for all active markets."""
     print(f"\n{'='*50}")
@@ -375,55 +367,58 @@ def generate_all_forecasts(horizon: str) -> list:
     forecasts = []
     errors = []
     
-    # Cache XGBoost model (used as fallback)
-    xgb_model, xgb_features, xgb_db_model = None, None, None
+    # Cache general XGBoost model (used as fallback)
+    xgb_general_model, xgb_general_features, xgb_general_db_model = None, None, None
     try:
-        xgb_db_model = MLModel.objects.filter(
+        xgb_general_db_model = MLModel.objects.filter(
             model_type=MLModel.ModelType.XGBOOST,
+            market__isnull=True,  # General model
             horizon=horizon,
             status=MLModel.Status.PRODUCTION
         ).first()
-        if xgb_db_model:
-            xgb_data = load_model(xgb_db_model.artifact_path)
-            xgb_model = xgb_data['model']
-            xgb_features = xgb_data['feature_names']
-            print(f"XGBoost model: {xgb_db_model.name} v{xgb_db_model.version}")
+        if xgb_general_db_model:
+            xgb_general_data = load_model(xgb_general_db_model.artifact_path)
+            xgb_general_model = xgb_general_data['model']
+            xgb_general_features = xgb_general_data['feature_names']
+            print(f"General XGBoost: {xgb_general_db_model.name} v{xgb_general_db_model.version}")
     except Exception as e:
-        print(f"Warning: No XGBoost model available - {e}")
+        print(f"Warning: No general XGBoost model available - {e}")
     
     for market in markets:
         try:
-            # Check for LSTM model first
-            lstm_db_model = MLModel.objects.filter(
-                model_type=MLModel.ModelType.LSTM,
+            # 1. Check for coin-specific XGBoost model first
+            coin_db_model = MLModel.objects.filter(
+                model_type=MLModel.ModelType.XGBOOST,
                 market=market,
                 horizon=horizon,
                 status=MLModel.Status.PRODUCTION
             ).first()
             
-            if lstm_db_model:
-                # Use LSTM
-                lstm_data = load_model(lstm_db_model.artifact_path)
+            if coin_db_model:
+                # Use coin-specific XGBoost
+                coin_data = load_model(coin_db_model.artifact_path)
                 forecast = generate_forecast(
                     market=market,
                     horizon=horizon,
-                    model=lstm_data['model'],
-                    feature_names=lstm_data['feature_names'],
-                    db_model=lstm_db_model,
-                    model_type='lstm',
+                    model=coin_data['model'],
+                    feature_names=coin_data['feature_names'],
+                    db_model=coin_db_model,
+                    model_type='xgboost_coin',
+                    model_data=coin_data,
                 )
-                print(f"  {market.symbol}: {forecast.direction} (LSTM, conf: {forecast.confidence_score:.2f})")
-            elif xgb_model:
-                # Fallback to XGBoost
+                print(f"  {market.symbol}: {forecast.direction} (XGB-Coin, conf: {forecast.confidence_score:.2f})")
+            
+            elif xgb_general_model:
+                # Fallback to general XGBoost
                 forecast = generate_forecast(
                     market=market,
                     horizon=horizon,
-                    model=xgb_model,
-                    feature_names=xgb_features,
-                    db_model=xgb_db_model,
-                    model_type='xgboost',
+                    model=xgb_general_model,
+                    feature_names=xgb_general_features,
+                    db_model=xgb_general_db_model,
+                    model_type='xgboost_general',
                 )
-                print(f"  {market.symbol}: {forecast.direction} (XGB, conf: {forecast.confidence_score:.2f})")
+                print(f"  {market.symbol}: {forecast.direction} (XGB-General, conf: {forecast.confidence_score:.2f})")
             else:
                 raise ValueError("No model available")
             
