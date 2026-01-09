@@ -181,8 +181,8 @@ class ForecastPoint(models.Model):
     
     class Meta:
         db_table = 'forecast_points'
-        unique_together = ['forecast', 'step']
-        ordering = ['step']
+        unique_together = ['forecast', 'timestamp']
+        ordering = ['timestamp']
     
     def __str__(self):
         return f"{self.forecast} - Step {self.step}"
