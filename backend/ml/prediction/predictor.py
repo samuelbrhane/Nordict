@@ -337,33 +337,31 @@ def generate_forecast(
             }
         )
         
-        forecast.points.filter(timestamp__gt=now).delete()
-        
-        points = []
+        # Update or create forecast points for future timestamps only
         for i, (price, conf) in enumerate(zip(predicted_prices, confidences)):
             timestamp = base_time + config['step_timedelta'] * (i + 1)
             
+            # Skip past timestamps - keep existing predictions with actual_price
             if timestamp <= now:
                 continue
             
             lower, upper = calculate_prediction_bounds(price, conf)
             
-            points.append(ForecastPoint(
+            # Update if timestamp exists, create if not
+            ForecastPoint.objects.update_or_create(
                 forecast=forecast,
-                step=i,
                 timestamp=timestamp,
-                predicted_price=Decimal(str(price)),
-                confidence_low=Decimal(str(lower)),
-                confidence_high=Decimal(str(upper)),
-                confidence_score=conf,
-            ))
-        
-        if points:
-            ForecastPoint.objects.bulk_create(points)
+                defaults={
+                    'step': i,
+                    'predicted_price': Decimal(str(price)),
+                    'confidence_low': Decimal(str(lower)),
+                    'confidence_high': Decimal(str(upper)),
+                    'confidence_score': conf,
+                }
+            )
     
     process_alerts_for_forecast(forecast)
     return forecast
-
 
 def generate_all_forecasts(horizon: str) -> list:
     """Generate forecasts for all active markets."""
