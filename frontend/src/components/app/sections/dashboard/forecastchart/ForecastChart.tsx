@@ -253,7 +253,13 @@ const ForecastChart = ({ horizon, fixedMarket }: ForecastChartProps) => {
                     </p>
                     <p className="text-sm font-semibold text-neutral-900 dark:text-white">
                       {forecast?.confidence_score
-                        ? `${(forecast.confidence_score * 100).toFixed(0)}%`
+                        ? (() => {
+                            const pct = forecast.confidence_score * 100;
+                            // If it has meaningful decimals, show 2 decimal places
+                            return pct % 1 === 0
+                              ? `${pct.toFixed(0)}%`
+                              : `${pct.toFixed(2)}%`;
+                          })()
                         : "N/A"}
                     </p>
                   </div>
