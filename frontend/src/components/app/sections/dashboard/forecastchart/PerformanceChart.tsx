@@ -89,7 +89,7 @@ const formatTimestampFull = (timestamp: string, horizon: Horizon): string => {
 const formatTimestampShort = (
   timestamp: string,
   horizon: Horizon,
-  isMobile: boolean = false
+  isMobile: boolean = false,
 ): string => {
   const date = new Date(timestamp);
 
@@ -274,10 +274,14 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
   const maxValue = Math.max(...allValues);
   const minValue = Math.min(...allValues);
   const range = maxValue - minValue;
-  const padding = range * 0.15;
+
+  const avgPrice = (maxValue + minValue) / 2;
+  const minPadding = avgPrice * 0.03;
+  const rangePadding = range * 0.5;
+  const padding = Math.max(minPadding, rangePadding);
 
   const paddedMax = maxValue + padding;
-  const paddedMin = minValue - padding;
+  const paddedMin = Math.max(0, minValue - padding);
   const paddedRange = paddedMax - paddedMin;
 
   const getY = (value: number) => {
@@ -348,7 +352,7 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
         label: formatTimestampShort(
           data[totalPoints - 1].timestamp,
           horizon,
-          isMobile
+          isMobile,
         ),
         x: 100,
       });
@@ -696,8 +700,8 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
                           x === 0
                             ? "translateX(0)"
                             : x === 100
-                            ? "translateX(-100%)"
-                            : "translateX(-50%)",
+                              ? "translateX(-100%)"
+                              : "translateX(-50%)",
                         whiteSpace: "nowrap",
                       }}
                     >
@@ -722,9 +726,9 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
                       tooltip.x > (containerRef.current?.offsetWidth || 0) * 0.7
                         ? "translateX(-100%)"
                         : tooltip.x <
-                          (containerRef.current?.offsetWidth || 0) * 0.3
-                        ? "translateX(0)"
-                        : "translateX(-50%)",
+                            (containerRef.current?.offsetWidth || 0) * 0.3
+                          ? "translateX(0)"
+                          : "translateX(-50%)",
                   }}
                 >
                   {/* Full timestamp header */}
@@ -824,8 +828,8 @@ const PerformanceChart = ({ horizon }: PerformanceChartProps) => {
                             Math.abs(tooltip.point.errorPercent) <= 2
                               ? "text-emerald-500"
                               : Math.abs(tooltip.point.errorPercent) <= 5
-                              ? "text-amber-500"
-                              : "text-red-500"
+                                ? "text-amber-500"
+                                : "text-red-500"
                           }`}
                         >
                           {tooltip.point.errorPercent > 0 ? "+" : ""}

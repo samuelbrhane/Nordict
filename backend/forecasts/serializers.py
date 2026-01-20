@@ -25,7 +25,7 @@ class ForecastChartSerializer(serializers.ModelSerializer):
     
     market_symbol = serializers.CharField(source='market.symbol')
     market_name = serializers.CharField(source='market.name')
-    points = ForecastPointSerializer(many=True, read_only=True)
+    points = serializers.SerializerMethodField() 
     
     # Calculate range for display
     price_range = serializers.SerializerMethodField()
@@ -52,6 +52,13 @@ class ForecastChartSerializer(serializers.ModelSerializer):
             'points',
         ]
     
+    def get_points(self, obj):
+        """Return only points from the current prediction run."""
+        future_points = obj.points.filter(
+            timestamp__gt=obj.generated_at
+        ).order_by('step')
+        return ForecastPointSerializer(future_points, many=True).data
+    
     def get_price_range(self, obj):
         """Format price range as string."""
         return f"${obj.predicted_low:,.0f} - ${obj.predicted_high:,.0f}"
@@ -62,7 +69,6 @@ class ForecastChartSerializer(serializers.ModelSerializer):
             change = ((obj.predicted_mid - obj.current_price) / obj.current_price) * 100
             return round(change, 2)
         return 0
-
 
 class ForecastSummarySerializer(serializers.ModelSerializer):
     """Forecast summary for list views."""
