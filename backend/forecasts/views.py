@@ -780,13 +780,13 @@ def forecast_performance(request):
     # 12W (weekly): 6 months = ~26 points
     # 12M (monthly): 2 years = 24 points
     horizon_config = {
-        "24H": {"days": 2, "max_points": 96},
-        "30D": {"days": 30, "max_points": 60},
-        "12W": {"days": 180, "max_points": 52},
-        "12M": {"days": 730, "max_points": 48},  # 2 years
+        "24H": {"days": 4, "max_points": 96},
+        "30D": {"days": 60, "max_points": 60},
+        "12W": {"days": 360, "max_points": 52},
+        "12M": {"days": 1460, "max_points": 48},  # 2 years
     }
     
-    config = horizon_config.get(horizon, {"days": 2, "max_points": 96})
+    config = horizon_config.get(horizon, {"days": 4, "max_points": 96})
     cutoff = timezone.now() - timedelta(days=config["days"])
     
     points = ForecastPoint.objects.filter(
