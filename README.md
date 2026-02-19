@@ -1,10 +1,22 @@
-# Nordict (Modelis)
+# Nordict
 
 ## Cloud-Native Market Forecasting & Decision Support Platform
 
 Nordict is a production-oriented, multi-horizon market forecasting platform designed to generate probabilistic predictions with confidence scoring, transparent performance tracking, and structured decision support.
 
 The system combines machine learning, disciplined validation methodology, and scalable cloud architecture to deliver rolling forecasts across multiple time horizons.
+
+---
+
+## System Architecture
+
+![Infrastructure Diagram](infrastructure/diagram.gif)
+
+---
+
+## Platform Demo
+
+![Platform Demo](demo.gif)
 
 ---
 
@@ -96,13 +108,28 @@ Model Artifacts (S3 in production)
 │   ├── manage.py
 │   └── requirements.txt
 │
-└── frontend/
-    ├── src/
-    ├── public/
-    ├── next.config.ts
-    ├── tailwind.config.ts
-    ├── package.json
-    └── tsconfig.json
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   ├── next.config.ts
+│   ├── tailwind.config.ts
+│   ├── package.json
+│   └── tsconfig.json
+│
+├── infrastructure/
+│   ├── stacks/
+│   ├── constructs/
+│   ├── diagrams/
+│   │   └── architecture.gif
+│   ├── app.py
+│   ├── cdk.json
+│   └── requirements.txt
+│
+├── demo.gif
+│
+├── LICENSE
+│
+└── README.md
 ```
 
 ---
